@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AUDWIHR // MMA Trader</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:         #12141a;
+  --surface:    #1a1d26;
+  --surface2:   #21252f;
+  --surface3:   #272c38;
+  --border:     #2e3340;
+  --border2:    #3a4055;
+  --text:       #c8cdd8;
+  --text-dim:   #6b7285;
+  --text-bright:#eef0f5;
+  --accent:     #d4a843;
+  --accent-dim: #8a6e2a;
+  --green:      #4caf82;
+  --red:        #d95f5f;
+  --blue:       #5b8dd9;
+  --purple:     #8b6fd4;
+  --orange:     #d4804a;
+  --font:       'Inter', sans-serif;
+  --mono:       'JetBrains Mono', monospace;
+}
+html, body, #root { height: 100%; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.5; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+.app { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+/* TOPBAR */
+.topbar { height: 48px; min-height: 48px; display: flex; align-items: center; gap: 16px; padding: 0 20px; background: var(--surface); border-bottom: 1px solid var(--border); z-index: 50; }
+.topbar-logo { font-size: 13px; font-weight: 700; letter-spacing: .12em; color: var(--accent); font-family: var(--mono); }
+.topbar-sep { color: var(--border2); }
+.topbar-section { font-size: 12px; font-weight: 500; color: var(--text-dim); letter-spacing: .06em; }
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.topbar-back { font-size: 11px; font-family: var(--mono); color: var(--accent); border: 1px solid var(--accent-dim); padding: 3px 10px; cursor: pointer; background: transparent; transition: all .15s; }
+.topbar-back:hover { background: var(--accent); color: var(--bg); }
+/* MENU */
+.menu-screen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; }
+.menu-wordmark { font-family: var(--mono); font-size: clamp(28px,5vw,48px); font-weight: 700; letter-spacing: .2em; color: var(--text-bright); margin-bottom: 4px; }
+.menu-sub { font-size: 11px; font-family: var(--mono); letter-spacing: .2em; color: var(--text-dim); margin-bottom: 48px; text-transform: uppercase; }
+.menu-list { display: flex; flex-direction: column; gap: 4px; width: 100%; max-width: 420px; }
+.menu-item { display: flex; align-items: center; gap: 14px; padding: 13px 18px; background: var(--surface); border: 1px solid var(--border); cursor: pointer; transition: all .15s; user-select: none; }
+.menu-item:hover { background: var(--surface2); border-color: var(--border2); color: var(--text-bright); }
+.menu-item-num { font-family: var(--mono); font-size: 10px; color: var(--accent); min-width: 20px; }
+.menu-item-label { font-size: 13px; font-weight: 600; letter-spacing: .05em; flex: 1; }
+.menu-item-badge { font-family: var(--mono); font-size: 9px; color: var(--text-dim); border: 1px solid var(--border2); padding: 2px 7px; letter-spacing: .08em; }
+.menu-item-badge.active { color: var(--green); border-color: var(--green); }
+/* LAYOUT */
+.main-layout { flex: 1; display: flex; overflow: hidden; }
+/* SIDEBAR */
+.sidebar { width: 220px; min-width: 220px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+.sidebar-header { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 10px; font-weight: 600; letter-spacing: .12em; color: var(--text-dim); text-transform: uppercase; font-family: var(--mono); }
+.sidebar-search { padding: 8px 10px; border-bottom: 1px solid var(--border); }
+.sidebar-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-family: var(--mono); font-size: 11px; padding: 5px 8px; outline: none; transition: border-color .15s; }
+.sidebar-input:focus { border-color: var(--border2); }
+.sidebar-input::placeholder { color: var(--text-dim); }
+.sidebar-filters { padding: 6px 10px; border-bottom: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 4px; }
+.filter-chip { font-size: 10px; font-family: var(--mono); padding: 2px 7px; border: 1px solid var(--border); color: var(--text-dim); cursor: pointer; transition: all .12s; background: transparent; white-space: nowrap; }
+.filter-chip:hover { border-color: var(--border2); color: var(--text); }
+.filter-chip.on { border-color: var(--accent-dim); color: var(--accent); background: rgba(212,168,67,.07); }
+.sidebar-list { flex: 1; overflow-y: auto; }
+.sidebar-fighter { padding: 9px 14px; cursor: pointer; border-bottom: 1px solid rgba(46,51,64,.5); transition: background .12s; }
+.sidebar-fighter:hover { background: var(--surface2); }
+.sidebar-fighter.active { background: var(--surface3); border-left: 2px solid var(--accent); padding-left: 12px; }
+.sf-name { font-size: 12px; font-weight: 600; color: var(--text-bright); }
+.sf-meta { font-size: 10px; color: var(--text-dim); font-family: var(--mono); margin-top: 1px; }
+.sf-record { color: var(--accent); }
+/* FIGHTER AREA */
+.fighter-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.card-hero { display: flex; border-bottom: 1px solid var(--border); background: var(--surface); flex-shrink: 0; }
+.card-portrait { width: 160px; min-width: 160px; height: 160px; background: var(--surface2); display: flex; align-items: center; justify-content: center; border-right: 1px solid var(--border); overflow: hidden; flex-shrink: 0; }
+.portrait-placeholder { font-size: 52px; opacity: .15; user-select: none; }
+.card-identity { flex: 1; padding: 16px 20px; display: flex; flex-direction: column; justify-content: center; gap: 6px; }
+.fighter-name-big { font-size: clamp(18px,2.5vw,28px); font-weight: 700; color: var(--text-bright); letter-spacing: .03em; line-height: 1.1; }
+.fighter-nickname { font-size: 12px; color: var(--accent); font-style: italic; font-family: var(--mono); }
+.identity-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.id-pill { font-size: 10px; font-family: var(--mono); padding: 2px 8px; border: 1px solid var(--border2); color: var(--text-dim); }
+.id-pill.rank { border-color: var(--accent-dim); color: var(--accent); }
+.id-pill.champ { background: rgba(212,168,67,.1); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+.archetype-row { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 4px; }
+.arch-tag { font-size: 9px; font-family: var(--mono); padding: 2px 7px; font-weight: 600; letter-spacing: .06em; border: 1px solid; }
+.card-record { padding: 16px 20px; border-left: 1px solid var(--border); flex-shrink: 0; display: flex; flex-direction: column; gap: 6px; justify-content: center; min-width: 140px; }
+.record-big { font-size: 26px; font-weight: 700; font-family: var(--mono); color: var(--text-bright); letter-spacing: .04em; }
+.record-breakdown { display: flex; gap: 12px; }
+.rb { text-align: center; }
+.rb-n { font-size: 15px; font-weight: 700; font-family: var(--mono); }
+.rb-l { font-size: 9px; color: var(--text-dim); letter-spacing: .08em; margin-top: 1px; }
+.finish-row { display: flex; gap: 8px; margin-top: 4px; }
+.fin-chip { flex: 1; background: var(--surface2); padding: 4px 6px; text-align: center; border: 1px solid var(--border); }
+.fin-n { font-size: 13px; font-weight: 700; font-family: var(--mono); }
+.fin-l { font-size: 8px; color: var(--text-dim); letter-spacing: .06em; margin-top: 1px; }
+/* TABS */
+.tabs-bar { display: flex; border-bottom: 1px solid var(--border); background: var(--surface); flex-shrink: 0; overflow-x: auto; }
+.tab-btn { padding: 10px 18px; font-size: 11px; font-weight: 600; letter-spacing: .08em; color: var(--text-dim); cursor: pointer; border: none; background: transparent; border-bottom: 2px solid transparent; transition: all .15s; white-space: nowrap; font-family: var(--mono); }
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-content { flex: 1; overflow-y: auto; padding: 20px; }
+/* STAT COMPONENTS */
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1px; background: var(--border); margin-bottom: 20px; }
+.stat-cell { background: var(--surface); padding: 12px 14px; }
+.stat-cell-label { font-size: 9px; font-family: var(--mono); color: var(--text-dim); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 4px; }
+.stat-cell-val { font-size: 20px; font-weight: 700; color: var(--text-bright); font-family: var(--mono); }
+.stat-cell-sub { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+.stat-row-list { display: flex; flex-direction: column; gap: 1px; margin-bottom: 20px; }
+.stat-row-item { display: flex; align-items: center; gap: 12px; padding: 8px 12px; background: var(--surface); }
+.srl-label { font-size: 11px; color: var(--text-dim); font-family: var(--mono); width: 200px; flex-shrink: 0; }
+.srl-bar { flex: 1; height: 3px; background: var(--border); position: relative; }
+.srl-fill { position: absolute; left:0; top:0; bottom:0; transition: width .5s ease; }
+.srl-val { font-size: 11px; font-family: var(--mono); color: var(--text); min-width: 50px; text-align: right; flex-shrink: 0; }
+.sec-label { font-size: 9px; font-family: var(--mono); letter-spacing: .15em; color: var(--text-dim); text-transform: uppercase; padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-bottom: 10px; margin-top: 20px; }
+.sec-label:first-child { margin-top: 0; }
+/* HISTORY */
+.fight-log { display: flex; flex-direction: column; gap: 1px; }
+.fight-log-header { display: grid; grid-template-columns: 32px 1fr 72px 52px 44px 1fr; gap: 10px; padding: 6px 12px; font-size: 9px; letter-spacing: .1em; color: var(--text-dim); font-family: var(--mono); border-bottom: 1px solid var(--border); }
+.fight-entry { display: grid; grid-template-columns: 32px 1fr 72px 52px 44px 1fr; gap: 10px; align-items: center; padding: 8px 12px; background: var(--surface); font-size: 11px; font-family: var(--mono); }
+.fight-entry:hover { background: var(--surface2); }
+.fe-result { font-weight: 700; font-size: 12px; }
+.fe-result.W { color: var(--green); }
+.fe-result.L { color: var(--red); }
+.fe-dim { color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* MARKET */
+.market-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.market-card { background: var(--surface); border: 1px solid var(--border); padding: 14px; }
+.mc-label { font-size: 9px; font-family: var(--mono); color: var(--text-dim); letter-spacing: .1em; margin-bottom: 6px; }
+.mc-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text-bright); font-family: var(--mono); font-size: 18px; font-weight: 700; padding: 6px 10px; outline: none; transition: border-color .15s; }
+.mc-input:focus { border-color: var(--accent); }
+.mc-implied { font-size: 10px; color: var(--text-dim); font-family: var(--mono); margin-top: 4px; }
+.mc-implied span { color: var(--accent); }
+.notes-area { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: var(--font); font-size: 13px; padding: 12px 14px; outline: none; resize: vertical; min-height: 100px; transition: border-color .15s; line-height: 1.6; }
+.notes-area:focus { border-color: var(--border2); }
+/* COMPARE */
+.compare-layout { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.compare-selector { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.compare-select { flex: 1; background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-family: var(--mono); font-size: 12px; padding: 7px 10px; outline: none; cursor: pointer; }
+.vs-text { font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--red); flex-shrink: 0; }
+.compare-body { flex: 1; display: flex; overflow: hidden; }
+.compare-table-wrap { flex: 1; overflow-y: auto; padding: 20px; }
+.checklist-wrap { width: 300px; min-width: 300px; border-left: 1px solid var(--border); overflow-y: auto; background: var(--surface); display: flex; flex-direction: column; }
+.ctable { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+.ctable th { font-size: 10px; font-family: var(--mono); letter-spacing: .1em; color: var(--text-dim); padding: 6px 12px; border-bottom: 1px solid var(--border); }
+.ctable td { padding: 7px 12px; font-size: 12px; font-family: var(--mono); border-bottom: 1px solid rgba(46,51,64,.4); }
+.ctable tr:hover td { background: var(--surface2); }
+.ctable .cat-row td { background: var(--surface); font-size: 9px; letter-spacing: .12em; color: var(--text-dim); padding: 8px 12px 4px; font-weight: 600; }
+.ctable td.center { text-align: center; color: var(--text-dim); font-size: 10px; }
+.ctable td.r { text-align: right; }
+.ctable td.win { color: var(--green); font-weight: 600; }
+.ctable td.lose { color: var(--text-dim); }
+/* CHECKLIST */
+.cl-header { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 10px; font-family: var(--mono); letter-spacing: .12em; color: var(--text-dim); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+.cl-reset { cursor: pointer; color: var(--accent-dim); transition: color .15s; background: none; border: none; font-family: var(--mono); font-size: 10px; letter-spacing: .08em; }
+.cl-reset:hover { color: var(--accent); }
+.cl-progress { padding: 8px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.cl-prog-label { display: flex; justify-content: space-between; font-size: 9px; font-family: var(--mono); color: var(--text-dim); margin-bottom: 4px; }
+.cl-prog-track { height: 2px; background: var(--border); position: relative; }
+.cl-prog-fill { position: absolute; left:0; top:0; bottom:0; background: var(--accent); transition: width .3s ease; }
+.cl-scroll { flex: 1; overflow-y: auto; }
+.cl-cat-label { padding: 8px 14px 3px; font-size: 9px; font-family: var(--mono); letter-spacing: .12em; font-weight: 600; }
+.cl-item { display: flex; align-items: flex-start; gap: 9px; padding: 7px 14px; cursor: pointer; transition: background .1s; border-bottom: 1px solid rgba(46,51,64,.3); }
+.cl-item:hover { background: var(--surface2); }
+.cl-box { width: 14px; height: 14px; border: 1px solid var(--border2); flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; font-size: 9px; transition: all .1s; }
+.cl-box.checked { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.cl-text { font-size: 11px; font-weight: 500; line-height: 1.3; }
+.cl-text.checked { color: var(--text-dim); text-decoration: line-through; }
+.cl-sub { font-size: 9px; color: var(--text-dim); font-family: var(--mono); margin-top: 2px; line-height: 1.4; }
+/* MISC */
+.empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--text-dim); font-family: var(--mono); font-size: 12px; letter-spacing: .08em; }
+.coming-soon { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+.anim-fade { animation: fadeIn .2s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useMemo, useEffect } = React;
+
+// ─── ARCH COLORS ───
+const ARCH_COLORS = {
+  'WRESTLER':         '#5b8dd9','BJJ / SUB HUNTER':'#4caf82',
+  'PRESSURE FIGHTER': '#d4a843','COUNTER STRIKER':  '#8b6fd4',
+  'KICKBOXER':        '#d4804a','BOXER-PUNCHER':    '#d95f5f',
+  'BRAWLER':          '#c0392b','COMPLETE FIGHTER': '#c8cdd8',
+};
+const MOD_COLORS = {
+  'SOUTHPAW':'#8b6fd4','VOLUME STRIKER':'#5b8dd9','KO POWER':'#d95f5f',
+  'CARDIO CONCERN':'#d4804a','WEIGHT CUT FLAG':'#d4a843','LATE BLOOMER':'#4caf82',
+  'FRONT-RUNNER':'#c0392b','STEP-UP CONCERN':'#888','DURABILITY RISK':'#d95f5f',
+  'GUARD DANGER':'#4caf82',
+};
+
+// ─── CHECKLIST ───
+const CHECKLIST = [
+  {id:1, cat:'MARKET',   cc:'#d4a843', text:'Where is sharp money?',            sub:'Line movement open→current. RLM? Steam moves?'},
+  {id:2, cat:'MARKET',   cc:'#d4a843', text:'Public inflation check',            sub:'Big name / viral KO / home crowd pushing price above real probability?'},
+  {id:3, cat:'MARKET',   cc:'#d4a843', text:'Implied probability vs your edge',  sub:'Convert odds. Is there 5%+ edge? What price would you actually lay?'},
+  {id:4, cat:'STYLES',   cc:'#4caf82', text:'Who controls fight location?',      sub:'Who has tools to dictate range/position — TD defense, footwork, cage work?'},
+  {id:5, cat:'STYLES',   cc:'#4caf82', text:'Grappling matchup depth',           sub:'Is TD offense dangerous on top? Guard danger? Grinder vs sub hunter?'},
+  {id:6, cat:'STYLES',   cc:'#4caf82', text:'Striking quality vs quantity',      sub:'Volume for judges vs KO power. Who lands the cleaner, impactful shots?'},
+  {id:7, cat:'STYLES',   cc:'#4caf82', text:'Archetype matchup trap?',           sub:'Wrestler into sub hunter, brawler into counter striker — trap dynamic in lines?'},
+  {id:8, cat:'PHYSICAL', cc:'#8b6fd4', text:'Reach & size edge',                 sub:'Wingspan is statistically significant. Using it via range control, jab, teep?'},
+  {id:9, cat:'PHYSICAL', cc:'#8b6fd4', text:'Weight cut + rehydration',          sub:'Visible drain at weigh-ins? Bigger fighter night-of? Power never returned?'},
+  {id:10,cat:'PHYSICAL', cc:'#8b6fd4', text:'Cardio across rounds',              sub:'Documented gas tank issue? Sig strike rate drop in R3?'},
+  {id:11,cat:'RISK',     cc:'#d95f5f', text:'Chin & damage history',             sub:'Stopped before? By what? Comparable power level incoming?'},
+  {id:12,cat:'RISK',     cc:'#d95f5f', text:'Layoff / camp / motivation',        sub:'Long layoff, gym switch, injury flag, home crowd vs travel?'},
+  {id:13,cat:'RISK',     cc:'#d95f5f', text:'Competition level step-up',         sub:'Padded record, first elite opponent? Step-up fights fail above market rate.'},
+  {id:14,cat:'RISK',     cc:'#d95f5f', text:'Judging tendencies in venue',       sub:'Known commission style. Who wins on a scorecard in this specific venue?'},
+  {id:15,cat:'METHOD',   cc:'#5b8dd9', text:'Most likely finish method?',        sub:'KO, Sub, or Dec — which prop has value given the archetype matchup?'},
+  {id:16,cat:'METHOD',   cc:'#5b8dd9', text:'Live betting angle?',               sub:'Mid-fight mispricing scenario? Set mental trigger before the fight starts.'},
+  {id:17,cat:'METHOD',   cc:'#5b8dd9', text:'Round betting value?',              sub:'Late bloomer vs front-runner tag? Early/late round markets with archetype support?'},
+];
+
+// ─── FIGHTERS ───
+const FIGHTERS = [
+  { id:1, name:'Islam Makhachev', nickname:'The Dagestani', weight:'Lightweight', org:'UFC', rank:'CHAMPION',
+    age:32, height:"5'10\"", reach:'70"', stance:'Southpaw', camp:'AKA / Abdulmanap Makhachev', country:'Russia',
+    archetype:'COMPLETE FIGHTER', mods:['SOUTHPAW','VOLUME STRIKER'],
+    record:'26-1', wins:26, losses:1, draws:0, streak:14, streakType:'W',
+    finishes:{ko:1,sub:11,dec:14}, losses_by:{ko:0,sub:1,dec:0}, finish_rate:46,
+    chin:'Solid', cardio:'Elite', weight_cut:'Moderate',
+    striking:{ slpm:4.24, str_acc:58, sapm:2.11, str_def:64, head_pct:52, body_pct:28, leg_pct:20, kd_landed:4, kd_suffered:0, clinch_str_pct:35, distance_str_pct:55, ground_str_pct:10 },
+    grappling:{ td_per15:3.12, td_acc:41, td_def:92, sub_per15:1.1, top_time_pct:62, bottom_time_pct:8, ctrl_time_per15:4.2, pass_rate:68, reversal_rate:12 },
+    history:[
+      {result:'W',opponent:'Dustin Poirier',method:'SUB',round:3,event:'UFC 302',year:2024},
+      {result:'W',opponent:'Alexander Volkanovski',method:'SUB',round:3,event:'UFC 294',year:2023},
+      {result:'W',opponent:'Charles Oliveira',method:'SUB',round:2,event:'UFC 280',year:2022},
+      {result:'W',opponent:'Bobby Green',method:'SUB',round:2,event:'UFC Fight Night',year:2022},
+      {result:'W',opponent:'Thiago Moises',method:'SUB',round:4,event:'UFC on ESPN',year:2021},
+      {result:'L',opponent:'Adriano Martins',method:'TKO',round:1,event:'UFC 192',year:2015},
+    ],
+    trader_notes:'Elite grappler, historically dominant TD defense (92%). Dangerous off back against walls. Southpaw creates layered complexity vs orthodox fighters. Single career loss at 22 years old.' },
+  { id:2, name:'Dustin Poirier', nickname:'The Diamond', weight:'Lightweight', org:'UFC', rank:'#3',
+    age:35, height:"5'9\"", reach:'72"', stance:'Southpaw', camp:'American Top Team', country:'USA',
+    archetype:'BRAWLER', mods:['KO POWER','SOUTHPAW','DURABILITY RISK'],
+    record:'30-9', wins:30, losses:9, draws:0, streak:1, streakType:'W',
+    finishes:{ko:17,sub:5,dec:8}, losses_by:{ko:4,sub:3,dec:2}, finish_rate:73,
+    chin:'Questionable', cardio:'Good', weight_cut:'Minimal',
+    striking:{ slpm:6.41, str_acc:50, sapm:5.53, str_def:52, head_pct:58, body_pct:26, leg_pct:16, kd_landed:12, kd_suffered:5, clinch_str_pct:28, distance_str_pct:62, ground_str_pct:10 },
+    grappling:{ td_per15:1.77, td_acc:44, td_def:62, sub_per15:0.4, top_time_pct:22, bottom_time_pct:18, ctrl_time_per15:1.4, pass_rate:42, reversal_rate:28 },
+    history:[
+      {result:'L',opponent:'Islam Makhachev',method:'SUB',round:3,event:'UFC 302',year:2024},
+      {result:'W',opponent:'Justin Gaethje',method:'KO',round:3,event:'UFC 291',year:2023},
+      {result:'W',opponent:'Michael Chandler',method:'TKO',round:1,event:'UFC 281',year:2022},
+      {result:'L',opponent:'Charles Oliveira',method:'SUB',round:3,event:'UFC 269',year:2021},
+      {result:'W',opponent:'Conor McGregor',method:'TKO',round:2,event:'UFC 264',year:2021},
+      {result:'L',opponent:'Khabib Nurmagomedov',method:'SUB',round:2,event:'UFC 242',year:2019},
+    ],
+    trader_notes:'High output, dangerous left hook. Struggles against elite grapplers (3 sub losses). Absorbs 5.53/min — high volume both ways. Heart and volume compensate for durability questions.' },
+  { id:3, name:'Dricus du Plessis', nickname:'Stillknocks', weight:'Middleweight', org:'UFC', rank:'CHAMPION',
+    age:30, height:"6'0\"", reach:'76"', stance:'Orthodox', camp:'EFC', country:'South Africa',
+    archetype:'BRAWLER', mods:['KO POWER','GUARD DANGER'],
+    record:'22-2', wins:22, losses:2, draws:0, streak:6, streakType:'W',
+    finishes:{ko:13,sub:5,dec:4}, losses_by:{ko:2,sub:0,dec:0}, finish_rate:82,
+    chin:'Iron', cardio:'Good', weight_cut:'Moderate',
+    striking:{ slpm:5.82, str_acc:52, sapm:4.91, str_def:55, head_pct:55, body_pct:25, leg_pct:20, kd_landed:8, kd_suffered:3, clinch_str_pct:32, distance_str_pct:58, ground_str_pct:10 },
+    grappling:{ td_per15:1.1, td_acc:38, td_def:71, sub_per15:0.7, top_time_pct:30, bottom_time_pct:25, ctrl_time_per15:2.1, pass_rate:44, reversal_rate:38 },
+    history:[
+      {result:'W',opponent:'Sean Strickland',method:'DEC',round:5,event:'UFC 312',year:2025},
+      {result:'W',opponent:'Israel Adesanya',method:'SUB',round:5,event:'UFC 305',year:2024},
+      {result:'W',opponent:'Sean Strickland',method:'DEC',round:5,event:'UFC 297',year:2024},
+      {result:'W',opponent:'Robert Whittaker',method:'TKO',round:5,event:'UFC 290',year:2023},
+      {result:'L',opponent:'Brad Riddell',method:'TKO',round:2,event:'UFC Fight Night',year:2022},
+      {result:'L',opponent:'Nassourdine Imavov',method:'TKO',round:3,event:'UFC on ESPN',year:2021},
+    ],
+    trader_notes:'Underrated grappling, dangerous from guard. Iron chin enables unconventional exchanges. Never backed down from contact. Fights better when hurt — pressure fighter who weaponizes damage.' },
+  { id:4, name:"Sean O'Malley", nickname:'Sugar', weight:'Bantamweight', org:'UFC', rank:'#2',
+    age:29, height:"5'11\"", reach:'71"', stance:'Orthodox', camp:'MMA Lab', country:'USA',
+    archetype:'COUNTER STRIKER', mods:['KO POWER','VOLUME STRIKER','FRONT-RUNNER'],
+    record:'18-2', wins:18, losses:2, draws:0, streak:1, streakType:'W',
+    finishes:{ko:12,sub:1,dec:5}, losses_by:{ko:2,sub:0,dec:0}, finish_rate:72,
+    chin:'Questionable', cardio:'Good', weight_cut:'Minimal',
+    striking:{ slpm:8.0, str_acc:57, sapm:4.34, str_def:60, head_pct:62, body_pct:22, leg_pct:16, kd_landed:10, kd_suffered:4, clinch_str_pct:18, distance_str_pct:74, ground_str_pct:8 },
+    grappling:{ td_per15:0.51, td_acc:36, td_def:80, sub_per15:0.1, top_time_pct:12, bottom_time_pct:14, ctrl_time_per15:0.6, pass_rate:30, reversal_rate:20 },
+    history:[
+      {result:'L',opponent:'Merab Dvalishvili',method:'DEC',round:5,event:'UFC 306',year:2024},
+      {result:'W',opponent:'Marlon Vera',method:'DEC',round:5,event:'UFC 299',year:2024},
+      {result:'W',opponent:'Aljamain Sterling',method:'TKO',round:2,event:'UFC 292',year:2023},
+      {result:'W',opponent:'Petr Yan',method:'DEC',round:5,event:'UFC 280',year:2022},
+      {result:'L',opponent:'Marlon Vera',method:'TKO',round:1,event:'UFC Fight Night',year:2020},
+      {result:'W',opponent:'Thomas Almeida',method:'KO',round:1,event:'UFC 248',year:2020},
+    ],
+    trader_notes:'Flashy counter-striker, exceptional lateral movement. Limited wrestling (0.51 TD/15). Vulnerable to grapplers and pressure fighters. Front-runner — performs best early when fresh.' },
+  { id:5, name:'Merab Dvalishvili', nickname:'The Machine', weight:'Bantamweight', org:'UFC', rank:'CHAMPION',
+    age:33, height:"5'7\"", reach:'68"', stance:'Orthodox', camp:'Serra-Longo Fight Team', country:'Georgia',
+    archetype:'WRESTLER', mods:['VOLUME STRIKER','LATE BLOOMER'],
+    record:'17-4', wins:17, losses:4, draws:0, streak:9, streakType:'W',
+    finishes:{ko:2,sub:4,dec:11}, losses_by:{ko:3,sub:1,dec:0}, finish_rate:35,
+    chin:'Solid', cardio:'Elite', weight_cut:'Minimal',
+    striking:{ slpm:5.38, str_acc:47, sapm:4.12, str_def:58, head_pct:48, body_pct:30, leg_pct:22, kd_landed:2, kd_suffered:4, clinch_str_pct:42, distance_str_pct:44, ground_str_pct:14 },
+    grappling:{ td_per15:7.33, td_acc:48, td_def:85, sub_per15:0.8, top_time_pct:55, bottom_time_pct:10, ctrl_time_per15:5.8, pass_rate:52, reversal_rate:18 },
+    history:[
+      {result:'W',opponent:"Sean O'Malley",method:'DEC',round:5,event:'UFC 306',year:2024},
+      {result:'W',opponent:'Henry Cejudo',method:'DEC',round:5,event:'UFC 298',year:2024},
+      {result:'W',opponent:'Marlon Vera',method:'DEC',round:5,event:'UFC Fight Night',year:2023},
+      {result:'W',opponent:'Petr Yan',method:'DEC',round:5,event:'TUF Finale',year:2022},
+      {result:'L',opponent:'Aljamain Sterling',method:'DEC',round:3,event:'UFC Fight Night',year:2021},
+      {result:'L',opponent:'Marlon Moraes',method:'KO',round:1,event:'UFC Fight Night',year:2019},
+    ],
+    trader_notes:'Highest TD volume in division at 7.33/15. Cardio freak — gets stronger every round. Late bloomer dynamic is real and tradeable. Early round striking is weakness before pace takes over.' },
+  { id:6, name:'Paddy Pimblett', nickname:'The Baddy', weight:'Lightweight', org:'UFC', rank:'#9',
+    age:29, height:"5'10\"", reach:'73"', stance:'Orthodox', camp:'Next Generation MMA', country:'England',
+    archetype:'BJJ / SUB HUNTER', mods:['GUARD DANGER','STEP-UP CONCERN','WEIGHT CUT FLAG'],
+    record:'22-3', wins:22, losses:3, draws:0, streak:7, streakType:'W',
+    finishes:{ko:9,sub:7,dec:6}, losses_by:{ko:2,sub:0,dec:1}, finish_rate:73,
+    chin:'Questionable', cardio:'Average', weight_cut:'Heavy Cutter',
+    striking:{ slpm:4.42, str_acc:43, sapm:3.91, str_def:52, head_pct:55, body_pct:28, leg_pct:17, kd_landed:5, kd_suffered:3, clinch_str_pct:30, distance_str_pct:55, ground_str_pct:15 },
+    grappling:{ td_per15:2.0, td_acc:45, td_def:67, sub_per15:1.2, top_time_pct:28, bottom_time_pct:32, ctrl_time_per15:2.8, pass_rate:38, reversal_rate:44 },
+    history:[
+      {result:'W',opponent:'Tony Ferguson',method:'SUB',round:4,event:'UFC 296',year:2023},
+      {result:'W',opponent:'Jared Gordon',method:'DEC',round:3,event:'UFC on ESPN',year:2022},
+      {result:'W',opponent:'Jordan Leavitt',method:'SUB',round:2,event:'UFC London',year:2022},
+      {result:'W',opponent:'Rodrigo Vargas',method:'SUB',round:1,event:'UFC London',year:2022},
+      {result:'L',opponent:'Saul Rogers',method:'DEC',round:3,event:'Cage Warriors',year:2018},
+      {result:'L',opponent:'Davide Martinez',method:'TKO',round:1,event:'Cage Warriors',year:2016},
+    ],
+    trader_notes:'Excellent BJJ, dangerous sub game from guard. Striking has real holes vs elite level. Heavy cutter flag. Big name public inflation — consistently overpriced due to fanbase size.' },
+];
+
+// ─── UTILS ───
+function mlToImplied(ml) {
+  const n = parseInt(ml); if (!n || isNaN(n)) return null;
+  return n < 0 ? ((-n)/(-n+100)*100).toFixed(1) : (100/(n+100)*100).toFixed(1);
+}
+function lineMovement(open, current) {
+  const o=parseInt(open),c=parseInt(current);
+  if(!o||!c||isNaN(o)||isNaN(c)) return null;
+  const diff = (parseFloat(mlToImplied(c))-parseFloat(mlToImplied(o))).toFixed(1);
+  if(diff>0) return {dir:'up', label:`+${diff}% implied (line moved toward)`};
+  if(diff<0) return {dir:'down', label:`${diff}% implied (line moved away)`};
+  return null;
+}
+function SBar({val,max,color}) {
+  const pct=Math.min(100,Math.round((val/max)*100));
+  return <div className="srl-bar"><div className="srl-fill" style={{width:pct+'%',background:color||'var(--accent)'}}/></div>;
+}
+function useLS(key, init) {
+  const [v,setV] = useState(()=>{ try{const s=localStorage.getItem(key);return s?JSON.parse(s):init;}catch{return init;} });
+  useEffect(()=>{ try{localStorage.setItem(key,JSON.stringify(v));}catch{} },[key,v]);
+  return [v,setV];
+}
+
+// ─── CHECKLIST ───
+function ChecklistPanel({storageKey}) {
+  const init = useMemo(()=>Object.fromEntries(CHECKLIST.map(i=>[i.id,false])),[]);
+  const [checked,setChecked] = useLS('cl_'+storageKey, init);
+  const done = Object.values(checked).filter(Boolean).length;
+  const toggle = id => setChecked(p=>({...p,[id]:!p[id]}));
+  const reset = () => setChecked(Object.fromEntries(CHECKLIST.map(i=>[i.id,false])));
+  const cats = [...new Set(CHECKLIST.map(i=>i.cat))];
+  return (
+    <>
+      <div className="cl-header"><span>TRADE CHECKLIST</span><button className="cl-reset" onClick={reset}>RESET</button></div>
+      <div className="cl-progress">
+        <div className="cl-prog-label"><span>PROGRESS</span><span>{done}/{CHECKLIST.length}</span></div>
+        <div className="cl-prog-track"><div className="cl-prog-fill" style={{width:`${(done/CHECKLIST.length)*100}%`}}/></div>
+      </div>
+      <div className="cl-scroll">
+        {cats.map(cat=>{
+          const items=CHECKLIST.filter(i=>i.cat===cat);
+          return <React.Fragment key={cat}>
+            <div className="cl-cat-label" style={{color:items[0].cc}}>{cat}</div>
+            {items.map(item=>(
+              <div className="cl-item" key={item.id} onClick={()=>toggle(item.id)}>
+                <div className={`cl-box ${checked[item.id]?'checked':''}`}>{checked[item.id]?'✓':''}</div>
+                <div>
+                  <div className={`cl-text ${checked[item.id]?'checked':''}`}>{item.text}</div>
+                  <div className="cl-sub">{item.sub}</div>
+                </div>
+              </div>
+            ))}
+          </React.Fragment>;
+        })}
+      </div>
+    </>
+  );
+}
+
+// ─── TABS ───
+const TABS = ['OVERVIEW','STRIKING','GRAPPLING','PHYSICAL','HISTORY','MARKET'];
+
+function TabOverview({f}) {
+  const chinColor = {Iron:'var(--green)',Solid:'var(--green)',Questionable:'var(--orange)','Stopped Before':'var(--red)'};
+  const cardioColor = {Elite:'var(--green)',Good:'var(--green)',Average:'var(--text)',Concern:'var(--red)'};
+  const cutColor = {Minimal:'var(--green)',Moderate:'var(--text)','Heavy Cutter':'var(--orange)','Drain Risk':'var(--red)'};
+  return <div className="anim-fade">
+    <div className="sec-label">KEY NUMBERS</div>
+    <div className="stat-grid">
+      {[
+        {l:'WIN STREAK',   v:f.streak,         s:`${f.streakType} streak`},
+        {l:'FINISH RATE',  v:f.finish_rate+'%', s:'non-decision wins'},
+        {l:'KO WINS',      v:f.finishes.ko,     s:'by KO/TKO'},
+        {l:'SUB WINS',     v:f.finishes.sub,    s:'by submission'},
+        {l:'DEC WINS',     v:f.finishes.dec,    s:'by decision'},
+        {l:'STR / MIN',    v:f.striking.slpm,   s:'sig strikes landed'},
+        {l:'STR ABS / MIN',v:f.striking.sapm,   s:'sig strikes absorbed'},
+        {l:'TD DEFENSE %', v:f.grappling.td_def+'%', s:'takedown defense'},
+      ].map(s=><div className="stat-cell" key={s.l}><div className="stat-cell-label">{s.l}</div><div className="stat-cell-val">{s.v}</div><div className="stat-cell-sub">{s.s}</div></div>)}
+    </div>
+    <div className="sec-label">FLAGS</div>
+    <div className="stat-grid" style={{gridTemplateColumns:'repeat(auto-fill,minmax(150px,1fr))'}}>
+      <div className="stat-cell"><div className="stat-cell-label">CHIN</div><div style={{fontSize:13,fontWeight:600,color:chinColor[f.chin]||'var(--text)',marginTop:4}}>{f.chin}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">CARDIO</div><div style={{fontSize:13,fontWeight:600,color:cardioColor[f.cardio]||'var(--text)',marginTop:4}}>{f.cardio}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">WEIGHT CUT</div><div style={{fontSize:13,fontWeight:600,color:cutColor[f.weight_cut]||'var(--text)',marginTop:4}}>{f.weight_cut}</div></div>
+    </div>
+    <div className="sec-label">TRADER NOTES</div>
+    <div style={{background:'var(--surface)',padding:'14px',fontSize:'13px',lineHeight:1.7,color:'var(--text)',borderLeft:'2px solid var(--accent-dim)'}}>{f.trader_notes}</div>
+  </div>;
+}
+
+function TabStriking({f}) {
+  const s=f.striking;
+  return <div className="anim-fade">
+    <div className="sec-label">VOLUME & ACCURACY</div>
+    <div className="stat-row-list">
+      {[
+        {l:'Sig Strikes / Min',      v:s.slpm,    m:12,  c:'var(--accent)'},
+        {l:'Striking Accuracy %',    v:s.str_acc, m:100, c:'var(--accent)',u:'%'},
+        {l:'Sig Strikes Absorbed / Min', v:s.sapm, m:10, c:'var(--red)'},
+        {l:'Striking Defense %',     v:s.str_def, m:100, c:'var(--green)',u:'%'},
+      ].map(r=><div className="stat-row-item" key={r.l}><span className="srl-label">{r.l}</span><SBar val={r.v} max={r.m} color={r.c}/><span className="srl-val">{r.v}{r.u||''}</span></div>)}
+    </div>
+    <div className="sec-label">KNOCKDOWNS</div>
+    <div className="stat-grid" style={{gridTemplateColumns:'1fr 1fr'}}>
+      <div className="stat-cell"><div className="stat-cell-label">KD LANDED</div><div className="stat-cell-val" style={{color:'var(--green)'}}>{s.kd_landed}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">KD SUFFERED</div><div className="stat-cell-val" style={{color:s.kd_suffered>0?'var(--red)':'var(--green)'}}>{s.kd_suffered}</div></div>
+    </div>
+    <div className="sec-label">STRIKE TARGET BREAKDOWN</div>
+    <div className="stat-row-list">
+      {[{l:'Head %',v:s.head_pct,c:'var(--red)'},{l:'Body %',v:s.body_pct,c:'var(--orange)'},{l:'Leg %',v:s.leg_pct,c:'var(--blue)'}]
+        .map(r=><div className="stat-row-item" key={r.l}><span className="srl-label">{r.l}</span><SBar val={r.v} max={100} color={r.c}/><span className="srl-val">{r.v}%</span></div>)}
+    </div>
+    <div className="sec-label">STRIKING BY POSITION</div>
+    <div className="stat-row-list">
+      {[{l:'Distance %',v:s.distance_str_pct,c:'var(--accent)'},{l:'Clinch %',v:s.clinch_str_pct,c:'var(--purple)'},{l:'Ground %',v:s.ground_str_pct,c:'var(--blue)'}]
+        .map(r=><div className="stat-row-item" key={r.l}><span className="srl-label">{r.l}</span><SBar val={r.v} max={100} color={r.c}/><span className="srl-val">{r.v}%</span></div>)}
+    </div>
+  </div>;
+}
+
+function TabGrappling({f}) {
+  const g=f.grappling;
+  return <div className="anim-fade">
+    <div className="sec-label">TAKEDOWNS</div>
+    <div className="stat-row-list">
+      {[{l:'TD Attempts / 15 Min',v:g.td_per15,m:10,c:'var(--blue)'},{l:'TD Accuracy %',v:g.td_acc,m:100,c:'var(--blue)',u:'%'},{l:'TD Defense %',v:g.td_def,m:100,c:'var(--green)',u:'%'}]
+        .map(r=><div className="stat-row-item" key={r.l}><span className="srl-label">{r.l}</span><SBar val={r.v} max={r.m} color={r.c}/><span className="srl-val">{r.v}{r.u||''}</span></div>)}
+    </div>
+    <div className="sec-label">SUBMISSIONS</div>
+    <div className="stat-row-list">
+      <div className="stat-row-item"><span className="srl-label">Sub Attempts / 15 Min</span><SBar val={g.sub_per15} max={3} color="var(--green)"/><span className="srl-val">{g.sub_per15}</span></div>
+    </div>
+    <div className="sec-label">GROUND CONTROL</div>
+    <div className="stat-row-list">
+      {[{l:'Top Position Time %',v:g.top_time_pct,m:100,c:'var(--accent)',u:'%'},{l:'Bottom Position Time %',v:g.bottom_time_pct,m:100,c:'var(--purple)',u:'%'},{l:'Control Time / 15 Min',v:g.ctrl_time_per15,m:8,c:'var(--blue)'}]
+        .map(r=><div className="stat-row-item" key={r.l}><span className="srl-label">{r.l}</span><SBar val={r.v} max={r.m} color={r.c}/><span className="srl-val">{r.v}{r.u||''}</span></div>)}
+    </div>
+    <div className="sec-label">TRANSITIONS</div>
+    <div className="stat-row-list">
+      {[{l:'Guard Pass Rate %',v:g.pass_rate,c:'var(--green)',u:'%'},{l:'Reversal Rate %',v:g.reversal_rate,c:'var(--orange)',u:'%'}]
+        .map(r=><div className="stat-row-item" key={r.l}><span className="srl-label">{r.l}</span><SBar val={r.v} max={100} color={r.c}/><span className="srl-val">{r.v}{r.u}</span></div>)}
+    </div>
+    <div className="sec-label">SUBMISSION WIN BREAKDOWN</div>
+    <div className="stat-grid" style={{gridTemplateColumns:'repeat(3,1fr)'}}>
+      <div className="stat-cell"><div className="stat-cell-label">SUB WINS</div><div className="stat-cell-val" style={{color:'var(--green)'}}>{f.finishes.sub}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">TOTAL WINS</div><div className="stat-cell-val">{f.wins}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">SUB WIN RATE</div><div className="stat-cell-val">{Math.round(f.finishes.sub/f.wins*100)}%</div></div>
+    </div>
+  </div>;
+}
+
+function TabPhysical({f}) {
+  const chinColor={Iron:'var(--green)',Solid:'var(--green)',Questionable:'var(--orange)','Stopped Before':'var(--red)'};
+  const cardioColor={Elite:'var(--green)',Good:'var(--green)',Average:'var(--text)',Concern:'var(--red)'};
+  const cutColor={Minimal:'var(--green)',Moderate:'var(--text)','Heavy Cutter':'var(--orange)','Drain Risk':'var(--red)'};
+  return <div className="anim-fade">
+    <div className="sec-label">PHYSICAL ATTRIBUTES</div>
+    <div className="stat-grid">
+      {[{l:'AGE',v:f.age+' yrs'},{l:'HEIGHT',v:f.height},{l:'REACH',v:f.reach},{l:'STANCE',v:f.stance},{l:'WEIGHT CLASS',v:f.weight},{l:'COUNTRY',v:f.country}]
+        .map(s=><div className="stat-cell" key={s.l}><div className="stat-cell-label">{s.l}</div><div style={{fontSize:14,fontWeight:600,color:'var(--text-bright)',marginTop:4}}>{s.v}</div></div>)}
+    </div>
+    <div className="sec-label">TRAINING CAMP</div>
+    <div className="stat-cell" style={{marginBottom:20}}><div className="stat-cell-label">CAMP / GYM</div><div style={{fontSize:13,color:'var(--text)',marginTop:4}}>{f.camp}</div></div>
+    <div className="sec-label">DURABILITY FLAGS</div>
+    <div className="stat-grid" style={{gridTemplateColumns:'repeat(auto-fill,minmax(150px,1fr))'}}>
+      <div className="stat-cell"><div className="stat-cell-label">CHIN RATING</div><div style={{fontSize:13,fontWeight:600,color:chinColor[f.chin]||'var(--text)',marginTop:4}}>{f.chin}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">CARDIO RATING</div><div style={{fontSize:13,fontWeight:600,color:cardioColor[f.cardio]||'var(--text)',marginTop:4}}>{f.cardio}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">WEIGHT CUT</div><div style={{fontSize:13,fontWeight:600,color:cutColor[f.weight_cut]||'var(--text)',marginTop:4}}>{f.weight_cut}</div></div>
+    </div>
+    <div className="sec-label">LOSS METHOD BREAKDOWN</div>
+    <div className="stat-grid" style={{gridTemplateColumns:'repeat(3,1fr)'}}>
+      <div className="stat-cell"><div className="stat-cell-label">LOSSES BY KO</div><div className="stat-cell-val" style={{color:f.losses_by.ko>0?'var(--red)':'var(--green)'}}>{f.losses_by.ko}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">LOSSES BY SUB</div><div className="stat-cell-val" style={{color:f.losses_by.sub>0?'var(--red)':'var(--green)'}}>{f.losses_by.sub}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">LOSSES BY DEC</div><div className="stat-cell-val" style={{color:f.losses_by.dec>0?'var(--orange)':'var(--green)'}}>{f.losses_by.dec}</div></div>
+    </div>
+  </div>;
+}
+
+function TabHistory({f}) {
+  return <div className="anim-fade">
+    <div className="sec-label">FIGHT LOG — LAST {f.history.length} FIGHTS</div>
+    <div className="fight-log">
+      <div className="fight-log-header"><span>RES</span><span>OPPONENT</span><span>METHOD</span><span>ROUND</span><span>YEAR</span><span>EVENT</span></div>
+      {f.history.map((h,i)=>(
+        <div className="fight-entry" key={i}>
+          <span className={`fe-result ${h.result}`}>{h.result}</span>
+          <span style={{fontWeight:500,color:'var(--text)'}}>{h.opponent}</span>
+          <span className="fe-dim">{h.method}</span>
+          <span className="fe-dim">R{h.round}</span>
+          <span className="fe-dim">{h.year}</span>
+          <span className="fe-dim">{h.event}</span>
+        </div>
+      ))}
+    </div>
+  </div>;
+}
+
+function TabMarket({f}) {
+  const [data,setData] = useLS(`mkt_${f.id}`, {ml_open:'',ml_current:'',odds_ko:'',odds_sub:'',odds_dec:'',public_pct:'',notes:''});
+  const upd = (k,v) => setData(p=>({...p,[k]:v}));
+  const mv = lineMovement(data.ml_open, data.ml_current);
+  return <div className="anim-fade">
+    <div className="sec-label">MONEYLINE</div>
+    <div className="market-grid">
+      {[{k:'ml_open',l:'OPENING LINE'},{k:'ml_current',l:'CURRENT LINE'}].map(({k,l})=>(
+        <div className="market-card" key={k}>
+          <div className="mc-label">{l}</div>
+          <input className="mc-input" placeholder="-150" value={data[k]} onChange={e=>upd(k,e.target.value)}/>
+          {data[k] && <div className="mc-implied">Implied: <span>{mlToImplied(data[k])}%</span></div>}
+        </div>
+      ))}
+    </div>
+    {mv && <div style={{padding:'8px 12px',background:'var(--surface)',marginBottom:16,fontFamily:'var(--mono)',fontSize:11,color:mv.dir==='up'?'var(--green)':'var(--red)'}}>▲ LINE MOVEMENT: {mv.label}</div>}
+    <div className="sec-label">METHOD ODDS</div>
+    <div className="market-grid">
+      {[{k:'odds_ko',l:'WIN BY KO/TKO'},{k:'odds_sub',l:'WIN BY SUB'},{k:'odds_dec',l:'WIN BY DEC'}].map(({k,l})=>(
+        <div className="market-card" key={k}>
+          <div className="mc-label">{l}</div>
+          <input className="mc-input" placeholder="+300" value={data[k]} onChange={e=>upd(k,e.target.value)}/>
+          {data[k] && <div className="mc-implied">Implied: <span>{mlToImplied(data[k])}%</span></div>}
+        </div>
+      ))}
+    </div>
+    <div className="sec-label">PUBLIC MONEY %</div>
+    <div className="market-grid" style={{gridTemplateColumns:'1fr'}}>
+      <div className="market-card">
+        <div className="mc-label">PUBLIC BET % (if available from tracker)</div>
+        <input className="mc-input" style={{fontSize:18}} placeholder="65" value={data.public_pct} onChange={e=>upd('public_pct',e.target.value)}/>
+        {data.public_pct && data.ml_current && (
+          <div className="mc-implied" style={{marginTop:6}}>
+            {parseInt(data.public_pct)>70
+              ? <span style={{color:'var(--orange)'}}>⚠ Heavy public action — potential price inflation</span>
+              : <span style={{color:'var(--green)'}}>Public distribution within normal range</span>}
+          </div>
+        )}
+      </div>
+    </div>
+    <div className="sec-label">ANALYSIS NOTES</div>
+    <textarea className="notes-area" placeholder="Line movement story, sharp action signals, your edge thesis for this fight..." value={data.notes} onChange={e=>upd('notes',e.target.value)}/>
+  </div>;
+}
+
+// ─── FIGHTER SCREEN ───
+function FighterScreen({onBack}) {
+  const [search,setSearch]=useState('');
+  const [wf,setWf]=useState('ALL');
+  const [sel,setSel]=useState(FIGHTERS[0]);
+  const [tab,setTab]=useState('OVERVIEW');
+  const weights=['ALL',...new Set(FIGHTERS.map(f=>f.weight))];
+  const filtered=useMemo(()=>FIGHTERS.filter(f=>{
+    const s=search.toLowerCase();
+    return (f.name.toLowerCase().includes(s)||f.nickname.toLowerCase().includes(s))&&(wf==='ALL'||f.weight===wf);
+  }),[search,wf]);
+  function pick(f){setSel(f);setTab('OVERVIEW');}
+  const ac = sel ? ARCH_COLORS[sel.archetype] : null;
+  return (
+    <div className="app">
+      <div className="topbar">
+        <span className="topbar-logo">AUDWIHR</span><span className="topbar-sep">/</span>
+        <span className="topbar-section">FIGHTERS</span>
+        <div className="topbar-right"><button className="topbar-back" onClick={onBack}>← MENU</button></div>
+      </div>
+      <div className="main-layout">
+        <div className="sidebar">
+          <div className="sidebar-header">ROSTER — {filtered.length}</div>
+          <div className="sidebar-search"><input className="sidebar-input" placeholder="Search..." value={search} onChange={e=>setSearch(e.target.value)}/></div>
+          <div className="sidebar-filters">{weights.map(w=><button key={w} className={`filter-chip ${wf===w?'on':''}`} onClick={()=>setWf(w)}>{w==='ALL'?'ALL':w.split(' ')[0].toUpperCase()}</button>)}</div>
+          <div className="sidebar-list">{filtered.map(f=>(
+            <div key={f.id} className={`sidebar-fighter ${sel?.id===f.id?'active':''}`} onClick={()=>pick(f)}>
+              <div className="sf-name">{f.name}</div>
+              <div className="sf-meta"><span className="sf-record">{f.record}</span> · {f.weight} · {f.rank}</div>
+            </div>
+          ))}</div>
+        </div>
+        {sel ? (
+          <div className="fighter-area">
+            <div className="card-hero">
+              <div className="card-portrait"><span className="portrait-placeholder">🥊</span></div>
+              <div className="card-identity">
+                <div className="fighter-name-big">{sel.name}</div>
+                <div className="fighter-nickname">"{sel.nickname}"</div>
+                <div className="identity-row">
+                  <span className={`id-pill ${sel.rank==='CHAMPION'?'champ':'rank'}`}>{sel.rank}</span>
+                  <span className="id-pill">{sel.weight}</span>
+                  <span className="id-pill">{sel.org}</span>
+                  <span className="id-pill">{sel.stance}</span>
+                  <span className="id-pill">{sel.country}</span>
+                </div>
+                <div className="archetype-row">
+                  {ac && <span className="arch-tag" style={{borderColor:ac,color:ac}}>{sel.archetype}</span>}
+                  {sel.mods.map(m=><span key={m} className="arch-tag" style={{borderColor:MOD_COLORS[m]||'#555',color:MOD_COLORS[m]||'#555',opacity:.8}}>{m}</span>)}
+                </div>
+              </div>
+              <div className="card-record">
+                <div className="record-big">{sel.record}</div>
+                <div className="record-breakdown">
+                  <div className="rb"><div className="rb-n" style={{color:'var(--green)'}}>{sel.wins}</div><div className="rb-l">W</div></div>
+                  <div className="rb"><div className="rb-n" style={{color:'var(--red)'}}>{sel.losses}</div><div className="rb-l">L</div></div>
+                  <div className="rb"><div className="rb-n">{sel.streak}</div><div className="rb-l">STRK</div></div>
+                </div>
+                <div className="finish-row">
+                  <div className="fin-chip"><div className="fin-n" style={{color:'var(--red)'}}>{sel.finishes.ko}</div><div className="fin-l">KO</div></div>
+                  <div className="fin-chip"><div className="fin-n" style={{color:'var(--green)'}}>{sel.finishes.sub}</div><div className="fin-l">SUB</div></div>
+                  <div className="fin-chip"><div className="fin-n" style={{color:'var(--text-dim)'}}>{sel.finishes.dec}</div><div className="fin-l">DEC</div></div>
+                </div>
+              </div>
+            </div>
+            <div className="tabs-bar">{TABS.map(t=><button key={t} className={`tab-btn ${tab===t?'active':''}`} onClick={()=>setTab(t)}>{t}</button>)}</div>
+            <div className="tab-content">
+              {tab==='OVERVIEW'  && <TabOverview  f={sel}/>}
+              {tab==='STRIKING'  && <TabStriking  f={sel}/>}
+              {tab==='GRAPPLING' && <TabGrappling f={sel}/>}
+              {tab==='PHYSICAL'  && <TabPhysical  f={sel}/>}
+              {tab==='HISTORY'   && <TabHistory   f={sel}/>}
+              {tab==='MARKET'    && <TabMarket    f={sel}/>}
+            </div>
+          </div>
+        ) : <div className="empty-state"><div style={{fontSize:32,opacity:.2}}>👊</div><span>SELECT A FIGHTER</span></div>}
+      </div>
+    </div>
+  );
+}
+
+// ─── COMPARE SCREEN ───
+function CompareScreen({onBack}) {
+  const [f1id,setF1id]=useState('');
+  const [f2id,setF2id]=useState('');
+  const f1=FIGHTERS.find(f=>f.id===parseInt(f1id));
+  const f2=FIGHTERS.find(f=>f.id===parseInt(f2id));
+  const clKey=f1&&f2?`${Math.min(f1.id,f2.id)}_${Math.max(f1.id,f2.id)}`:'default';
+  let lastCat=null;
+  const rows=f1&&f2?[
+    {cat:'RECORD',  l:'Overall Record',       v1:`${f1.wins}-${f1.losses}`,v2:`${f2.wins}-${f2.losses}`,n1:f1.wins,n2:f2.wins,hi:true},
+    {cat:'RECORD',  l:'Win Streak',            v1:f1.streak,    v2:f2.streak,    n1:f1.streak,   n2:f2.streak,    hi:true},
+    {cat:'RECORD',  l:'Finish Rate %',         v1:f1.finish_rate+'%',v2:f2.finish_rate+'%',n1:f1.finish_rate,n2:f2.finish_rate,hi:true},
+    {cat:'STRIKING',l:'Sig Strikes / Min',     v1:f1.striking.slpm,    v2:f2.striking.slpm,    n1:f1.striking.slpm,  n2:f2.striking.slpm, hi:true},
+    {cat:'STRIKING',l:'Striking Accuracy %',   v1:f1.striking.str_acc+'%',v2:f2.striking.str_acc+'%',n1:f1.striking.str_acc,n2:f2.striking.str_acc,hi:true},
+    {cat:'STRIKING',l:'Str Absorbed / Min',    v1:f1.striking.sapm,    v2:f2.striking.sapm,    n1:f1.striking.sapm,  n2:f2.striking.sapm, hi:false},
+    {cat:'STRIKING',l:'Striking Defense %',    v1:f1.striking.str_def+'%',v2:f2.striking.str_def+'%',n1:f1.striking.str_def,n2:f2.striking.str_def,hi:true},
+    {cat:'STRIKING',l:'Knockdowns Landed',     v1:f1.striking.kd_landed,v2:f2.striking.kd_landed,n1:f1.striking.kd_landed,n2:f2.striking.kd_landed,hi:true},
+    {cat:'GRAPPLING',l:'TD Attempts / 15',     v1:f1.grappling.td_per15,v2:f2.grappling.td_per15,n1:f1.grappling.td_per15,n2:f2.grappling.td_per15,hi:true},
+    {cat:'GRAPPLING',l:'TD Accuracy %',        v1:f1.grappling.td_acc+'%',v2:f2.grappling.td_acc+'%',n1:f1.grappling.td_acc,n2:f2.grappling.td_acc,hi:true},
+    {cat:'GRAPPLING',l:'TD Defense %',         v1:f1.grappling.td_def+'%',v2:f2.grappling.td_def+'%',n1:f1.grappling.td_def,n2:f2.grappling.td_def,hi:true},
+    {cat:'GRAPPLING',l:'Sub Avg / 15 Min',     v1:f1.grappling.sub_per15,v2:f2.grappling.sub_per15,n1:f1.grappling.sub_per15,n2:f2.grappling.sub_per15,hi:true},
+    {cat:'GRAPPLING',l:'Ctrl Time / 15 Min',   v1:f1.grappling.ctrl_time_per15,v2:f2.grappling.ctrl_time_per15,n1:f1.grappling.ctrl_time_per15,n2:f2.grappling.ctrl_time_per15,hi:true},
+    {cat:'PHYSICAL', l:'Reach',                v1:f1.reach,v2:f2.reach,n1:parseInt(f1.reach),n2:parseInt(f2.reach),hi:true},
+    {cat:'PHYSICAL', l:'Age',                  v1:f1.age+' yrs',v2:f2.age+' yrs',n1:f1.age,n2:f2.age,hi:false},
+  ]:[];
+  return (
+    <div className="app">
+      <div className="topbar">
+        <span className="topbar-logo">AUDWIHR</span><span className="topbar-sep">/</span>
+        <span className="topbar-section">COMPARE</span>
+        <div className="topbar-right"><button className="topbar-back" onClick={onBack}>← MENU</button></div>
+      </div>
+      <div className="compare-layout">
+        <div className="compare-selector">
+          <select className="compare-select" value={f1id} onChange={e=>setF1id(e.target.value)}>
+            <option value="">— Fighter 1 —</option>
+            {FIGHTERS.map(f=><option key={f.id} value={f.id}>{f.name} ({f.record})</option>)}
+          </select>
+          <span className="vs-text">VS</span>
+          <select className="compare-select" value={f2id} onChange={e=>setF2id(e.target.value)}>
+            <option value="">— Fighter 2 —</option>
+            {FIGHTERS.map(f=><option key={f.id} value={f.id}>{f.name} ({f.record})</option>)}
+          </select>
+        </div>
+        <div className="compare-body">
+          <div className="compare-table-wrap">
+            {f1&&f2 ? (
+              <div className="anim-fade">
+                <div style={{display:'grid',gridTemplateColumns:'1fr 80px 1fr',marginBottom:1,gap:1,background:'var(--border)'}}>
+                  <div style={{background:'var(--surface)',padding:'12px 16px',borderBottom:'2px solid var(--accent)'}}>
+                    <div style={{fontSize:15,fontWeight:700,color:'var(--text-bright)'}}>{f1.name}</div>
+                    <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--accent)',marginTop:2}}>{f1.record} · {f1.rank}</div>
+                    <div style={{marginTop:6}}><span className="arch-tag" style={{borderColor:ARCH_COLORS[f1.archetype],color:ARCH_COLORS[f1.archetype],fontSize:9}}>{f1.archetype}</span></div>
+                  </div>
+                  <div style={{background:'var(--surface2)',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--mono)',fontSize:13,fontWeight:700,color:'var(--red)'}}>VS</div>
+                  <div style={{background:'var(--surface)',padding:'12px 16px',borderBottom:'2px solid var(--blue)',textAlign:'right'}}>
+                    <div style={{fontSize:15,fontWeight:700,color:'var(--text-bright)'}}>{f2.name}</div>
+                    <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--blue)',marginTop:2}}>{f2.record} · {f2.rank}</div>
+                    <div style={{marginTop:6,display:'flex',justifyContent:'flex-end'}}><span className="arch-tag" style={{borderColor:ARCH_COLORS[f2.archetype],color:ARCH_COLORS[f2.archetype],fontSize:9}}>{f2.archetype}</span></div>
+                  </div>
+                </div>
+                <table className="ctable">
+                  <thead><tr><th style={{textAlign:'left',width:'38%'}}>F1</th><th className="center" style={{width:'24%'}}>STAT</th><th style={{textAlign:'right',width:'38%'}}>F2</th></tr></thead>
+                  <tbody>{rows.map((r,i)=>{
+                    const sc=r.cat!==lastCat; lastCat=r.cat;
+                    const tie=r.n1===r.n2, f1w=r.hi?r.n1>r.n2:r.n1<r.n2;
+                    return <React.Fragment key={i}>
+                      {sc&&<tr className="cat-row"><td colSpan={3}>{r.cat}</td></tr>}
+                      <tr>
+                        <td className={tie?'':f1w?'win':'lose'}>{r.v1}</td>
+                        <td className="center">{r.l}</td>
+                        <td className={`r ${tie?'':!f1w?'win':'lose'}`}>{r.v2}</td>
+                      </tr>
+                    </React.Fragment>;
+                  })}</tbody>
+                </table>
+              </div>
+            ) : <div className="empty-state" style={{height:'100%'}}><div style={{fontSize:32,opacity:.2}}>⚔️</div><span>SELECT TWO FIGHTERS TO COMPARE</span></div>}
+          </div>
+          <div className="checklist-wrap"><ChecklistPanel storageKey={clKey}/></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── COMING SOON ───
+function ComingSoon({label,onBack}) {
+  return (
+    <div className="app">
+      <div className="topbar">
+        <span className="topbar-logo">AUDWIHR</span><span className="topbar-sep">/</span>
+        <span className="topbar-section">{label}</span>
+        <div className="topbar-right"><button className="topbar-back" onClick={onBack}>← MENU</button></div>
+      </div>
+      <div className="coming-soon">
+        <div style={{fontFamily:'var(--mono)',fontSize:10,letterSpacing:'.15em',color:'var(--text-dim)'}}>COMING IN FUTURE PHASE</div>
+        <div style={{fontSize:20,fontWeight:700,color:'var(--text-bright)',letterSpacing:'.05em'}}>{label}</div>
+        <div style={{fontFamily:'var(--mono)',fontSize:11,color:'var(--text-dim)',marginTop:8}}>See the project outline for the full roadmap.</div>
+      </div>
+    </div>
+  );
+}
+
+// ─── MENU ───
+function MenuScreen({onSelect}) {
+  const items=[
+    {id:'fighters',label:'FIGHTERS',      badge:'ACTIVE', active:true},
+    {id:'compare', label:'COMPARE',       badge:'ACTIVE', active:true},
+    {id:'calendar',label:'FIGHT CALENDAR',badge:'PHASE 3',active:false},
+    {id:'markets', label:'MARKETS',       badge:'PHASE 4',active:false},
+    {id:'news',    label:'FIGHTER NEWS',  badge:'PHASE 5',active:false},
+  ];
+  return (
+    <div className="app">
+      <div className="topbar">
+        <span className="topbar-logo">AUDWIHR // MMA TRADER</span>
+        <div className="topbar-right"><span style={{fontFamily:'var(--mono)',fontSize:10,color:'var(--text-dim)',letterSpacing:'.08em'}}>v0.2.0 — MOCK DATA</span></div>
+      </div>
+      <div className="menu-screen">
+        <div className="menu-wordmark">AUDWIHR</div>
+        <div className="menu-sub">MMA Prediction Market Trader</div>
+        <div className="menu-list">
+          {items.map((item,i)=>(
+            <div key={item.id} className="menu-item" onClick={()=>onSelect(item.id)}>
+              <span className="menu-item-num">0{i+1}</span>
+              <span className="menu-item-label">{item.label}</span>
+              <span className={`menu-item-badge ${item.active?'active':''}`}>{item.badge}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── ROOT ───
+function App() {
+  const [screen,setScreen]=useState('menu');
+  if(screen==='fighters') return <FighterScreen onBack={()=>setScreen('menu')}/>;
+  if(screen==='compare')  return <CompareScreen onBack={()=>setScreen('menu')}/>;
+  if(screen==='calendar') return <ComingSoon label="FIGHT CALENDAR" onBack={()=>setScreen('menu')}/>;
+  if(screen==='markets')  return <ComingSoon label="MARKETS" onBack={()=>setScreen('menu')}/>;
+  if(screen==='news')     return <ComingSoon label="FIGHTER NEWS" onBack={()=>setScreen('menu')}/>;
+  return <MenuScreen onSelect={setScreen}/>;
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
