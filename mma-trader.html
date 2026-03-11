@@ -1055,12 +1055,8 @@ function CalendarScreen({onBack, onGoFighter}) {
                   <div className="cal-event-meta">{fmtDate(sel.date)} · {sel.venue} · {sel.city}</div>
                 </div>
                 <div>
-                  {()=>{ const d=daysUntil(sel.date); const past=isPast(sel.date);
-                    return <>
-                      <div className="cal-countdown-big" style={{color:past?'var(--text-dim)':d<=7?'var(--accent)':'var(--green)'}}>{countdown(sel.date)}</div>
-                      <div className="cal-countdown-label">{past?'COMPLETED':'DAYS UNTIL EVENT'}</div>
-                    </>;
-                  }()}
+                  <div className="cal-countdown-big" style={{color:isPast(sel.date)?'var(--text-dim)':daysUntil(sel.date)<=7?'var(--accent)':'var(--green)'}}>{countdown(sel.date)}</div>
+                  <div className="cal-countdown-label">{isPast(sel.date)?'COMPLETED':'DAYS UNTIL EVENT'}</div>
                 </div>
               </div>
 
