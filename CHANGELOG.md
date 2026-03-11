@@ -4,6 +4,15 @@ All notable changes to this project. Format: [version] — date — description.
 
 ---
 
+## [0.3.0] — 2026-03-10
+
+### Added
+- 8 new fighters: Charles Oliveira, Justin Gaethje, Arman Tsarukyan (LW); Belal Muhammad, Leon Edwards, Jack Della Maddalena (WW); Jon Jones, Tom Aspinall (HW)
+- Roster now spans 5 weight classes: Lightweight, Welterweight, Middleweight, Bantamweight, Heavyweight
+- Full data model for each new fighter (60+ data points, 6-fight history, trader notes, archetype/modifier tags)
+
+---
+
 ## [0.2.0] — 2026-03-10
 
 ### Added

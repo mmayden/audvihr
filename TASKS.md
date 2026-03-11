@@ -10,21 +10,39 @@
 
 ## Current Sprint
 
-**Branch:** `feature/expand-roster`
-**Goal:** Add more fighters to the roster (10+ total, multiple weight classes)
+**Branch:** `feature/phase-3-calendar`
+**Goal:** Build the Fight Calendar screen — upcoming events, card breakdowns, fighter links
 
 ### Tasks
-- [ ] Add fighters — Lightweight division (2–3 more)
-- [ ] Add fighters — Welterweight division (2–3)
-- [ ] Add fighters — Heavyweight or P4P (1–2)
-- [ ] Verify all fighter data is internally consistent (finish_rate matches finishes/wins)
-- [ ] Run a manual smoke test: all 6 tabs render for every fighter
+- [ ] Add static event data model (events array with card structure)
+- [ ] Build CalendarScreen component — event list with date/countdown
+- [ ] Event detail view: main event / co-main / prelims breakdown
+- [ ] Fighter name links from calendar → fighter profile
+- [ ] Filter by promotion (UFC / Bellator / PFL)
+- [ ] Run smoke test: calendar renders, fighter links navigate correctly
 - [ ] Commit and merge to `main`
-- [ ] Cut branch `feature/phase-3-calendar`
+- [ ] Cut branch `feature/phase-4-markets`
+
+---
+
+## ✅ Completed Sprints
+
+### expand-roster — complete
+- [x] Add fighters — Lightweight division (Oliveira, Gaethje, Tsarukyan)
+- [x] Add fighters — Welterweight division (Muhammad, Edwards, Della Maddalena)
+- [x] Add fighters — Heavyweight (Jones, Aspinall)
+- [x] Verify all fighter data internally consistent
+- [x] Merged to `main`, tagged v0.3.0
 
 ---
 
 ## Roadmap
+
+### ✅ Phase 2b — Expand Roster (v0.3.0)
+- 14 fighters across 5 weight classes
+- LW: Makhachev, Poirier, Pimblett, Oliveira, Gaethje, Tsarukyan
+- WW: Muhammad, Edwards, Della Maddalena
+- MW: du Plessis | BW: O'Malley, Dvalishvili | HW: Jones, Aspinall
 
 ### ✅ Phase 1 — Core Roster + Compare
 - Single HTML file, React via CDN
