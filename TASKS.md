@@ -10,12 +10,12 @@
 
 ## Current Sprint
 
-**Branch:** `feature/phase-7-live-odds` (built, pending merge to master + tag v0.7.0)
-**Status:** All must-haves complete. Smoke test, then merge. Should-haves to follow.
+**Branch:** `feature/phase-7-should-haves`
+**Status:** Phase 7 must-haves merged + tagged v0.7.0. Working through should-haves.
 
 ---
 
-### ✅ Phase 7 — Live Odds + Market Intelligence (v0.7.0) — complete
+### ✅ Phase 7 — Live Odds + Market Intelligence (v0.7.0) — merged to master
 
 **Must Have — done:**
 - [x] Cut branch `feature/phase-7-live-odds`
@@ -35,15 +35,15 @@
 - [x] `VITE_KALSHI_API_KEY` in `.env.example`; CSP updated in `netlify.toml` + `vercel.json`
 - [x] 142 tests, 0 lint errors, `npm run build` passes (71 kB gzipped)
 - [x] `MenuScreen` version badge → `v0.7.0 — LIVE ODDS`
-- [ ] Merge to `master`, tag v0.7.0
+- [x] Merge to `master`, tag v0.7.0
 
-### Phase 7 — Should Have (next)
+### ✅ Phase 7 — Should Have — complete
 
-- [ ] Move compare stat rows to `src/constants/compareRows.js` (config-driven, zero behavior change)
-- [ ] Add `opp_quality` field to fight history entries in `scripts/fighter-seed.json` (elite / contender / gatekeeper / unknown)
-- [ ] Add `weigh_in` result field to event fight card entries in `scripts/fighter-seed.json` (missed / made / under)
-- [ ] Add `judges: []` field to event card data in seed (manual — enables decision prop research)
-- [ ] Simple client-side edge score in CompareScreen — weighted rules: archetype mismatch + market discrepancy + flag count → displayed as research prompt, not a pick
+- [x] Move compare stat rows to `src/constants/compareRows.js` (config-driven, zero behavior change)
+- [x] Add `opp_quality` field to fight history entries in `scripts/fighter-seed.json` (elite / contender / gatekeeper / unknown)
+- [x] Add `weigh_in` result field to event fight card entries in `scripts/fighter-seed.json` (missed / made / under)
+- [x] Add `judges: []` field to event card data in seed (manual — enables decision prop research)
+- [x] Simple client-side edge score in CompareScreen — stat rows + archetype + flags + market discrepancy → research prompt panel, not a pick
 
 ---
 

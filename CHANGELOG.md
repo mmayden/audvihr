@@ -6,6 +6,15 @@ All notable changes to this project. Format: [version] — date — description.
 
 ## [Unreleased]
 
+### Added
+- `src/constants/compareRows.js` — 15 stat-row definitions extracted from `CompareScreen`; each is a `(f1, f2) → row` function; zero behavior change
+- `opp_quality` field on fight history entries — editorial label (elite / contender / gatekeeper / unknown) per opponent; stored in `scripts/fighter-seed.json` as `history_overrides` and merged at build time; emitted in `fighters.js`
+- `weigh_in` and `judges` fields on event card fight entries — stored in `scripts/fighter-seed.json` as `event_overrides`; applied by `applyEventOverrides()` in `fetch-data.js`; UFC 314–317 covered
+- Edge signal panel in `CompareScreen` — `computeEdgeSignals()` fires on stat-row edge (contested row win count), archetype matchup (WRESTLER vs COUNTER STRIKER, PRESSURE FIGHTER vs KICKBOXER, etc.), modifier flags (DURABILITY RISK, FRONT-RUNNER, LATE BLOOMER), and market discrepancy (≥15pt gap between implied% and stat-row share when ml_current is set); panel labeled "RESEARCH PROMPT — NOT A PICK"
+
+### Changed
+- `scripts/fetch-data.js` — `mergeFighter()` applies `history_overrides`; `serializeFighter()` emits `opp_quality` when present; `serializeFight()` emits optional `weigh_in` / `judges`; new `applyEventOverrides()` helper; `generateEventsFile()` accepts overrides arg; schema comments updated
+
 ---
 
 ## [0.7.0] — 2026-03-15
