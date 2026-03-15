@@ -24,7 +24,7 @@
 - [x] Menu badge updated to ACTIVE, version bumped to v0.5.0
 - [x] `npm run build` passes — 66 kB gzipped
 - [x] ESLint clean (0 errors, 0 warnings)
-- [ ] Smoke test: filters work, fighter link navigates correctly
+- [x] Smoke test: filters work, fighter link navigates correctly
 - [ ] Commit and merge to `main`, tag v0.5.0
 
 ---

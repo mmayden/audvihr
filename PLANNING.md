@@ -28,28 +28,54 @@ After migration to Vite + React:
 
 ---
 
-## Current File Structure (Single HTML)
+## Current File Structure (Vite + React — v0.5.0)
+
+The single-file prototype (`mma-trader.html`) was retired at Phase 3a. The project is now a Vite + React app with the following modular layout:
 
 ```
-mma-trader.html                1,185 lines (migration trigger: ~2000)
-├── <style>                    CSS variables + all component styles
-└── <script type="text/babel">
-    ├── Constants               ARCH_COLORS, MOD_COLORS, CHECKLIST
-    │                           CHIN_COLOR, CARDIO_COLOR, CUT_COLOR, ORG_COLOR
-    ├── Fighter Data            FIGHTERS array (14 fighters, all mock data)
-    ├── Event Data              EVENTS array (5 events, static card data)
-    ├── Utils                   mlToImplied(), lineMovement(), SBar, useLS()
-    ├── ChecklistPanel          Reusable checklist with localStorage
-    ├── FighterName             Name → profile link resolver (calendar use)
-    ├── Tab Components          TabOverview, TabStriking, TabGrappling,
-    │                           TabPhysical, TabHistory, TabMarket
-    ├── FighterScreen           Sidebar + hero card + tabs
-    ├── CompareScreen           Selector + comparison table + checklist
-    ├── CalendarScreen          Event list sidebar + card detail view
-    ├── ComingSoon              Placeholder screen for locked features
-    ├── MenuScreen              Main navigation
-    └── App (root)              Screen router via useState
+src/
+├── main.jsx                  Entry point — ReactDOM.createRoot + StrictMode
+├── App.jsx                   Screen router — useState only, no business logic
+├── styles/
+│   └── app.css               All global styles and CSS variables (design system)
+├── constants/
+│   ├── archetypes.js         ARCH_COLORS (8), MOD_COLORS (10) — CSS var references
+│   ├── checklist.js          CHECKLIST (17 items), TABS (6 tab names)
+│   └── qualifiers.js         CHIN_COLOR, CARDIO_COLOR, CUT_COLOR, ORG_COLOR
+├── data/
+│   ├── fighters.js           FIGHTERS array — 14 mock fighters, full schema comment
+│   ├── events.js             EVENTS array — 5 mock UFC events, full schema comment
+│   ├── markets.js            MARKETS array — 8 mock prediction markets (Phase 4)
+│   └── news.js               NEWS array — 12 mock news items (Phase 5)
+├── hooks/
+│   ├── useLocalStorage.js    useLocalStorage — JSON-serialised state with try/catch
+│   └── useWatchlist.js       useWatchlist — watchlist set over useLocalStorage (Phase 4)
+├── utils/
+│   └── odds.js               mlToImplied(), lineMovement()
+├── components/
+│   ├── StatBar.jsx           Horizontal proportional fill bar
+│   ├── FighterName.jsx       Name → profile link resolver (calendar + news)
+│   └── ChecklistPanel.jsx    17-item trade checklist with progress bar
+├── tabs/
+│   ├── TabOverview.jsx       Key numbers, flags, trader notes
+│   ├── TabStriking.jsx       Striking volume, accuracy, knockdowns, position
+│   ├── TabGrappling.jsx      Takedowns, submissions, ground control, transitions
+│   ├── TabPhysical.jsx       Physical attributes, camp, durability, loss methods
+│   ├── TabHistory.jsx        Fight log table
+│   └── TabMarket.jsx         Moneyline entry, implied %, line movement, notes
+├── screens/
+│   ├── MenuScreen.jsx        Main navigation (5 ACTIVE items)
+│   ├── FighterScreen.jsx     Sidebar + hero card + 6-tab profile
+│   ├── CompareScreen.jsx     Two-fighter selector + stat table + checklist
+│   ├── CalendarScreen.jsx    Event sidebar + card detail + fighter deep-links
+│   ├── MarketsScreen.jsx     Prediction market dashboard (Phase 4)
+│   ├── NewsScreen.jsx        Fighter news feed with filters (Phase 5)
+│   └── ComingSoon.jsx        Placeholder for unimplemented screens
+└── test/
+    └── setup.js              Vitest setup — jest-dom + in-memory localStorage mock
 ```
+
+Test files are co-located with source: `*.test.{js,jsx}` next to the file under test.
 
 ---
 
@@ -218,16 +244,16 @@ Where `storageKey` for compare screen = `${Math.min(f1.id, f2.id)}_${Math.max(f1
 ## Archetype System
 
 ### Primary Archetypes (single select)
-| Archetype | Color |
-|-----------|-------|
-| WRESTLER | `#5b8dd9` blue |
-| BJJ / SUB HUNTER | `#4caf82` green |
-| PRESSURE FIGHTER | `#d4a843` amber |
-| COUNTER STRIKER | `#8b6fd4` purple |
-| KICKBOXER | `#d4804a` orange |
-| BOXER-PUNCHER | `#d95f5f` red |
-| BRAWLER | `#c0392b` dark red |
-| COMPLETE FIGHTER | `#c8cdd8` neutral |
+| Archetype | CSS Variable | Color |
+|-----------|-------------|-------|
+| WRESTLER | `--blue` | #5b8dd9 |
+| BJJ / SUB HUNTER | `--green` | #4caf82 |
+| PRESSURE FIGHTER | `--accent` | #d4a843 |
+| COUNTER STRIKER | `--purple` | #8b6fd4 |
+| KICKBOXER | `--orange` | #d4804a |
+| BOXER-PUNCHER | `--red` | #d95f5f |
+| BRAWLER | `--dark-red` | #c0392b |
+| COMPLETE FIGHTER | `--text` | #c8cdd8 |
 
 ### Modifier Tags (up to 3)
 `SOUTHPAW` `VOLUME STRIKER` `KO POWER` `CARDIO CONCERN` `WEIGHT CUT FLAG` `LATE BLOOMER` `FRONT-RUNNER` `STEP-UP CONCERN` `DURABILITY RISK` `GUARD DANGER`
@@ -250,20 +276,20 @@ Checklist persists per matchup via localStorage. Key = `cl_{f1id}_{f2id}`.
 
 ## Security Model
 
-### Current State (pre-Vite, single HTML file)
+### Current State (Vite + React — v0.5.0)
 
 | Surface | Risk | Status |
 |---------|------|--------|
-| `babel-standalone` CDN | Runtime code execution (~860KB compiler, supply chain risk) | **Eliminated by Phase 3a** |
-| CDN scripts (React, ReactDOM) | No SRI — CDN compromise could inject arbitrary JS | **Mitigated by Phase 3a** (no CDN scripts post-build) |
+| `babel-standalone` CDN | Runtime code execution (~860KB compiler, supply chain risk) | **Eliminated** — Vite compiles at build time, no runtime JSX compiler |
+| CDN scripts (React, ReactDOM) | No SRI — CDN compromise could inject arbitrary JS | **Eliminated** — Vite bundles React into `dist/`, no CDN scripts at runtime |
 | Google Fonts CDN | No SRI — low risk (CSS/fonts only, no JS) | Acceptable; add SRI if CSP tightened |
 | `localStorage` reads | Malformed JSON parsed directly into state | **Mitigated** — `try/catch` with typed default fallback in `useLocalStorage` |
-| User inputs (odds fields, notes) | Reflected into UI | **Mitigated** — React JSX escapes by default; `parseInt`/`isNaN` guard on numeric fields |
+| User inputs (odds fields, notes) | Reflected into UI | **Mitigated** — React JSX escapes by default; `parseInt`/`isNaN` guard on all numeric fields |
 | `dangerouslySetInnerHTML` | XSS if used with user input | **Not used** — do not introduce |
-| Secrets / credentials | Hardcoded in source | **N/A currently** — no API keys yet. Phase 6 requires `.env` with `VITE_` prefix |
-| Search engine indexing | Personal trading tool exposed publicly | **Mitigated** — `noindex, nofollow` robots meta tag |
+| Secrets / credentials | Hardcoded in source | **N/A currently** — no API keys yet; Phase 6 requires `.env` with `VITE_` prefix |
+| Search engine indexing | Personal trading tool exposed publicly | **Mitigated** — `noindex, nofollow` robots meta tag in `index.html` |
 
-### Post-Vite Requirements (Phase 3a+)
+### Deployment Security (Phase 3a+)
 
 **Content Security Policy** — configure at the hosting layer, not in HTML:
 
@@ -321,3 +347,9 @@ Permissions-Policy: geolocation=(), camera=(), microphone=()
 | Phase 3 | Static EVENTS array | No live event API; user enters card data manually same as fighter data |
 | Phase 3 | FighterName at top-level | Was nested inside CalendarScreen (React anti-pattern); extracted to stable module-level component |
 | Phase 3a | Vite migration is now required | App will be hosted on web — babel-standalone is a production blocker (~860KB runtime compiler). Must migrate before live deployment. |
+| Phase 4 | useWatchlist hook wraps useLocalStorage | Isolates the `watchlist_markets` key and toggle logic; keeps MarketsScreen focused on presentation |
+| Phase 4 | computeArb / helpers at module scope | Pure functions with no state dependencies belong outside the component render — consistent with CLAUDE.md module-level constant rule |
+| Phase 5 | fighter_id nullable in NEWS items | Some news covers multiple fighters or general events; null fighter_id means the item is not filterable by fighter but still visible in ALL mode |
+| Phase 5 | Relevance field on news items | Three-tier signal (high/medium/low) used as a trading-relevance indicator rather than arbitrary tagging — mirrors the checklist's categorical weighting |
+| Phase 5 (cleanup) | Tab props renamed f → fighter | Single-letter prop names at API level are prohibited by CLAUDE.md; internal aliases (const s = fighter.striking) kept for brevity |
+| Phase 5 (cleanup) | ARCH_COLORS / MOD_COLORS use CSS var() | Colors were previously hardcoded hex, violating the "all colors from CSS variables" standard; --dark-red added to cover BRAWLER / FRONT-RUNNER |

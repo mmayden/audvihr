@@ -4,10 +4,10 @@ import { StatBar } from '../components/StatBar';
  * TabStriking — renders the Striking tab for a fighter profile.
  * Shows volume & accuracy stats, knockdowns, strike target breakdown,
  * and striking-by-position breakdown, all with StatBar visualisations.
- * @param {object} f - fighter object from FIGHTERS
+ * @param {object} fighter - fighter object from FIGHTERS
  */
-export function TabStriking({f}) {
-  const s=f.striking;
+export function TabStriking({ fighter }) {
+  const s = fighter.striking;
   return <div className="anim-fade">
     <div className="sec-label">VOLUME & ACCURACY</div>
     <div className="stat-row-list">

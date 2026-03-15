@@ -9,6 +9,9 @@ import { TabPhysical } from '../tabs/TabPhysical';
 import { TabHistory } from '../tabs/TabHistory';
 import { TabMarket } from '../tabs/TabMarket';
 
+/** Weight class filter options derived from the static FIGHTERS roster. */
+const WEIGHT_FILTERS = ['ALL', ...new Set(FIGHTERS.map(f => f.weight))];
+
 /**
  * FighterScreen — full fighter profile screen with sidebar roster list,
  * hero card, and tabbed detail view (Overview, Striking, Grappling,
@@ -21,7 +24,6 @@ export function FighterScreen({onBack, initialFighter}) {
   const [wf,setWf]=useState('ALL');
   const [sel,setSel]=useState(initialFighter||FIGHTERS[0]);
   const [tab,setTab]=useState('OVERVIEW');
-  const weights=['ALL',...new Set(FIGHTERS.map(f=>f.weight))];
   const filtered=useMemo(()=>FIGHTERS.filter(f=>{
     const s=search.toLowerCase();
     return (f.name.toLowerCase().includes(s)||f.nickname.toLowerCase().includes(s))&&(wf==='ALL'||f.weight===wf);
@@ -39,7 +41,7 @@ export function FighterScreen({onBack, initialFighter}) {
         <div className="sidebar">
           <div className="sidebar-header">ROSTER — {filtered.length}</div>
           <div className="sidebar-search"><input className="sidebar-input" placeholder="Search..." value={search} onChange={e=>setSearch(e.target.value)}/></div>
-          <div className="sidebar-filters">{weights.map(w=><button key={w} className={`filter-chip ${wf===w?'on':''}`} onClick={()=>setWf(w)}>{w==='ALL'?'ALL':w.split(' ')[0].toUpperCase()}</button>)}</div>
+          <div className="sidebar-filters">{WEIGHT_FILTERS.map(w=><button key={w} className={`filter-chip ${wf===w?'on':''}`} onClick={()=>setWf(w)}>{w==='ALL'?'ALL':w.split(' ')[0].toUpperCase()}</button>)}</div>
           <div className="sidebar-list">{filtered.map(f=>(
             <div key={f.id} className={`sidebar-fighter ${sel?.id===f.id?'active':''}`} onClick={()=>pick(f)}>
               <div className="sf-name">{f.name}</div>
@@ -82,12 +84,12 @@ export function FighterScreen({onBack, initialFighter}) {
             </div>
             <div className="tabs-bar">{TABS.map(t=><button key={t} className={`tab-btn ${tab===t?'active':''}`} onClick={()=>setTab(t)}>{t}</button>)}</div>
             <div className="tab-content">
-              {tab==='OVERVIEW'  && <TabOverview  f={sel}/>}
-              {tab==='STRIKING'  && <TabStriking  f={sel}/>}
-              {tab==='GRAPPLING' && <TabGrappling f={sel}/>}
-              {tab==='PHYSICAL'  && <TabPhysical  f={sel}/>}
-              {tab==='HISTORY'   && <TabHistory   f={sel}/>}
-              {tab==='MARKET'    && <TabMarket    f={sel}/>}
+              {tab==='OVERVIEW'  && <TabOverview  fighter={sel}/>}
+              {tab==='STRIKING'  && <TabStriking  fighter={sel}/>}
+              {tab==='GRAPPLING' && <TabGrappling fighter={sel}/>}
+              {tab==='PHYSICAL'  && <TabPhysical  fighter={sel}/>}
+              {tab==='HISTORY'   && <TabHistory   fighter={sel}/>}
+              {tab==='MARKET'    && <TabMarket    fighter={sel}/>}
             </div>
           </div>
         ) : <div className="empty-state"><div style={{fontSize:32,opacity:.2}}>👊</div><span>SELECT A FIGHTER</span></div>}

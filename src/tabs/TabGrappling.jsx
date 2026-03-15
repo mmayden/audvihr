@@ -4,10 +4,10 @@ import { StatBar } from '../components/StatBar';
  * TabGrappling — renders the Grappling tab for a fighter profile.
  * Shows takedown stats, submission attempts, ground control time,
  * and transition rates, all with StatBar visualisations.
- * @param {object} f - fighter object from FIGHTERS
+ * @param {object} fighter - fighter object from FIGHTERS
  */
-export function TabGrappling({f}) {
-  const g=f.grappling;
+export function TabGrappling({ fighter }) {
+  const g = fighter.grappling;
   return <div className="anim-fade">
     <div className="sec-label">TAKEDOWNS</div>
     <div className="stat-row-list">
@@ -30,9 +30,9 @@ export function TabGrappling({f}) {
     </div>
     <div className="sec-label">SUBMISSION WIN BREAKDOWN</div>
     <div className="stat-grid" style={{gridTemplateColumns:'repeat(3,1fr)'}}>
-      <div className="stat-cell"><div className="stat-cell-label">SUB WINS</div><div className="stat-cell-val" style={{color:'var(--green)'}}>{f.finishes.sub}</div></div>
-      <div className="stat-cell"><div className="stat-cell-label">TOTAL WINS</div><div className="stat-cell-val">{f.wins}</div></div>
-      <div className="stat-cell"><div className="stat-cell-label">SUB WIN RATE</div><div className="stat-cell-val">{Math.round(f.finishes.sub/f.wins*100)}%</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">SUB WINS</div><div className="stat-cell-val" style={{color:'var(--green)'}}>{fighter.finishes.sub}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">TOTAL WINS</div><div className="stat-cell-val">{fighter.wins}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">SUB WIN RATE</div><div className="stat-cell-val">{fighter.wins > 0 ? Math.round(fighter.finishes.sub / fighter.wins * 100) : 0}%</div></div>
     </div>
   </div>;
 }
