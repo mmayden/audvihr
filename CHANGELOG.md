@@ -6,40 +6,37 @@ All notable changes to this project. Format: [version] — date — description.
 
 ## [Unreleased]
 
-### Phase 7 — Live Odds + Market Intelligence
-
-#### Added
-- `src/hooks/useOdds.js` — The Odds API hook: fetches live UFC moneylines; caches in `sessionStorage` (15-min TTL); degrades silently when `VITE_ODDS_API_KEY` is absent or quota exceeded; `refetch()` for manual refresh
-- `src/hooks/usePolymarket.js` — Polymarket CLOB hook: fetches active UFC markets (no auth); caches current prices in `sessionStorage` (10-min TTL); persists CLV snapshots to `localStorage` on every fresh fetch; `fetchHistory(conditionId, tokenId)` for lazy-loaded price history
-- `src/hooks/useKalshi.js` — Kalshi REST API hook: fetches markets across UFC series tickers; caches in `sessionStorage`; appends CLV snapshots to localStorage; `fetchHistory(ticker)` lazy-loaded; degrades silently when `VITE_KALSHI_API_KEY` absent
-- `src/utils/normalizeOdds.js` — five transform/validation functions: `fightKey()`, `probToML()`, `normalizeOddsApiResponse()`, `normalizePolymarketMarket()`, `normalizeKalshiMarket()`, `normalizePriceHistory()` — all return null/[] on invalid input, never throw
-- `src/utils/normalizeOdds.test.js` — 29 tests covering all normalizer functions (valid input, null/bad input, malformed shapes, out-of-range values)
-- `src/hooks/useOdds.test.js` — 6 tests: absent key, placeholder key, successful fetch, HTTP 401, HTTP 422, sessionStorage cache hit, malformed response
-- `src/hooks/usePolymarket.test.js` — 7 tests: successful fetch, non-UFC market filtering, HTTP error, cache hit, network failure, empty response, CLV snapshot persistence
-- `src/hooks/useKalshi.test.js` — 7 tests: absent key, placeholder key, successful fetch, HTTP 401 soft degradation, cache hit, malformed response, CLV snapshot persistence
-- `src/components/PriceChart.jsx` — SVG sparkline for probability-over-time charts; 50% reference line; area fill; terminal dot; configurable color and height; handles < 2 data points gracefully
-- `VITE_KALSHI_API_KEY` added to `.env.example` with documentation comment
-
-#### Changed
-- `src/screens/MarketsScreen.jsx` — redesigned with unified three-column live market row (Sportsbook | Polymarket | Kalshi); `LivePriceCell` component for each column; arb detection updated to compare across all three live sources; lazy-loaded price history charts on per-card expand/collapse toggle; CLV log panel (top-100 recent snapshots, sortable); live markets merged with mock MARKETS (live-only fights appended as stubs); `● LIVE` indicator when any API is active; falls back to existing mock platform rows when no live data
-- `src/tabs/TabMarket.jsx` — live market prices section added (Polymarket + Kalshi current price when fighter is matched by name); price history charts auto-loaded for matched roster fighters; manual entry section unchanged
-- `netlify.toml` — CSP `connect-src` updated: added `https://api.the-odds-api.com`, `https://clob.polymarket.com`, `https://trading-api.kalshi.com`
-- `vercel.json` — same CSP `connect-src` update
-- `eslint.config.js` — added browser globals: `sessionStorage`, `fetch`, `setTimeout`, `clearTimeout`, `Promise`, `Date`, `JSON`, `Math`, `parseInt`, `parseFloat`, `isNaN`, `Array`, `Object`, `String`, `Boolean`, `Number`; added test-file config with `global` and `process` Node globals
-
 ---
 
-## [Unreleased — Planning]
+## [0.7.0] — 2026-03-15
 
-### Planning (2026-03-15)
-- Full design + competitive landscape assessment conducted
-- Phase 7 scope revised: expanded from The Odds API only → three-API unified market view (The Odds API + Polymarket CLOB + Kalshi) + historical price charts + personal CLV log
+### Added
+- `src/hooks/useOdds.js` — The Odds API hook; live UFC moneylines; sessionStorage cache (15-min TTL); degrades silently when key absent or quota exceeded; `refetch()` for manual cache bust
+- `src/hooks/usePolymarket.js` — Polymarket CLOB hook; active UFC markets, no auth; sessionStorage cache (10-min TTL); CLV snapshots to localStorage on every fresh fetch; lazy `fetchHistory(conditionId, tokenId)`
+- `src/hooks/useKalshi.js` — Kalshi REST API hook; fetches across `KXUFC`/`KXMMA` series; sessionStorage cache; CLV snapshots; lazy `fetchHistory(ticker)`; degrades silently when key absent
+- `src/utils/normalizeOdds.js` — `fightKey()`, `probToML()`, `normalizeOddsApiResponse()`, `normalizePolymarketMarket()`, `normalizeKalshiMarket()`, `normalizePriceHistory()` — defensive transform/validate; all return null/[] on invalid input, never throw
+- `src/utils/cache.js` — `readCache()`, `writeCache()`, `evictCache()` — shared sessionStorage cache helpers with configurable TTL; 100% coverage
+- `src/utils/clv.js` — `appendCLVEntries()`, `readCLVLog()` — CLV log persistence helpers; cap at 500 entries; 100% coverage
+- `src/components/PriceChart.jsx` — SVG sparkline; 50% reference line; area fill; terminal dot; configurable color/height; `< 2 data points` fallback; no chart.js dependency
+- `VITE_KALSHI_API_KEY` added to `.env.example` with inline documentation; `!.env.example` negation added to `.gitignore`
+- 142 tests total (up from 97); all passing — 31 new tests across normalizeOdds, cache, clv, PriceChart, MarketsScreen (smoke), and fetchHistory paths in all three hooks
+
+### Changed
+- `src/screens/MarketsScreen.jsx` — unified three-column live market row (SPORTSBOOK | POLYMARKET | KALSHI); `LivePriceCell` at module scope; arb detection across all three live sources; lazy price history chart per card (expand/collapse); CLV log panel (top-100 recent snapshots); live fights merged with mock MARKETS, live-only fights appended as price-only stubs; `● LIVE` indicator; falls back to mock platform rows when all APIs offline
+- `src/tabs/TabMarket.jsx` — live price display added (Polymarket + Kalshi current price when fighter matched by last name); price history charts auto-loaded for matched fighters; manual entry unchanged
+- `netlify.toml` + `vercel.json` — CSP `connect-src` updated: `https://api.the-odds-api.com https://clob.polymarket.com https://trading-api.kalshi.com`
+- `eslint.config.js` — browser globals extended (`sessionStorage`, `fetch`, etc.); test-file config adds `global` and `process`
+- `MenuScreen.jsx` — version badge updated to `v0.7.0 — LIVE ODDS`
+
+### Security
+- Kalshi API key sent from browser (Authorization header) — accepted constraint for personal/self-hosted tool; documented in PLANNING.md decisions log with remediation scope (proxy required if ever multi-user)
+- PLANNING.md security table updated to reflect Phase 7 API key status
+
+### Planning context (recorded 2026-03-15)
+- Phase 7 scope was expanded from The Odds API only → three-API unified market view after competitive landscape review
 - Polymarket CLOB `/prices-history` endpoint confirmed live (no auth) — enables probability movement charts
 - Kalshi historical market endpoints confirmed available (free API key)
-- Oddible (2026 iOS/Android) assessed — confirmed different product category (tracker vs research OS), no overlap with core Audwihr differentiators
-- Polymarket × TKO/UFC multiyear deal noted — liquidity on big cards increasing
-- `BRAINSTORMING.md` created — full strategy reference with competitive landscape, community sentiment, gap analysis, revised Phase 7 scope, and open design questions
-- `PLANNING.md` updated: competitive landscape section added, edge score architecture documented, three-API Phase 7 surface documented, decisions log extended with six new entries
+- Oddible (2026) assessed — tracker category, not research OS; validates market direction without occupying Audwihr's intersection
 
 ---
 

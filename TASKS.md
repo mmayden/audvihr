@@ -10,30 +10,44 @@
 
 ## Current Sprint
 
-**Branch:** `feature/phase-7-live-odds` (not yet cut)
-**Goal:** Live Odds Integration — The Odds API hook, live moneylines in TabMarket and MarketsScreen
-
-### Phase 6 — Live Data Layer
-- [x] `scripts/fighter-seed.json` — 14 fighters with editorial fields + `ufcstats_url`
-- [x] Discover and verify all 14 UFCStats fighter URLs (letter-browse + event page scraping)
-- [x] `scripts/fetch-data.js` — UFCStats scraper (Node ESM, cheerio, native fetch)
-  - [x] Fighter stats: record, age, height, reach, stance, SLpM, str_acc, sapm, str_def, TD/15, TD acc, TD def, sub/15
-  - [x] Derived stats: streak, finishes (ko/sub/dec), losses_by, finish_rate
-  - [x] Fight history: result, opponent, method, round, event, year
-  - [x] Cache layer: `*.raw.json` per fighter, `--fresh` flag to bypass
-  - [x] Validation: all required fields checked; non-zero exit on error in CI mode
-  - [x] `--dry-run`, `--ci`, `--fresh` CLI flags
-- [x] `npm run fetch-data` / `fetch-data:dry` / `fetch-data:fresh` / `prebuild` scripts
-- [x] `cheerio ^1.2.0` devDependency
-- [x] `.env.example` committed with `VITE_ODDS_API_KEY` placeholder
-- [x] `*.raw.json` gitignored (scraper cache)
-- [x] `src/data/fighters.js` generated with live data — 14/14 verified correct
-- [x] ESLint clean (0 errors)
-- [x] All 32 tests passing
-- [x] Version bumped to v0.6.0, menu badge updated to `LIVE DATA`
-- [x] Commit and merge to `master`, tag v0.6.0
+**Branch:** `feature/phase-7-live-odds` (built, pending merge to master + tag v0.7.0)
+**Status:** All must-haves complete. Smoke test, then merge. Should-haves to follow.
 
 ---
+
+### ✅ Phase 7 — Live Odds + Market Intelligence (v0.7.0) — complete
+
+**Must Have — done:**
+- [x] Cut branch `feature/phase-7-live-odds`
+- [x] `src/utils/normalizeOdds.js` — 6 transform/validate functions; 31 tests
+- [x] `src/utils/cache.js` — shared sessionStorage helpers; 100% coverage
+- [x] `src/utils/clv.js` — shared CLV log helpers; 100% coverage
+- [x] `src/hooks/useOdds.js` — The Odds API; silent degradation; sessionStorage cache
+- [x] `src/hooks/usePolymarket.js` — Polymarket CLOB; CLV snapshot; lazy history
+- [x] `src/hooks/useKalshi.js` — Kalshi REST; CLV snapshot; lazy history; silent degradation
+- [x] `src/components/PriceChart.jsx` — SVG sparkline; 9 tests
+- [x] Unified market row in MarketsScreen (SPORTSBOOK | POLYMARKET | KALSHI + arb)
+- [x] Arb detection across all three live sources
+- [x] Lazy price history charts in MarketsScreen (expand/collapse per card)
+- [x] Price history charts in fighter Market tab (matched by name)
+- [x] Personal CLV log panel in MarketsScreen
+- [x] All hooks degrade silently; live-only fights shown as price-only stubs
+- [x] `VITE_KALSHI_API_KEY` in `.env.example`; CSP updated in `netlify.toml` + `vercel.json`
+- [x] 142 tests, 0 lint errors, `npm run build` passes (71 kB gzipped)
+- [x] `MenuScreen` version badge → `v0.7.0 — LIVE ODDS`
+- [ ] Merge to `master`, tag v0.7.0
+
+### Phase 7 — Should Have (next)
+
+- [ ] Move compare stat rows to `src/constants/compareRows.js` (config-driven, zero behavior change)
+- [ ] Add `opp_quality` field to fight history entries in `scripts/fighter-seed.json` (elite / contender / gatekeeper / unknown)
+- [ ] Add `weigh_in` result field to event fight card entries in `scripts/fighter-seed.json` (missed / made / under)
+- [ ] Add `judges: []` field to event card data in seed (manual — enables decision prop research)
+- [ ] Simple client-side edge score in CompareScreen — weighted rules: archetype mismatch + market discrepancy + flag count → displayed as research prompt, not a pick
+
+---
+
+## ✅ Completed Sprints
 
 ### ✅ Phase 5 — Fighter News Feed (v0.5.0) — complete
 - [x] Design NEWS data model (id, date, fighter_id, category, headline, body, source, relevance)
@@ -50,8 +64,6 @@
 - [x] Commit and merge to `master`, tag v0.5.0
 
 ---
-
-## ✅ Completed Sprints
 
 ### expand-roster — complete
 - [x] Add fighters — Lightweight division (Oliveira, Gaethje, Tsarukyan)
