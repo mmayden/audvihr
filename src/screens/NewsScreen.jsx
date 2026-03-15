@@ -2,22 +2,9 @@ import { useState, useMemo } from 'react';
 import { NEWS } from '../data/news';
 import { FIGHTERS } from '../data/fighters';
 import { FighterName } from '../components/FighterName';
+import { RELEVANCE_COLOR, CATEGORY_COLOR } from '../constants/qualifiers';
 
 const CATEGORIES = ['ALL', 'FIGHT', 'INJURY', 'CAMP', 'WEIGH-IN', 'RESULT'];
-
-const RELEVANCE_COLOR = {
-  high:   'var(--accent)',
-  medium: 'var(--blue)',
-  low:    'var(--text-dim)',
-};
-
-const CATEGORY_COLOR = {
-  fight:    'var(--green)',
-  injury:   'var(--red)',
-  camp:     'var(--purple)',
-  'weigh-in': 'var(--orange)',
-  result:   'var(--blue)',
-};
 
 /** Format ISO date string as 'Mar 14 2026'. */
 function fmtDate(iso) {
@@ -31,7 +18,7 @@ function fmtDate(iso) {
  * @param {function} onBack - callback invoked when the back button is clicked
  * @param {function} onGoFighter - callback invoked with a fighter object for deep navigation
  */
-export function NewsScreen({ onBack, onGoFighter }) {
+export const NewsScreen = ({ onBack, onGoFighter }) => {
   const [catFilter, setCatFilter] = useState('ALL');
   const [fighterFilter, setFighterFilter] = useState('ALL');
 
@@ -128,4 +115,4 @@ export function NewsScreen({ onBack, onGoFighter }) {
       </div>
     </div>
   );
-}
+};

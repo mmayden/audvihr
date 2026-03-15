@@ -6,8 +6,8 @@ import { FIGHTERS } from '../data/fighters';
  * @param {string} name - the fighter's display name
  * @param {function} onGoFighter - callback invoked with the fighter object when clicked
  */
-export function FighterName({name, onGoFighter}) {
+export const FighterName = ({name, onGoFighter}) => {
   const f = FIGHTERS.find(f => f.name === name);
   if (f) return <span className="fighter-link" onClick={() => onGoFighter(f)}>{name}</span>;
   return <span>{name}</span>;
-}
+};

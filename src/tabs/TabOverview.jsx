@@ -6,7 +6,7 @@ import { CHIN_COLOR, CARDIO_COLOR, CUT_COLOR } from '../constants/qualifiers';
  * highlights), qualitative flags (chin, cardio, weight cut), and trader notes.
  * @param {object} fighter - fighter object from FIGHTERS
  */
-export function TabOverview({ fighter }) {
+export const TabOverview = ({ fighter }) => {
   return <div className="anim-fade">
     <div className="sec-label">KEY NUMBERS</div>
     <div className="stat-grid">
@@ -30,4 +30,4 @@ export function TabOverview({ fighter }) {
     <div className="sec-label">TRADER NOTES</div>
     <div style={{background:'var(--surface)',padding:'14px',fontSize:'13px',lineHeight:1.7,color:'var(--text)',borderLeft:'2px solid var(--accent-dim)'}}>{fighter.trader_notes}</div>
   </div>;
-}
+};

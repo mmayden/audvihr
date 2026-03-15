@@ -6,7 +6,7 @@ import { StatBar } from '../components/StatBar';
  * and striking-by-position breakdown, all with StatBar visualisations.
  * @param {object} fighter - fighter object from FIGHTERS
  */
-export function TabStriking({ fighter }) {
+export const TabStriking = ({ fighter }) => {
   const s = fighter.striking;
   return <div className="anim-fade">
     <div className="sec-label">VOLUME & ACCURACY</div>
@@ -34,4 +34,4 @@ export function TabStriking({ fighter }) {
         .map(r=><div className="stat-row-item" key={r.l}><span className="srl-label">{r.l}</span><StatBar val={r.v} max={100} color={r.c}/><span className="srl-val">{r.v}%</span></div>)}
     </div>
   </div>;
-}
+};

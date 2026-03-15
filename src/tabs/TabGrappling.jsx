@@ -6,7 +6,7 @@ import { StatBar } from '../components/StatBar';
  * and transition rates, all with StatBar visualisations.
  * @param {object} fighter - fighter object from FIGHTERS
  */
-export function TabGrappling({ fighter }) {
+export const TabGrappling = ({ fighter }) => {
   const g = fighter.grappling;
   return <div className="anim-fade">
     <div className="sec-label">TAKEDOWNS</div>
@@ -35,4 +35,4 @@ export function TabGrappling({ fighter }) {
       <div className="stat-cell"><div className="stat-cell-label">SUB WIN RATE</div><div className="stat-cell-val">{fighter.wins > 0 ? Math.round(fighter.finishes.sub / fighter.wins * 100) : 0}%</div></div>
     </div>
   </div>;
-}
+};

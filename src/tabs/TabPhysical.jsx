@@ -6,7 +6,7 @@ import { CHIN_COLOR, CARDIO_COLOR, CUT_COLOR } from '../constants/qualifiers';
  * and loss method breakdown.
  * @param {object} fighter - fighter object from FIGHTERS
  */
-export function TabPhysical({ fighter }) {
+export const TabPhysical = ({ fighter }) => {
   return <div className="anim-fade">
     <div className="sec-label">PHYSICAL ATTRIBUTES</div>
     <div className="stat-grid">
@@ -28,4 +28,4 @@ export function TabPhysical({ fighter }) {
       <div className="stat-cell"><div className="stat-cell-label">LOSSES BY DEC</div><div className="stat-cell-val" style={{color:fighter.losses_by.dec>0?'var(--orange)':'var(--green)'}}>{fighter.losses_by.dec}</div></div>
     </div>
   </div>;
-}
+};

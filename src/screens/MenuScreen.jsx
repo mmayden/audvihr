@@ -12,12 +12,12 @@ const MENU_ITEMS = [
  * Displays a list of app sections with activity badges.
  * @param {function} onSelect - callback invoked with the section id string when a menu item is clicked
  */
-export function MenuScreen({ onSelect }) {
+export const MenuScreen = ({ onSelect }) => {
   return (
     <div className="app">
       <div className="topbar">
         <span className="topbar-logo">AUDWIHR // MMA TRADER</span>
-        <div className="topbar-right"><span style={{fontFamily:'var(--mono)',fontSize:10,color:'var(--text-dim)',letterSpacing:'.08em'}}>v0.6.0 — LIVE DATA</span></div>
+        <div className="topbar-right"><span style={{fontFamily:'var(--mono)',fontSize:10,color:'var(--text-dim)',letterSpacing:'.08em'}}>v0.6.1 — LIVE DATA</span></div>
       </div>
       <div className="menu-screen">
         <div className="menu-wordmark">AUDWIHR</div>
@@ -34,4 +34,4 @@ export function MenuScreen({ onSelect }) {
       </div>
     </div>
   );
-}
+};

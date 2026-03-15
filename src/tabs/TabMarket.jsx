@@ -8,7 +8,7 @@ import { mlToImplied, lineMovement } from '../utils/odds';
  * persisted to localStorage keyed by fighter id.
  * @param {object} fighter - fighter object from FIGHTERS
  */
-export function TabMarket({ fighter }) {
+export const TabMarket = ({ fighter }) => {
   const [data,setData] = useLocalStorage(`mkt_${fighter.id}`, {ml_open:'',ml_current:'',odds_ko:'',odds_sub:'',odds_dec:'',public_pct:'',notes:''});
   const upd = (k,v) => setData(p=>({...p,[k]:v}));
   const mv = lineMovement(data.ml_open, data.ml_current);
@@ -51,4 +51,4 @@ export function TabMarket({ fighter }) {
     <div className="sec-label">ANALYSIS NOTES</div>
     <textarea className="notes-area" placeholder="Line movement story, sharp action signals, your edge thesis for this fight..." value={data.notes} onChange={e=>upd('notes',e.target.value)}/>
   </div>;
-}
+};

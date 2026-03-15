@@ -3,7 +3,7 @@
  * Displays a chronological fight log table for the last N fights.
  * @param {object} fighter - fighter object from FIGHTERS
  */
-export function TabHistory({ fighter }) {
+export const TabHistory = ({ fighter }) => {
   return <div className="anim-fade">
     <div className="sec-label">FIGHT LOG — LAST {fighter.history.length} FIGHTS</div>
     <div className="fight-log">
@@ -20,4 +20,4 @@ export function TabHistory({ fighter }) {
       ))}
     </div>
   </div>;
-}
+};
