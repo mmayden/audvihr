@@ -10,8 +10,8 @@
 
 ## Current Sprint
 
-**Branch:** `feature/phase-7-should-haves`
-**Status:** Phase 7 must-haves merged + tagged v0.7.0. Working through should-haves.
+**Branch:** `feature/phase-8-css-extraction`
+**Status:** Inline styles → CSS classes pass complete. Ready to merge.
 
 ---
 
