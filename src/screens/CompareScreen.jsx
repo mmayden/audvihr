@@ -1,6 +1,7 @@
 import { useState, useMemo, Fragment } from 'react';
 import { FIGHTERS } from '../data/fighters';
 import { ARCH_COLORS } from '../constants/archetypes';
+import { COMPARE_ROW_DEFS } from '../constants/compareRows';
 import { ChecklistPanel } from '../components/ChecklistPanel';
 
 /**
@@ -15,23 +16,7 @@ export function CompareScreen({onBack}) {
   const f1 = FIGHTERS.find(f => f.id === parseInt(fighter1Id));
   const f2 = FIGHTERS.find(f => f.id === parseInt(fighter2Id));
   const clKey=f1&&f2?`${Math.min(f1.id,f2.id)}_${Math.max(f1.id,f2.id)}`:'default';
-  const rows=useMemo(()=>f1&&f2?[
-    {cat:'RECORD',  l:'Overall Record',       v1:`${f1.wins}-${f1.losses}`,v2:`${f2.wins}-${f2.losses}`,n1:f1.wins,n2:f2.wins,higherIsBetter:true},
-    {cat:'RECORD',  l:'Win Streak',            v1:f1.streak,    v2:f2.streak,    n1:f1.streak,   n2:f2.streak,    higherIsBetter:true},
-    {cat:'RECORD',  l:'Finish Rate %',         v1:f1.finish_rate+'%',v2:f2.finish_rate+'%',n1:f1.finish_rate,n2:f2.finish_rate,higherIsBetter:true},
-    {cat:'STRIKING',l:'Sig Strikes / Min',     v1:f1.striking.slpm,    v2:f2.striking.slpm,    n1:f1.striking.slpm,  n2:f2.striking.slpm, higherIsBetter:true},
-    {cat:'STRIKING',l:'Striking Accuracy %',   v1:f1.striking.str_acc+'%',v2:f2.striking.str_acc+'%',n1:f1.striking.str_acc,n2:f2.striking.str_acc,higherIsBetter:true},
-    {cat:'STRIKING',l:'Str Absorbed / Min',    v1:f1.striking.sapm,    v2:f2.striking.sapm,    n1:f1.striking.sapm,  n2:f2.striking.sapm, higherIsBetter:false},
-    {cat:'STRIKING',l:'Striking Defense %',    v1:f1.striking.str_def+'%',v2:f2.striking.str_def+'%',n1:f1.striking.str_def,n2:f2.striking.str_def,higherIsBetter:true},
-    {cat:'STRIKING',l:'Knockdowns Landed',     v1:f1.striking.kd_landed,v2:f2.striking.kd_landed,n1:f1.striking.kd_landed,n2:f2.striking.kd_landed,higherIsBetter:true},
-    {cat:'GRAPPLING',l:'TD Attempts / 15',     v1:f1.grappling.td_per15,v2:f2.grappling.td_per15,n1:f1.grappling.td_per15,n2:f2.grappling.td_per15,higherIsBetter:true},
-    {cat:'GRAPPLING',l:'TD Accuracy %',        v1:f1.grappling.td_acc+'%',v2:f2.grappling.td_acc+'%',n1:f1.grappling.td_acc,n2:f2.grappling.td_acc,higherIsBetter:true},
-    {cat:'GRAPPLING',l:'TD Defense %',         v1:f1.grappling.td_def+'%',v2:f2.grappling.td_def+'%',n1:f1.grappling.td_def,n2:f2.grappling.td_def,higherIsBetter:true},
-    {cat:'GRAPPLING',l:'Sub Avg / 15 Min',     v1:f1.grappling.sub_per15,v2:f2.grappling.sub_per15,n1:f1.grappling.sub_per15,n2:f2.grappling.sub_per15,higherIsBetter:true},
-    {cat:'GRAPPLING',l:'Ctrl Time / 15 Min',   v1:f1.grappling.ctrl_time_per15,v2:f2.grappling.ctrl_time_per15,n1:f1.grappling.ctrl_time_per15,n2:f2.grappling.ctrl_time_per15,higherIsBetter:true},
-    {cat:'PHYSICAL', l:'Reach',                v1:f1.reach,v2:f2.reach,n1:parseInt(f1.reach),n2:parseInt(f2.reach),higherIsBetter:true},
-    {cat:'PHYSICAL', l:'Age',                  v1:f1.age+' yrs',v2:f2.age+' yrs',n1:f1.age,n2:f2.age,higherIsBetter:false},
-  ]:[], [f1, f2]);
+  const rows=useMemo(()=>f1&&f2?COMPARE_ROW_DEFS.map(def=>def(f1,f2)):[], [f1, f2]);
   return (
     <div className="app">
       <div className="topbar">
