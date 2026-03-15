@@ -119,17 +119,43 @@
 
 ---
 
+## 🔲 Phase 7 — Live Odds Integration
+
+**Branch:** `feature/phase-7-live-odds` (not yet cut)
+**API:** The Odds API — `VITE_ODDS_API_KEY` placeholder already in `.env.example`
+**Free tier:** 500 requests/month
+
+### Planned tasks
+- [ ] Cut branch `feature/phase-7-live-odds`
+- [ ] `src/hooks/useOdds.js` — fetch + cache odds from The Odds API at session start
+- [ ] Display live moneylines in TabMarket (supplement manual entry, not replace)
+- [ ] Inject live lines into MarketsScreen alongside Polymarket/Kalshi/Novig rows
+- [ ] Rate-limit guard: cache response in sessionStorage, one fetch per session
+- [ ] Graceful degradation: if key missing or quota exceeded, fall back to manual entry silently
+- [ ] `VITE_ODDS_API_KEY` documented in `.env.example`, validated at startup with warning if absent
+- [ ] CSP: add `connect-src https://api.the-odds-api.com` to `netlify.toml` / `vercel.json`
+- [ ] Write tests for `useOdds` hook (mock fetch, quota error, empty response)
+- [ ] Lint, tests, build, merge, tag v0.7.0
+
+---
+
 ## Backlog (Unscheduled)
 
-- [ ] Fighter portrait images (hosting solution TBD)
-- [ ] Matchup context engine (archetype-aware auto-warnings in compare view)
+### High value
+- [ ] Matchup context engine — archetype-aware auto-warnings in compare view (e.g. "WRESTLER vs COUNTER STRIKER — takedown threat flagged")
+- [ ] Fighter portrait images — hosting solution TBD (Cloudinary / repo assets)
+- [ ] Add more fighters — expand to full top-15 per division
+- [ ] Fighter search by stat range (e.g. "TD def > 80%", "SLpM > 5")
+
+### Medium value
+- [ ] Mobile responsive layout — sidebar collapses to bottom nav on narrow viewports
 - [ ] Export trade notes as PDF or markdown
-- [ ] Sound design pass (click feedback, ambient, confirmation sounds)
-- [ ] Visual reskin pass (final art direction)
-- [ ] Mobile responsive layout
-- [ ] Dark/light theme toggle
-- [ ] Keyboard navigation
-- [ ] Fighter search by stat range (e.g. "TD def > 80%")
+- [ ] Dark/light theme toggle — CSS variable swap, all colors already tokenized
+
+### Low / nice-to-have
+- [ ] Keyboard navigation — arrow keys in sidebar, tab key across screens
+- [ ] Visual reskin pass — final art direction, consider typographic hierarchy update
+- [ ] Sound design pass — click feedback, confirmation sounds (user opt-in only)
 
 ---
 
@@ -139,6 +165,6 @@
 2. Manual smoke test passes (all screens render, no console errors)
 3. localStorage functions correctly (odds/notes/checklist persist on reload)
 4. Changes committed to feature branch
-5. PR merged to `main`
+5. Merged to `master` with `--no-ff`, tagged vN.N.N
 6. CHANGELOG.md updated
 7. New feature branch cut for next phase
