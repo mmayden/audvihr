@@ -178,10 +178,38 @@ Clean, functional, dark. Soft on the eyes. No animations beyond fade-in on tab s
 }
 ```
 
+### Market Object (Phase 4 — prediction markets dashboard)
+```javascript
+{
+  id:          String,    // unique slug e.g. 'ufc315-main'
+  event:       String,    // event name
+  eventDate:   String,    // ISO date
+  fighter1:    String,    // name (may match FIGHTERS roster)
+  fighter2:    String,
+  weight:      String,
+  isTitle:     Boolean,
+  closing:     String,    // ISO date — when market closes
+  platforms: [{
+    name:   String,       // 'Polymarket' | 'Kalshi' | 'Novig'
+    f1_ml:  String,       // American moneyline e.g. '-130'
+    f2_ml:  String,
+    volume: Number,       // USD 24h volume
+  }],
+  method_props: [{
+    label: String,        // 'KO/TKO' | 'Submission' | 'Decision'
+    ml:    String,        // American odds for fight ending this way
+  }],
+}
+```
+
+**Arbitrage detection:** `min(f1_implied across platforms) + min(f2_implied across platforms) < 100`
+= guaranteed profit by betting F1 on platform with lowest F1 implied and F2 on platform with lowest F2 implied.
+
 ### localStorage Key Schema
 ```
 cl_{storageKey}            checklist state (object: {id: boolean})
-mkt_{fighter.id}           market data for fighter (market object above)
+mkt_{fighter.id}           per-fighter market tab data (ml, odds, notes)
+watchlist_markets          array of market IDs added to watchlist
 ```
 Where `storageKey` for compare screen = `${Math.min(f1.id, f2.id)}_${Math.max(f1.id, f2.id)}`
 

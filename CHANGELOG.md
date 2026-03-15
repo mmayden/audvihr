@@ -4,6 +4,22 @@ All notable changes to this project. Format: [version] — date — description.
 
 ---
 
+## [Unreleased] — Phase 4 Markets Dashboard
+
+### Added
+- `MarketsScreen` — full prediction market dashboard with filter bar and sorted market list
+- `src/data/markets.js` — 8 mock markets across UFC 315, Fight Night, UFC 316, UFC 317
+- `src/hooks/useWatchlist.js` — localStorage-persisted watchlist by market ID
+- Moneyline + implied probability display per platform per fighter
+- Cross-platform arbitrage detection: best-of implied sum < 100% triggers ⚡ ARB ALERT
+- Method props per fight (KO/TKO, Submission, Decision odds)
+- Filter by platform (Polymarket / Kalshi / Novig), title fights only, watchlist only
+- Sort by closing date, total volume, or event date (cycling toggle)
+- Platform color badges: Polymarket (blue), Kalshi (green), Novig (purple)
+- Markets menu item activated (badge: ACTIVE), version bumped to v0.4.0 in menu
+
+---
+
 ## [Unreleased] — Phase 3 + Phase 3a
 
 ### Added — Phase 3 (Fight Calendar)

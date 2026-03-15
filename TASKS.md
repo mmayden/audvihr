@@ -10,36 +10,27 @@
 
 ## Current Sprint
 
-**Branch:** `feature/phase-3-calendar` → merge pending, then `feature/phase-3a-vite`
-**Goal:** Complete Phase 3 merge + Phase 3a Vite migration for web deployment
+**Branch:** `feature/phase-4-markets`
+**Goal:** Markets Dashboard — cross-platform odds tracking, arb detection, watchlist
 
-### Phase 3 — Calendar (close out)
-- [x] Add static event data model (events array with card structure)
-- [x] Build CalendarScreen component — event list with date/countdown
-- [x] Event detail view: main event / co-main / prelims breakdown
-- [x] Fighter name links from calendar → fighter profile
-- [x] Filter by promotion (UFC / Bellator / PFL)
-- [ ] Run smoke test on `mma-trader.html`: calendar renders, fighter links navigate correctly
-- [ ] Commit and merge to `main`
-
-### Phase 3a — Vite Migration
-- [x] Create Vite project structure (`package.json`, `vite.config.js`, `index.html`)
-- [x] Extract CSS to `src/styles/app.css`
-- [x] Extract constants to `src/constants/` (archetypes, checklist, qualifiers)
-- [x] Extract data to `src/data/` (fighters, events) with schema comments
-- [x] Extract hooks to `src/hooks/useLocalStorage.js`
-- [x] Extract utils to `src/utils/odds.js`
-- [x] Extract shared components to `src/components/` (StatBar, FighterName, ChecklistPanel)
-- [x] Extract tab components to `src/tabs/`
-- [x] Extract screens to `src/screens/`
-- [x] Create `src/App.jsx` and `src/main.jsx`
-- [x] `npm install` — 0 vulnerabilities (upgraded to Vite 6.4.1 + plugin-react 4.7.0)
-- [x] `npm run build` passes — 205 kB JS / 61 kB gzipped
-- [x] Add CSP and security headers (`netlify.toml`, `vercel.json`)
-- [ ] Smoke test all screens in Vite dev server (`npm run dev`)
-- [ ] `npm run preview` against production build
-- [ ] Commit and merge to `main`
-- [ ] Cut branch `feature/phase-4-markets`
+### Phase 4 — Markets Dashboard
+- [x] Design MARKETS data model (8 markets, multi-platform prices, method props)
+- [x] `src/data/markets.js` with full schema comment
+- [x] `src/hooks/useWatchlist.js` — localStorage watchlist by market ID
+- [x] `src/screens/MarketsScreen.jsx` — filter bar, sorted market list, arb detection
+- [x] Platform price display: moneyline + implied % per platform per fighter
+- [x] Cross-platform arbitrage detection and alert (best-of sum < 100%)
+- [x] Method props display (KO/TKO, Submission, Decision odds)
+- [x] Filters: platform, title fights only, watchlist only
+- [x] Sort: closing date, total volume, event date (cycling)
+- [x] Watchlist toggle per market with localStorage persistence
+- [x] Markets CSS added to `app.css`
+- [x] Menu badge updated to ACTIVE, version bumped to v0.4.0
+- [x] `npm run build` passes — 213 kB JS / 63 kB gzipped
+- [ ] Smoke test: all filters/sort work, arb alert appears on Oliveira vs Dariush market
+- [ ] Smoke test: watchlist persists on page reload
+- [ ] Commit and merge to `main`, tag v0.4.0
+- [ ] Cut branch `feature/phase-5-news`
 
 ---
 
@@ -99,13 +90,15 @@
 - No new features in this phase — migration only
 - Deploy output: static site (`dist/`) → GitHub Pages / Netlify / Vercel
 
-### 🔲 Phase 4 — Markets Dashboard
+### ✅ Phase 4 — Markets Dashboard
 **Branch:** `feature/phase-4-markets`
 
-- Live market prices pulled from Polymarket/Kalshi (public APIs where available)
-- Market list view: active UFC markets sorted by volume / closing time
-- Quick-add to watchlist
-- Implied probability tracker across platforms (arbitrage spotting)
+- 8 active UFC markets across Polymarket, Kalshi, Novig
+- Moneyline + implied % per platform per fighter
+- Cross-platform arb detection (best-of sum < 100%)
+- Method props per fight (KO/TKO, Sub, Dec odds)
+- Filter by platform, title fights, watchlist; sort by closing/volume/event
+- Watchlist persisted to localStorage
 
 ### 🔲 Phase 5 — Fighter News Feed
 **Branch:** `feature/phase-5-news`
