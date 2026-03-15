@@ -111,7 +111,7 @@ function computeEdgeSignals(f1, f2, rows) {
  * trade checklist.
  * @param {function} onBack - callback invoked when the back button is clicked
  */
-export function CompareScreen({onBack}) {
+export const CompareScreen = ({onBack}) => {
   const [fighter1Id, setFighter1Id] = useState('');
   const [fighter2Id, setFighter2Id] = useState('');
   const f1 = FIGHTERS.find(f => f.id === parseInt(fighter1Id));

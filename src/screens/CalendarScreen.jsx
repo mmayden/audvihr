@@ -27,7 +27,7 @@ function countdown(dateStr, today) {
  * @param {function} onBack - callback invoked when the back button is clicked
  * @param {function} onGoFighter - callback invoked with a fighter object to deep-navigate to their profile
  */
-export function CalendarScreen({onBack, onGoFighter}) {
+export const CalendarScreen = ({onBack, onGoFighter}) => {
   const today = useMemo(()=>{ const d=new Date(); d.setHours(0,0,0,0); return d; },[]);
   const sorted = useMemo(()=>[...EVENTS].sort((a,b)=>new Date(a.date)-new Date(b.date)),[]);
   const firstUpcoming = sorted.find(e=>new Date(e.date)>=today);

@@ -10,24 +10,6 @@ import { daysUntil } from '../utils/date';
 import { readCLVLog } from '../utils/clv';
 import { PriceChart } from '../components/PriceChart';
 
-/**
- * MarketsScreen — prediction market dashboard.
- *
- * Displays active UFC markets with three live data columns (Sportsbook, Polymarket, Kalshi)
- * when API keys are configured. Falls back to mock platform rows from `data/markets.js`
- * when live APIs are unavailable (no keys, quota exceeded, offline).
- *
- * Features:
- *   - Unified market row: Sportsbook (best available) | Polymarket | Kalshi | Arb alert
- *   - Cross-platform arbitrage detection across all three live sources
- *   - Probability movement line chart (lazy-loaded per market)
- *   - Personal CLV log view (localStorage-persisted snapshots)
- *   - Watchlist (localStorage-persisted)
- *   - Filters: platform, title fights, watchlist; Sort: closing, volume, event
- *
- * @param {function} onBack - callback invoked when the back button is clicked
- */
-
 const SORT_LABELS = ['CLOSING', 'VOLUME', 'EVENT'];
 const PLATFORMS   = ['ALL', 'Polymarket', 'Kalshi', 'Novig'];
 /** Format USD volume as compact string. */
@@ -78,7 +60,24 @@ function countdownColor(dateStr, today) {
   return 'var(--green)';
 }
 
-export function MarketsScreen({ onBack }) {
+/**
+ * MarketsScreen — prediction market dashboard.
+ *
+ * Displays active UFC markets with three live data columns (Sportsbook, Polymarket, Kalshi)
+ * when API keys are configured. Falls back to mock platform rows from `data/markets.js`
+ * when live APIs are unavailable (no keys, quota exceeded, offline).
+ *
+ * Features:
+ *   - Unified market row: Sportsbook (best available) | Polymarket | Kalshi | Arb alert
+ *   - Cross-platform arbitrage detection across all three live sources
+ *   - Probability movement line chart (lazy-loaded per market)
+ *   - Personal CLV log view (localStorage-persisted snapshots)
+ *   - Watchlist (localStorage-persisted)
+ *   - Filters: platform, title fights, watchlist; Sort: closing, volume, event
+ *
+ * @param {function} onBack - callback invoked when the back button is clicked
+ */
+export const MarketsScreen = ({ onBack }) => {
   const { isWatched, toggle }                    = useWatchlist();
   const [platformFilter, setPlatformFilter]      = useState('ALL');
   const [titleOnly, setTitleOnly]                = useState(false);

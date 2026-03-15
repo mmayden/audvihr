@@ -7,7 +7,7 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
  * persistence, a progress bar, and a reset button.
  * @param {string} storageKey - unique key suffix used to namespace localStorage (e.g. '1_2')
  */
-export function ChecklistPanel({storageKey}) {
+export const ChecklistPanel = ({storageKey}) => {
   const init = useMemo(()=>Object.fromEntries(CHECKLIST.map(i=>[i.id,false])),[]);
   const [checked, setChecked] = useLocalStorage('cl_' + storageKey, init);
   const done = useMemo(() => Object.values(checked).filter(Boolean).length, [checked]);

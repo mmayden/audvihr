@@ -10,8 +10,19 @@
 
 ## Current Sprint
 
-**Branch:** `feature/phase-8-css-extraction`
-**Status:** Inline styles → CSS classes pass complete. Ready to merge.
+**Branch:** `master`
+**Status:** No active sprint. Phase 8 merged. v0.8.0 tagged. Backlog is next.
+
+---
+
+### ✅ Phase 8 — CSS Extraction + Phase 7 Should-Haves (v0.8.0) — merged to master
+
+- [x] Extract inline styles → named CSS classes (~33 style blocks → 35 CSS classes in app.css)
+- [x] `src/constants/compareRows.js` — 15 stat-row definitions extracted from CompareScreen
+- [x] `opp_quality` field on fight history entries (elite / contender / gatekeeper / unknown)
+- [x] `weigh_in` and `judges` fields on event card fight entries (UFC 314–317 covered)
+- [x] Edge signal panel in CompareScreen — `computeEdgeSignals()` (archetype mismatch, modifier flags, market discrepancy); labeled "RESEARCH PROMPT — NOT A PICK"
+- [x] CHANGELOG promoted to v0.8.0, TASKS updated, memory updated
 
 ---
 
@@ -131,57 +142,22 @@
 
 ---
 
-## 🔲 Phase 7 — Live Odds + Market Intelligence
+### ✅ Phase 7 — Live Odds + Market Intelligence (v0.7.0) — merged to master
 
-**Branch:** `feature/phase-7-live-odds` (not yet cut)
-**Scope revision:** Expanded from The Odds API only → full three-API unified market view + historical price charts + personal CLV log. See BRAINSTORMING.md §8 for full rationale.
+- Three live hooks: `useOdds` (The Odds API), `usePolymarket` (CLOB, no auth), `useKalshi` (REST)
+- `normalizeOdds.js` — 6 transform/validate functions; all return null/[] on invalid input, never throw
+- `cache.js` + `clv.js` — shared sessionStorage/localStorage helpers; 100% coverage
+- `PriceChart.jsx` — SVG sparkline; no Chart.js dependency
+- MarketsScreen: unified 3-column live row; arb across 3 sources; lazy charts; CLV log panel
+- TabMarket: live prices + auto-loaded history for matched roster fighters
+- CSP updated: 3 API domains in `netlify.toml` + `vercel.json`
+- 142 tests, 0 lint errors, `npm run build` passes
 
-**APIs:**
-- The Odds API — `VITE_ODDS_API_KEY` (placeholder in `.env.example`). 500 req/month free.
-- Polymarket CLOB API — no auth for reads. `https://clob.polymarket.com`. `/prices-history` endpoint live.
-- Kalshi REST API — `VITE_KALSHI_API_KEY` (add to `.env.example`). Free API key at trading-api.kalshi.com.
-
-### Must Have — Core Differentiator
-
-**Hooks (data layer)**
-- [x] Cut branch `feature/phase-7-live-odds`
-- [x] `src/hooks/useOdds.js` — The Odds API moneylines; cache in `sessionStorage`; graceful degradation if key absent or quota exceeded
-- [x] `src/hooks/usePolymarket.js` — Polymarket CLOB current prices + `/prices-history`; cache current prices in `sessionStorage`; persist CLV snapshots to `localStorage`
-- [x] `src/hooks/useKalshi.js` — Kalshi current + historical prices; cache in `sessionStorage`; graceful degradation if key absent
-
-**Transform / validation utils**
-- [x] `src/utils/normalizeOdds.js` — `normalizeOddsApiResponse()`, `normalizePolymarketMarket()`, `normalizeKalshiMarket()`, `normalizePriceHistory()`, `fightKey()`, `probToML()`: validate + reshape raw API responses; 29 tests covering all shapes
-
-**Display**
-- [x] Unified market row in MarketsScreen — one row per fight, columns: Sportsbook | Polymarket | Kalshi + arb alert
-- [x] Arb detection updated to compare across all three live sources (not just mock platforms)
-- [x] Probability movement line chart in MarketsScreen (Polymarket + Kalshi price history, lazy-loaded per card)
-- [x] Same price history chart in fighter Market tab for roster fighters
-- [x] Personal CLV log view in MarketsScreen — top-100 recent snapshots (toggle button in topbar)
-
-**Fallback + roster handling**
-- [x] All three hooks degrade silently to mock/manual data if API unavailable
-- [ ] "Archetype unknown — stats only" stub fighter shape for non-roster fighters returned by The Odds API (live-only fights shown as stubs in MarketsScreen — name + prices, no editorial layer)
-
-**Infrastructure**
-- [x] `VITE_KALSHI_API_KEY` added to `.env.example` with documentation comment
-- [x] CSP updated: `connect-src https://api.the-odds-api.com https://clob.polymarket.com https://trading-api.kalshi.com` in `netlify.toml` + `vercel.json`
-- [x] Tests: all three hooks (mock fetch, error/quota, empty response, malformed response) — 29 normalizer + 20 hook tests
-- [x] Lint clean, all tests pass, `npm run build` passes
-- [ ] Merge to `master`, tag v0.7.0
-
-### Should Have — High Value, Low Lift
-
-- [ ] Move compare stat rows to `src/constants/compareRows.js` (zero behavior change, config-driven)
-- [ ] Add `opp_quality` field to fight history entries in `scripts/fighter-seed.json` per fighter (elite / contender / gatekeeper / unknown)
-- [ ] Add `weigh_in` result field to event fight card entries in `scripts/fighter-seed.json` (missed / made / under)
-- [ ] Add `judges: []` field to event card data in seed (manual curation — enables decision prop research)
-- [ ] Simple client-side edge score in CompareScreen — weighted rules: archetype mismatch + market discrepancy + flag count → displayed as research prompt, not a pick
-
-### Nice to Have — If Time Allows
+### Nice to Have (from Phase 7) — Backlogged
 
 - [ ] Tapology community % column in MarketsScreen as "public money" fade signal
 - [ ] Export checklist + notes + CLV log as markdown (download link)
+- [ ] "Archetype unknown" stub fighter shape for non-roster fighters from The Odds API
 
 ---
 

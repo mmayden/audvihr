@@ -6,17 +6,34 @@ All notable changes to this project. Format: [version] — date — description.
 
 ## [Unreleased]
 
+### Code Quality
+- `ChecklistPanel`, `CalendarScreen`, `CompareScreen`, `FighterScreen`, `MarketsScreen` — converted from `export function` to `export const` arrow functions (CLAUDE.md standard; all 5 were missed in prior phases)
+- `MarketsScreen` — JSDoc block relocated from above module-level constants to directly above the component declaration
+
+### Testing
+- `src/components/ErrorBoundary.test.jsx` — 5 new tests covering: children pass-through, default fallback UI, custom fallback prop, RETRY button reset cycle, and unknown-error message; component coverage 0% → 100%
+- `src/utils/normalizeOdds.test.js` — 7 new edge-case tests for `extractNamesFromQuestion` and `cleanName` (non-string question input, event-context stripping, dash separator cleanup, `defeat`/`win against` patterns); normalizeOdds branch coverage improved
+
+### Docs
+- `CHANGELOG.md` — `[Unreleased]` promoted to `v0.8.0`; entry covers Phase 8 CSS extraction and Phase 7 should-haves
+- `TASKS.md` — current sprint updated to master/no active sprint; Phase 8 marked complete; stale Phase 7 roadmap block replaced with clean `✅` summary; orphaned nice-to-haves moved to backlog
+- `PLANNING.md` — file structure heading bumped to v0.8.0; decisions log extended with 6 Phase 8 entries
+- `package.json` — version bumped to `0.8.0`
+- `MenuScreen.jsx` — version badge updated to `v0.8.0 — LIVE ODDS`
+
+---
+
+## [0.8.0] — 2026-03-15
+
 ### Changed
 - Inline styles → named CSS classes extraction across all 13 affected files (Phase 8). ~33 static `style={{}}` blocks replaced with 35 new semantic CSS classes in `app.css`. Dynamic/computed styles (archetype colors, countdown colors, org badge colors, stat conditional colors) correctly kept inline. Unblocks mobile layout and theming work. JS bundle −2 kB; CSS +4 kB.
+- `scripts/fetch-data.js` — `mergeFighter()` applies `history_overrides`; `serializeFighter()` emits `opp_quality` when present; `serializeFight()` emits optional `weigh_in` / `judges`; new `applyEventOverrides()` helper; `generateEventsFile()` accepts overrides arg; schema comments updated
 
-### Added (Phase 7 should-haves, merged 2026-03-15)
+### Added (Phase 7 should-haves)
 - `src/constants/compareRows.js` — 15 stat-row definitions extracted from `CompareScreen`; each is a `(f1, f2) → row` function; zero behavior change
 - `opp_quality` field on fight history entries — editorial label (elite / contender / gatekeeper / unknown) per opponent; stored in `scripts/fighter-seed.json` as `history_overrides` and merged at build time; emitted in `fighters.js`
 - `weigh_in` and `judges` fields on event card fight entries — stored in `scripts/fighter-seed.json` as `event_overrides`; applied by `applyEventOverrides()` in `fetch-data.js`; UFC 314–317 covered
 - Edge signal panel in `CompareScreen` — `computeEdgeSignals()` fires on stat-row edge (contested row win count), archetype matchup (WRESTLER vs COUNTER STRIKER, PRESSURE FIGHTER vs KICKBOXER, etc.), modifier flags (DURABILITY RISK, FRONT-RUNNER, LATE BLOOMER), and market discrepancy (≥15pt gap between implied% and stat-row share when ml_current is set); panel labeled "RESEARCH PROMPT — NOT A PICK"
-
-### Changed
-- `scripts/fetch-data.js` — `mergeFighter()` applies `history_overrides`; `serializeFighter()` emits `opp_quality` when present; `serializeFight()` emits optional `weigh_in` / `judges`; new `applyEventOverrides()` helper; `generateEventsFile()` accepts overrides arg; schema comments updated
 
 ---
 

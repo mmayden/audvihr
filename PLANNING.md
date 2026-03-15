@@ -19,7 +19,7 @@ This document is the primary reference for Claude and the developer during long-
 
 ---
 
-## Current File Structure (Vite + React — v0.7.0)
+## Current File Structure (Vite + React — v0.8.0)
 
 The single-file prototype (`mma-trader.html`) was retired at Phase 3a. The project is now a Vite + React app with the following modular layout:
 
@@ -431,3 +431,8 @@ A simple client-side "edge score" per matchup — no ML, no backend. Weighted ru
 | 2026-03-15 | Pre-fight focus only through Phase 7 | Live round-by-round data is expensive, requires official data partner (Sportradar/SportsDataIO), and is a different product category. Post-fight review requires historical result storage. Both deferred indefinitely. |
 | 2026-03-15 | Client-side Kalshi API key accepted as constraint | `VITE_KALSHI_API_KEY` is sent in an Authorization header from the browser bundle. This is an accepted risk for a personal, self-hosted tool: only the person who deploys the app with their own `.env` can access it; no shared endpoint, noindex, no public exposure. If the app becomes multi-user or public, the Kalshi API calls must be proxied server-side. |
 | 2026-03-15 | Shared cache.js + clv.js utilities extracted | `readCache`/`writeCache` were duplicated across 3 hooks; `appendCLVEntries`/`readCLVLog` were duplicated across 2 hooks. Extracted to `src/utils/cache.js` and `src/utils/clv.js`. Both at 100% test coverage. |
+| 2026-03-15 | Phase 8 — inline styles → CSS classes (v0.8.0) | ~33 static `style={{}}` blocks replaced with 35 named CSS classes in `app.css`. Dynamic/computed styles (archetype colors, countdown colors, org badge colors, stat conditional colors) kept inline intentionally. Unblocks mobile layout and theming. JS bundle −2 kB; CSS +4 kB. |
+| 2026-03-15 | compareRows.js extracted to src/constants/ | 15 stat-row definitions moved from CompareScreen render body to `src/constants/compareRows.js` as `(f1, f2) → row` functions. Zero behavior change; enables future reuse and isolated testing. |
+| 2026-03-15 | opp_quality / weigh_in / judges editorial fields added | Added to `fighter-seed.json` as `history_overrides` and `event_overrides`; applied at build time by `fetch-data.js`. Enables opponent quality tracking and decision prop research without changing scraper's live data pipeline. |
+| 2026-03-15 | Edge score deferred from ML to rules-based signals | `computeEdgeSignals()` in CompareScreen uses archetype mismatch table, modifier flag sets, and market discrepancy threshold (≥15pt). Labeled "RESEARCH PROMPT — NOT A PICK". Rules are auditable and adjustable per fight — preferred over ML given seed data volume. |
+| 2026-03-15 | All 5 remaining `export function` components → `export const` | ChecklistPanel, CalendarScreen, CompareScreen, FighterScreen, MarketsScreen. CLAUDE.md standard: prefer const arrow functions for components. Utils and hooks retain `function` declarations per the exception rule. |

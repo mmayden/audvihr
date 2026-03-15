@@ -17,7 +17,7 @@ export const MenuScreen = ({ onSelect }) => {
     <div className="app">
       <div className="topbar">
         <span className="topbar-logo">AUDWIHR // MMA TRADER</span>
-        <div className="topbar-right"><span className="topbar-version-badge">v0.7.0 — LIVE ODDS</span></div>
+        <div className="topbar-right"><span className="topbar-version-badge">v0.8.0 — LIVE ODDS</span></div>
       </div>
       <div className="menu-screen">
         <div className="menu-wordmark">AUDWIHR</div>

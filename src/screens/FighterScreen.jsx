@@ -19,7 +19,7 @@ const WEIGHT_FILTERS = ['ALL', ...new Set(FIGHTERS.map(f => f.weight))];
  * @param {function} onBack - callback invoked when the back button is clicked
  * @param {object|null} initialFighter - fighter object to pre-select on mount
  */
-export function FighterScreen({onBack, initialFighter}) {
+export const FighterScreen = ({onBack, initialFighter}) => {
   const [search, setSearch] = useState('');
   const [weightFilter, setWeightFilter] = useState('ALL');
   const [sel, setSel] = useState(initialFighter || FIGHTERS[0]);

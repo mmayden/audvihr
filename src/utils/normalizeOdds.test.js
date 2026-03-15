@@ -250,6 +250,84 @@ describe('normalizePolymarketMarket — question patterns', () => {
   });
 });
 
+// ── extractNamesFromQuestion edge cases (via normalizePolymarketMarket / normalizeKalshiMarket) ──
+
+describe('extractNamesFromQuestion — uncovered branches', () => {
+  const twoTokens = [
+    { token_id: '0x1', outcome: 'Yes', price: 0.6 },
+    { token_id: '0x2', outcome: 'No',  price: 0.4 },
+  ];
+
+  // Line 278: non-string truthy question passes the !question guard but fails typeof check.
+  it('returns null when question is a truthy non-string value', () => {
+    const m = { condition_id: '0xabc', question: 99999, tokens: twoTokens };
+    expect(normalizePolymarketMarket(m)).toBeNull();
+  });
+
+  // cleanName line 308: strips " at/in/@ UFC..." event context from fighter names.
+  it('strips "at UFC N" event context embedded in fighter names', () => {
+    const m = {
+      condition_id: '0xabc',
+      question: 'Islam Makhachev at UFC 315 vs Dustin Poirier at UFC 315',
+      tokens: twoTokens,
+    };
+    const result = normalizePolymarketMarket(m);
+    expect(result).not.toBeNull();
+    expect(result.fighter1).toBe('Islam Makhachev');
+    expect(result.fighter2).toBe('Dustin Poirier');
+  });
+
+  // cleanName line 309 / extractNamesFromQuestion line 286:
+  // vsMatch succeeds but a pipe separator leaves the f2 name clean.
+  it('normalizes a Kalshi title with a pipe separator', () => {
+    const m = {
+      ticker: 'KXUFC315-TEST',
+      title: 'Islam Makhachev | Dustin Poirier — UFC 315',
+      last_price: 0.65,
+    };
+    // Pipe is excluded from vsMatch f2 group, so "| Dustin Poirier" won't match vs-pattern.
+    // The title does not match "vs" or "Will X beat Y" — normalizeKalshiMarket returns null.
+    expect(normalizeKalshiMarket(m)).toBeNull();
+  });
+
+  // cleanName line 309: dash/pipe in f1 portion is stripped.
+  it('strips trailing dash context from a matched fighter name', () => {
+    const m = {
+      condition_id: '0xabc',
+      // f1 capture group includes everything before " vs "; cleanName strips from dash.
+      question: 'Islam Makhachev - contender vs Dustin Poirier',
+      tokens: twoTokens,
+    };
+    const result = normalizePolymarketMarket(m);
+    expect(result).not.toBeNull();
+    expect(result.fighter1).toBe('Islam Makhachev');
+  });
+
+  // "Will X defeat Y" pattern covers line 291 branch.
+  it('parses "Will X defeat Y" question pattern', () => {
+    const m = {
+      condition_id: '0xabc',
+      question: 'Will Islam Makhachev defeat Dustin Poirier at UFC 315?',
+      tokens: twoTokens,
+    };
+    const result = normalizePolymarketMarket(m);
+    expect(result).not.toBeNull();
+    expect(result.fightKey).toBe('makhachev_poirier');
+  });
+
+  // "Will X win against Y" pattern.
+  it('parses "Will X win against Y" question pattern', () => {
+    const m = {
+      condition_id: '0xabc',
+      question: 'Will Dustin Poirier win against Islam Makhachev?',
+      tokens: twoTokens,
+    };
+    const result = normalizePolymarketMarket(m);
+    expect(result).not.toBeNull();
+    expect(result.fightKey).toBe('makhachev_poirier');
+  });
+});
+
 // ── normalizePriceHistory ─────────────────────────────────────────────────────
 
 describe('normalizePriceHistory', () => {
