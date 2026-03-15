@@ -19,7 +19,7 @@ This document is the primary reference for Claude and the developer during long-
 
 ---
 
-## Current File Structure (Vite + React — v0.6.1)
+## Current File Structure (Vite + React — v0.7.0)
 
 The single-file prototype (`mma-trader.html`) was retired at Phase 3a. The project is now a Vite + React app with the following modular layout:
 
@@ -43,15 +43,22 @@ src/
 │   └── fighter-seed.json     Editorial data per fighter (archetype, mods, notes, ufcstats_url)
 ├── hooks/
 │   ├── useLocalStorage.js    useLocalStorage — JSON-serialised state with try/catch
-│   └── useWatchlist.js       useWatchlist — watchlist set over useLocalStorage (Phase 4)
+│   ├── useWatchlist.js       useWatchlist — watchlist set over useLocalStorage (Phase 4)
+│   ├── useOdds.js            useOdds — The Odds API moneylines; sessionStorage cache; silent degradation (Phase 7)
+│   ├── usePolymarket.js      usePolymarket — Polymarket CLOB prices + lazy history; CLV snapshot (Phase 7)
+│   └── useKalshi.js          useKalshi — Kalshi REST API prices + lazy history; CLV snapshot (Phase 7)
 ├── utils/
 │   ├── odds.js               mlToImplied(), lineMovement()
-│   └── date.js               daysUntil(), isPast() — shared date helpers
+│   ├── date.js               daysUntil(), isPast() — shared date helpers
+│   ├── normalizeOdds.js      fightKey(), probToML(), normalizeOddsApiResponse/PolymarketMarket/KalshiMarket/PriceHistory (Phase 7)
+│   ├── cache.js              readCache(), writeCache(), evictCache() — sessionStorage helpers (Phase 7)
+│   └── clv.js                appendCLVEntries(), readCLVLog() — CLV log localStorage helpers (Phase 7)
 ├── components/
 │   ├── StatBar.jsx           Horizontal proportional fill bar
 │   ├── FighterName.jsx       Name → profile link resolver (calendar + news)
 │   ├── ChecklistPanel.jsx    17-item trade checklist with progress bar
-│   └── ErrorBoundary.jsx     Class component error boundary wrapping all screens
+│   ├── ErrorBoundary.jsx     Class component error boundary wrapping all screens
+│   └── PriceChart.jsx        SVG sparkline for prediction-market probability-over-time (Phase 7)
 ├── tabs/
 │   ├── TabOverview.jsx       Key numbers, flags, trader notes
 │   ├── TabStriking.jsx       Striking volume, accuracy, knockdowns, position
@@ -281,7 +288,7 @@ Checklist persists per matchup via localStorage. Key = `cl_{f1id}_{f2id}`.
 | `localStorage` reads | Malformed JSON parsed directly into state | **Mitigated** — `try/catch` with typed default fallback in `useLocalStorage` |
 | User inputs (odds fields, notes) | Reflected into UI | **Mitigated** — React JSX escapes by default; `parseInt`/`isNaN` guard on all numeric fields |
 | `dangerouslySetInnerHTML` | XSS if used with user input | **Not used** — do not introduce |
-| Secrets / credentials | Hardcoded in source | **N/A currently** — no API keys yet; Phase 6 requires `.env` with `VITE_` prefix |
+| Secrets / credentials | Hardcoded in source | **Mitigated** — `VITE_ODDS_API_KEY` and `VITE_KALSHI_API_KEY` in `.env` (gitignored). Kalshi key sent from browser (accepted constraint for personal tool — see decisions log). |
 | Search engine indexing | Personal trading tool exposed publicly | **Mitigated** — `noindex, nofollow` robots meta tag in `index.html` |
 
 ### Deployment Security (Phase 3a+)
@@ -422,3 +429,5 @@ A simple client-side "edge score" per matchup — no ML, no backend. Weighted ru
 | 2026-03-15 | Oddible (2026 competitor) assessed, no threat to core position | Oddible is a multi-sport odds tracker with CLV and Kalshi sync. Lacks deep fighter profiles, archetypes, qualitative flags, trade checklist. Different product category (tracker vs research OS). Validates the market direction but does not occupy the Audwihr intersection. |
 | 2026-03-15 | App stays personal-only through Phase 7 | No URL routing, no shareable links, noindex tag stays. Personal lean = faster velocity. React Router deferred to Phase 8+ pending a deliberate decision on whether sharing is ever in scope. |
 | 2026-03-15 | Pre-fight focus only through Phase 7 | Live round-by-round data is expensive, requires official data partner (Sportradar/SportsDataIO), and is a different product category. Post-fight review requires historical result storage. Both deferred indefinitely. |
+| 2026-03-15 | Client-side Kalshi API key accepted as constraint | `VITE_KALSHI_API_KEY` is sent in an Authorization header from the browser bundle. This is an accepted risk for a personal, self-hosted tool: only the person who deploys the app with their own `.env` can access it; no shared endpoint, noindex, no public exposure. If the app becomes multi-user or public, the Kalshi API calls must be proxied server-side. |
+| 2026-03-15 | Shared cache.js + clv.js utilities extracted | `readCache`/`writeCache` were duplicated across 3 hooks; `appendCLVEntries`/`readCLVLog` were duplicated across 2 hooks. Extracted to `src/utils/cache.js` and `src/utils/clv.js`. Both at 100% test coverage. |

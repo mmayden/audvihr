@@ -220,6 +220,36 @@ describe('normalizeKalshiMarket', () => {
   });
 });
 
+// ── normalizePolymarketMarket — question pattern coverage ────────────────────
+
+describe('normalizePolymarketMarket — question patterns', () => {
+  it('parses "Will X beat Y at UFC N?" pattern', () => {
+    const m = {
+      condition_id: '0xbcd',
+      question: 'Will Islam Makhachev beat Dustin Poirier at UFC 315?',
+      tokens: [
+        { token_id: '0x1', outcome: 'Yes', price: 0.68 },
+        { token_id: '0x2', outcome: 'No',  price: 0.32 },
+      ],
+    };
+    const result = normalizePolymarketMarket(m);
+    expect(result).not.toBeNull();
+    expect(result.fightKey).toBe('makhachev_poirier');
+  });
+
+  it('returns null when question does not match any known pattern', () => {
+    const m = {
+      condition_id: '0xbcd',
+      question: 'Something completely unrelated about fighting.',
+      tokens: [
+        { token_id: '0x1', outcome: 'Yes', price: 0.5 },
+        { token_id: '0x2', outcome: 'No',  price: 0.5 },
+      ],
+    };
+    expect(normalizePolymarketMarket(m)).toBeNull();
+  });
+});
+
 // ── normalizePriceHistory ─────────────────────────────────────────────────────
 
 describe('normalizePriceHistory', () => {

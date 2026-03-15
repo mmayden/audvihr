@@ -7,6 +7,7 @@ import { useKalshi } from '../hooks/useKalshi';
 import { mlToImplied } from '../utils/odds';
 import { fightKey } from '../utils/normalizeOdds';
 import { daysUntil } from '../utils/date';
+import { readCLVLog } from '../utils/clv';
 import { PriceChart } from '../components/PriceChart';
 
 /**
@@ -29,8 +30,6 @@ import { PriceChart } from '../components/PriceChart';
 
 const SORT_LABELS = ['CLOSING', 'VOLUME', 'EVENT'];
 const PLATFORMS   = ['ALL', 'Polymarket', 'Kalshi', 'Novig'];
-const CLV_LOG_KEY = 'clv_log';
-
 /** Format USD volume as compact string. */
 function fmtVolume(n) {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
@@ -77,16 +76,6 @@ function countdownColor(dateStr, today) {
   if (d < 0) return 'var(--text-dim)';
   if (d <= 7) return 'var(--accent)';
   return 'var(--green)';
-}
-
-/** Read and parse CLV log from localStorage. */
-function readCLVLog() {
-  try {
-    const raw = localStorage.getItem(CLV_LOG_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
 }
 
 export function MarketsScreen({ onBack }) {

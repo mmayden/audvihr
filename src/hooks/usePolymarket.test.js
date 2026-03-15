@@ -123,4 +123,41 @@ describe('usePolymarket', () => {
     expect(log[0].source).toBe('polymarket');
     expect(log[0].fightKey).toBe('makhachev_poirier');
   });
+
+  it('fetchHistory returns [] for empty conditionId without a history request', async () => {
+    global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ data: [] }) });
+    const { result } = renderHook(() => usePolymarket());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    const callsBefore = global.fetch.mock.calls.length;
+    const hist = await result.current.fetchHistory('', '0xtok1');
+    expect(hist).toEqual([]);
+    // No additional fetch beyond the initial markets call
+    expect(global.fetch.mock.calls.length).toBe(callsBefore);
+  });
+
+  it('fetchHistory fetches and normalizes price history', async () => {
+    const historyData = { history: [{ t: 1000, p: 0.60 }, { t: 2000, p: 0.65 }] };
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => historyData,
+    });
+    const { result } = renderHook(() => usePolymarket());
+    const hist = await result.current.fetchHistory('0xcond', '0xtok1');
+    expect(hist).toHaveLength(2);
+    expect(hist[0].p).toBe(0.60);
+  });
+
+  it('fetchHistory returns [] when fetch fails', async () => {
+    global.fetch = vi.fn().mockResolvedValue({ ok: false, status: 500 });
+    const { result } = renderHook(() => usePolymarket());
+    const hist = await result.current.fetchHistory('0xcond', '0xtok1');
+    expect(hist).toEqual([]);
+  });
+
+  it('fetchHistory returns [] on network error', async () => {
+    global.fetch = vi.fn().mockRejectedValue(new Error('offline'));
+    const { result } = renderHook(() => usePolymarket());
+    const hist = await result.current.fetchHistory('0xcond', '0xtok1');
+    expect(hist).toEqual([]);
+  });
 });

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { normalizeOddsApiResponse } from '../utils/normalizeOdds';
+import { readCache, writeCache, evictCache } from '../utils/cache';
 
 /**
  * useOdds — fetches live UFC moneylines from The Odds API.
@@ -14,27 +15,9 @@ import { normalizeOddsApiResponse } from '../utils/normalizeOdds';
  */
 
 const CACHE_KEY  = 'cache_odds_v1';
-const CACHE_TTL  = 15 * 60 * 1000; // 15 minutes
+const CACHE_TTL  = 15 * 60 * 1000; // 15 minutes — conservative for 500 req/month budget
 const API_BASE   = 'https://api.the-odds-api.com/v4';
 const SPORT_KEY  = 'mma_mixed_martial_arts';
-
-function readCache(key) {
-  try {
-    const raw = sessionStorage.getItem(key);
-    if (!raw) return null;
-    const { data, ts } = JSON.parse(raw);
-    if (!ts || Date.now() - ts > CACHE_TTL) return null;
-    return data;
-  } catch {
-    return null;
-  }
-}
-
-function writeCache(key, data) {
-  try {
-    sessionStorage.setItem(key, JSON.stringify({ data, ts: Date.now() }));
-  } catch { /* quota exceeded or private browsing */ }
-}
 
 export function useOdds() {
   const [data,    setData]    = useState(null);
@@ -48,7 +31,7 @@ export function useOdds() {
     // Degrade silently if key is absent or is the placeholder value.
     if (!apiKey || apiKey === 'your_key_here') return;
 
-    const cached = readCache(CACHE_KEY);
+    const cached = readCache(CACHE_KEY, CACHE_TTL);
     if (cached) {
       setData(cached);
       return;
@@ -81,7 +64,7 @@ export function useOdds() {
   }, [apiKey, rev]);
 
   const refetch = () => {
-    try { sessionStorage.removeItem(CACHE_KEY); } catch { /* ignore */ }
+    evictCache(CACHE_KEY);
     setRev((v) => v + 1);
   };
 

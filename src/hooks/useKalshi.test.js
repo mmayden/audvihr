@@ -110,4 +110,51 @@ describe('useKalshi', () => {
     expect(kalshiEntries.length).toBeGreaterThan(0);
     expect(kalshiEntries[0].fightKey).toBe('makhachev_poirier');
   });
+
+  it('fetchHistory returns [] when apiKey is absent', async () => {
+    vi.stubEnv('VITE_KALSHI_API_KEY', '');
+    global.fetch = vi.fn();
+    const { result } = renderHook(() => useKalshi());
+    const hist = await result.current.fetchHistory('KXUFC315-MAKHACHEV');
+    expect(hist).toEqual([]);
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('fetchHistory returns [] for empty ticker without a history request', async () => {
+    global.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({ markets: [] }) });
+    const { result } = renderHook(() => useKalshi());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    const callsBefore = global.fetch.mock.calls.length;
+    const hist = await result.current.fetchHistory('');
+    expect(hist).toEqual([]);
+    expect(global.fetch.mock.calls.length).toBe(callsBefore);
+  });
+
+  it('fetchHistory fetches and normalizes Kalshi price history', async () => {
+    const historyData = { history: [{ ts: 1000, yes_price: 0.62 }, { ts: 2000, yes_price: 0.65 }] };
+    global.fetch = vi.fn()
+      .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ markets: [] }) }) // series KXUFC
+      .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ markets: [] }) }) // series KXMMA
+      .mockResolvedValueOnce({ ok: true, json: async () => historyData }); // history
+
+    const { result } = renderHook(() => useKalshi());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    const hist = await result.current.fetchHistory('KXUFC315-MAKHACHEV');
+    expect(hist).toHaveLength(2);
+    expect(hist[0].p).toBe(0.62);
+  });
+
+  it('fetchHistory returns [] when fetch fails', async () => {
+    global.fetch = vi.fn()
+      .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ markets: [] }) })
+      .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ markets: [] }) })
+      .mockResolvedValueOnce({ ok: false, status: 500 });
+
+    const { result } = renderHook(() => useKalshi());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    const hist = await result.current.fetchHistory('KXUFC315-MAKHACHEV');
+    expect(hist).toEqual([]);
+  });
 });
