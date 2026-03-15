@@ -1,4 +1,4 @@
-import { useState, Fragment } from 'react';
+import { useState, useMemo, Fragment } from 'react';
 import { FIGHTERS } from '../data/fighters';
 import { ARCH_COLORS } from '../constants/archetypes';
 import { ChecklistPanel } from '../components/ChecklistPanel';
@@ -15,7 +15,7 @@ export function CompareScreen({onBack}) {
   const f1=FIGHTERS.find(f=>f.id===parseInt(f1id));
   const f2=FIGHTERS.find(f=>f.id===parseInt(f2id));
   const clKey=f1&&f2?`${Math.min(f1.id,f2.id)}_${Math.max(f1.id,f2.id)}`:'default';
-  const rows=f1&&f2?[
+  const rows=useMemo(()=>f1&&f2?[
     {cat:'RECORD',  l:'Overall Record',       v1:`${f1.wins}-${f1.losses}`,v2:`${f2.wins}-${f2.losses}`,n1:f1.wins,n2:f2.wins,hi:true},
     {cat:'RECORD',  l:'Win Streak',            v1:f1.streak,    v2:f2.streak,    n1:f1.streak,   n2:f2.streak,    hi:true},
     {cat:'RECORD',  l:'Finish Rate %',         v1:f1.finish_rate+'%',v2:f2.finish_rate+'%',n1:f1.finish_rate,n2:f2.finish_rate,hi:true},
@@ -31,7 +31,7 @@ export function CompareScreen({onBack}) {
     {cat:'GRAPPLING',l:'Ctrl Time / 15 Min',   v1:f1.grappling.ctrl_time_per15,v2:f2.grappling.ctrl_time_per15,n1:f1.grappling.ctrl_time_per15,n2:f2.grappling.ctrl_time_per15,hi:true},
     {cat:'PHYSICAL', l:'Reach',                v1:f1.reach,v2:f2.reach,n1:parseInt(f1.reach),n2:parseInt(f2.reach),hi:true},
     {cat:'PHYSICAL', l:'Age',                  v1:f1.age+' yrs',v2:f2.age+' yrs',n1:f1.age,n2:f2.age,hi:false},
-  ]:[];
+  ]:[], [f1, f2]);
   return (
     <div className="app">
       <div className="topbar">

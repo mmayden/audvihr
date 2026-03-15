@@ -4,6 +4,16 @@ All notable changes to this project. Format: [version] — date — description.
 
 ---
 
+## [Unreleased]
+
+### Code Quality
+- `CompareScreen`: wrap `rows` derived array in `useMemo` (was rebuilt on every render)
+- `FighterScreen`: `function pick` → `const pick` arrow (CLAUDE.md component-scope rule)
+- `FighterScreen`: replace hardcoded `'#555'` fallback with `var(--border2)` / `var(--text-dim)` CSS variables
+- `PLANNING.md`: rewrite Architecture Philosophy to reflect post-Vite state; remove `ComingSoon.jsx` from file structure
+
+---
+
 ## [0.5.0] — 2026-03-15
 
 ### Added

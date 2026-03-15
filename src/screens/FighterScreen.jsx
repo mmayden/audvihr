@@ -28,7 +28,7 @@ export function FighterScreen({onBack, initialFighter}) {
     const s=search.toLowerCase();
     return (f.name.toLowerCase().includes(s)||f.nickname.toLowerCase().includes(s))&&(wf==='ALL'||f.weight===wf);
   }),[search,wf]);
-  function pick(f){setSel(f);setTab('OVERVIEW');}
+  const pick = (f) => { setSel(f); setTab('OVERVIEW'); };
   const ac = sel ? ARCH_COLORS[sel.archetype] : null;
   return (
     <div className="app">
@@ -65,7 +65,7 @@ export function FighterScreen({onBack, initialFighter}) {
                 </div>
                 <div className="archetype-row">
                   {ac && <span className="arch-tag" style={{borderColor:ac,color:ac}}>{sel.archetype}</span>}
-                  {sel.mods.map(m=><span key={m} className="arch-tag" style={{borderColor:MOD_COLORS[m]||'#555',color:MOD_COLORS[m]||'#555',opacity:.8}}>{m}</span>)}
+                  {sel.mods.map(m=><span key={m} className="arch-tag" style={{borderColor:MOD_COLORS[m]||'var(--border2)',color:MOD_COLORS[m]||'var(--text-dim)',opacity:.8}}>{m}</span>)}
                 </div>
               </div>
               <div className="card-record">

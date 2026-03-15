@@ -6,25 +6,16 @@ This document is the primary reference for Claude and the developer during long-
 
 ## Architecture Philosophy
 
-**Single-file first.** The app is one HTML file with React via CDN and inline CSS. This was intentional for Phase 1–3 (local dev). It means:
-- Zero build tooling during rapid prototyping
-- Fully portable, shareable by just sending a file
-- Trade-off: gets unwieldy past ~2000 lines; also not suitable for web deployment as-is
+**Vite + React (current).** The app was migrated from a single-file HTML prototype to a full Vite + React project at Phase 3a. The prototype used `babel-standalone` for runtime JSX compilation (~860KB, 1–3s blank-screen penalty) and was unsuitable for web deployment. The Vite build compiles at build time, outputs a static `dist/` folder, and is deployable to Netlify, Vercel, or GitHub Pages.
 
-**Deployment target: web.** The app will be hosted publicly. This changes one constraint:
+**Current stack:**
+- Vite 6 + `@vitejs/plugin-react` — fast HMR in dev, optimised production bundle
+- React 18 + StrictMode — all components are function components with hooks
+- No state management library — `useState` / `useMemo` / custom hooks only
+- No CSS framework — global `app.css` with CSS variables as the design system
+- Vitest + Testing Library — co-located unit tests, 80% coverage target on utils/hooks
 
-> **`babel-standalone` is a hard blocker for production.** It is an ~860KB runtime JSX compiler that fires on every page load, causing 1–3s of blank screen before React renders. Acceptable locally; not acceptable on the web.
-
-**Migration trigger (updated):** Phase 3a Vite migration is now a **required pre-launch step**, not an optional trigger. It must happen before Phase 3 is deployed live. Triggers:
-- Deploying to the web (active) ← **this is the active trigger**
-- File exceeds ~2000 lines
-- Need for multi-file imports
-
-After migration to Vite + React:
-- Build output is a static site (`dist/`) — deployable to GitHub Pages, Netlify, or Vercel
-- No runtime JSX compilation
-- Proper React production build
-- Same component structure, just split across files
+**Deployment target: web.** Build output is static (`dist/`). Security headers (CSP, HSTS, X-Frame-Options, Referrer-Policy, Permissions-Policy) are configured via `netlify.toml` / `vercel.json`.
 
 ---
 
@@ -69,8 +60,7 @@ src/
 │   ├── CompareScreen.jsx     Two-fighter selector + stat table + checklist
 │   ├── CalendarScreen.jsx    Event sidebar + card detail + fighter deep-links
 │   ├── MarketsScreen.jsx     Prediction market dashboard (Phase 4)
-│   ├── NewsScreen.jsx        Fighter news feed with filters (Phase 5)
-│   └── ComingSoon.jsx        Placeholder for unimplemented screens
+│   └── NewsScreen.jsx        Fighter news feed with filters (Phase 5)
 └── test/
     └── setup.js              Vitest setup — jest-dom + in-memory localStorage mock
 ```
