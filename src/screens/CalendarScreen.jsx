@@ -57,7 +57,7 @@ export function CalendarScreen({onBack, onGoFighter}) {
               const cdColor=past?'var(--text-dim)':d<=7?'var(--accent)':'var(--green)';
               return (
                 <div key={e.id} className={`sidebar-fighter${sel?.id===e.id?' active':''}${past?' past-event':''}`} onClick={()=>setSelId(e.id)}>
-                  <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:3}}>
+                  <div className="cal-sidebar-event-row">
                     <span className="sf-name">{e.name}</span>
                     <span className="cal-countdown" style={{color:cdColor}}>{countdown(e.date, today)}</span>
                   </div>
@@ -74,10 +74,10 @@ export function CalendarScreen({onBack, onGoFighter}) {
 
         <div className="fighter-area">
           {sel && (
-            <div className="anim-fade" style={{display:'flex',flexDirection:'column',height:'100%'}}>
+            <div className="anim-fade cal-event-detail">
               <div className="cal-event-header">
                 <div>
-                  <div style={{display:'flex',alignItems:'center'}}>
+                  <div className="cal-event-org-row">
                     <span className="org-badge" style={{background:ORG_COLOR[sel.org]||'var(--border2)'}}>{sel.org}</span>
                     <span className="cal-event-title">{sel.name}</span>
                   </div>
@@ -111,7 +111,7 @@ export function CalendarScreen({onBack, onGoFighter}) {
                   <span className="cal-bout-name"><FighterName name={sel.card.comain.f2} onGoFighter={onGoFighter}/></span>
                   <span className="cal-bout-weight">{sel.card.comain.weight.toUpperCase()}</span>
                 </div>
-                {sel.card.comain.title && <div className="cal-title-banner" style={{marginTop:-1}}>TITLE FIGHT — {sel.card.comain.weight.toUpperCase()} CHAMPIONSHIP</div>}
+                {sel.card.comain.title && <div className="cal-title-banner cal-title-banner--comain">TITLE FIGHT — {sel.card.comain.weight.toUpperCase()} CHAMPIONSHIP</div>}
 
                 {sel.card.prelims.length>0 && <>
                   <div className="sec-label">PRELIMS</div>

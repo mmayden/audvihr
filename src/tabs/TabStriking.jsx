@@ -19,8 +19,8 @@ export const TabStriking = ({ fighter }) => {
       ].map(r=><div className="stat-row-item" key={r.l}><span className="srl-label">{r.l}</span><StatBar val={r.v} max={r.m} color={r.c}/><span className="srl-val">{r.v}{r.u||''}</span></div>)}
     </div>
     <div className="sec-label">KNOCKDOWNS</div>
-    <div className="stat-grid" style={{gridTemplateColumns:'1fr 1fr'}}>
-      <div className="stat-cell"><div className="stat-cell-label">KD LANDED</div><div className="stat-cell-val" style={{color:'var(--green)'}}>{s.kd_landed}</div></div>
+    <div className="stat-grid stat-grid--two-col">
+      <div className="stat-cell"><div className="stat-cell-label">KD LANDED</div><div className="stat-cell-val stat-cell-val--win">{s.kd_landed}</div></div>
       <div className="stat-cell"><div className="stat-cell-label">KD SUFFERED</div><div className="stat-cell-val" style={{color:s.kd_suffered>0?'var(--red)':'var(--green)'}}>{s.kd_suffered}</div></div>
     </div>
     <div className="sec-label">STRIKE TARGET BREAKDOWN</div>

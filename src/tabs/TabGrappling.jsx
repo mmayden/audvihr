@@ -29,8 +29,8 @@ export const TabGrappling = ({ fighter }) => {
         .map(r=><div className="stat-row-item" key={r.l}><span className="srl-label">{r.l}</span><StatBar val={r.v} max={100} color={r.c}/><span className="srl-val">{r.v}{r.u}</span></div>)}
     </div>
     <div className="sec-label">SUBMISSION WIN BREAKDOWN</div>
-    <div className="stat-grid" style={{gridTemplateColumns:'repeat(3,1fr)'}}>
-      <div className="stat-cell"><div className="stat-cell-label">SUB WINS</div><div className="stat-cell-val" style={{color:'var(--green)'}}>{fighter.finishes.sub}</div></div>
+    <div className="stat-grid stat-grid--three-col">
+      <div className="stat-cell"><div className="stat-cell-label">SUB WINS</div><div className="stat-cell-val stat-cell-val--win">{fighter.finishes.sub}</div></div>
       <div className="stat-cell"><div className="stat-cell-label">TOTAL WINS</div><div className="stat-cell-val">{fighter.wins}</div></div>
       <div className="stat-cell"><div className="stat-cell-label">SUB WIN RATE</div><div className="stat-cell-val">{fighter.wins > 0 ? Math.round(fighter.finishes.sub / fighter.wins * 100) : 0}%</div></div>
     </div>

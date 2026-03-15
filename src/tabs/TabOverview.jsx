@@ -22,12 +22,12 @@ export const TabOverview = ({ fighter }) => {
       ].map(s=><div className="stat-cell" key={s.l}><div className="stat-cell-label">{s.l}</div><div className="stat-cell-val">{s.v}</div><div className="stat-cell-sub">{s.s}</div></div>)}
     </div>
     <div className="sec-label">FLAGS</div>
-    <div className="stat-grid" style={{gridTemplateColumns:'repeat(auto-fill,minmax(150px,1fr))'}}>
-      <div className="stat-cell"><div className="stat-cell-label">CHIN</div><div style={{fontSize:13,fontWeight:600,color:CHIN_COLOR[fighter.chin]||'var(--text)',marginTop:4}}>{fighter.chin}</div></div>
-      <div className="stat-cell"><div className="stat-cell-label">CARDIO</div><div style={{fontSize:13,fontWeight:600,color:CARDIO_COLOR[fighter.cardio]||'var(--text)',marginTop:4}}>{fighter.cardio}</div></div>
-      <div className="stat-cell"><div className="stat-cell-label">WEIGHT CUT</div><div style={{fontSize:13,fontWeight:600,color:CUT_COLOR[fighter.weight_cut]||'var(--text)',marginTop:4}}>{fighter.weight_cut}</div></div>
+    <div className="stat-grid stat-grid--narrow">
+      <div className="stat-cell"><div className="stat-cell-label">CHIN</div><div className="flag-value" style={{color:CHIN_COLOR[fighter.chin]||'var(--text)'}}>{fighter.chin}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">CARDIO</div><div className="flag-value" style={{color:CARDIO_COLOR[fighter.cardio]||'var(--text)'}}>{fighter.cardio}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">WEIGHT CUT</div><div className="flag-value" style={{color:CUT_COLOR[fighter.weight_cut]||'var(--text)'}}>{fighter.weight_cut}</div></div>
     </div>
     <div className="sec-label">TRADER NOTES</div>
-    <div style={{background:'var(--surface)',padding:'14px',fontSize:'13px',lineHeight:1.7,color:'var(--text)',borderLeft:'2px solid var(--accent-dim)'}}>{fighter.trader_notes}</div>
+    <div className="trader-notes-block">{fighter.trader_notes}</div>
   </div>;
 };
