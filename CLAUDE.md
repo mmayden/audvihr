@@ -51,6 +51,20 @@ These are non-negotiable. Do not skip them to save time or complexity.
 - **TASKS.md sprint board kept current.** Check off tasks as they're completed. Do not leave stale unchecked items from prior sessions.
 - **PLANNING.md decisions log updated for architecture changes.** Any change to deployment target, build approach, or data model gets a row in the decisions table with date and reason.
 
+### Testing
+
+- **Test runner: Vitest.** Run `npm run test:run` for a single pass, `npm test` for watch mode, `npm run test:coverage` for coverage report.
+- **Test setup: `src/test/setup.js`** extends `@testing-library/jest-dom` and provides a deterministic in-memory `localStorage` mock. Never call `localStorage.clear()` without this setup in place.
+- **What to test:**
+  - Every util function in `src/utils/` — test all branches (happy path, edge cases, null/invalid input).
+  - Every custom hook in `src/hooks/` — use `renderHook` + `act` from `@testing-library/react`. Reset localStorage in `beforeEach`.
+  - Every component in `src/components/` that has conditional render paths — use `@testing-library/react`. Test DOM output, not implementation details.
+  - Screens and tabs are integration-heavy — smoke tests only (renders without crashing). Full rendering tests can wait until Phase 6.
+- **Coverage target: 80%** on utils and hooks. Run `npm run test:coverage` and check the `text` output before merging.
+- **Test files co-located with source.** `src/utils/odds.test.js` lives next to `src/utils/odds.js`. Pattern: `<name>.test.{js,jsx}`.
+- **All tests must pass before merging to `main`.** A failing test is a merge blocker.
+- **ESLint must exit 0 before merging.** Run `npm run lint`. Zero errors is required; warnings are acceptable only if they cannot be resolved without disproportionate effort (document in PR description).
+
 ### Modular Design (post-Vite)
 
 File and folder structure must match the following layout. Do not put components in the wrong location:

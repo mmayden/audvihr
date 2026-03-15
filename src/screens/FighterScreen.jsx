@@ -2,7 +2,6 @@ import { useState, useMemo } from 'react';
 import { FIGHTERS } from '../data/fighters';
 import { ARCH_COLORS, MOD_COLORS } from '../constants/archetypes';
 import { TABS } from '../constants/checklist';
-import { StatBar } from '../components/StatBar';
 import { TabOverview } from '../tabs/TabOverview';
 import { TabStriking } from '../tabs/TabStriking';
 import { TabGrappling } from '../tabs/TabGrappling';
@@ -54,7 +53,7 @@ export function FighterScreen({onBack, initialFighter}) {
               <div className="card-portrait"><span className="portrait-placeholder">🥊</span></div>
               <div className="card-identity">
                 <div className="fighter-name-big">{sel.name}</div>
-                <div className="fighter-nickname">"{sel.nickname}"</div>
+                <div className="fighter-nickname">&ldquo;{sel.nickname}&rdquo;</div>
                 <div className="identity-row">
                   <span className={`id-pill ${sel.rank==='CHAMPION'?'champ':'rank'}`}>{sel.rank}</span>
                   <span className="id-pill">{sel.weight}</span>
