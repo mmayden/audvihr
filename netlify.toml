@@ -1,0 +1,28 @@
+# netlify.toml — Audwihr deployment config
+
+[build]
+  publish = "dist"
+  command = "npm run build"
+
+# ── Security Headers ────────────────────────────────────────────────────────
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Content Security Policy
+    # Vite output is fully compiled static JS — no inline scripts, no unsafe-inline needed.
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self'; img-src 'self' data:; frame-ancestors 'none'"
+
+    # Prevent clickjacking
+    X-Frame-Options = "DENY"
+
+    # Prevent MIME sniffing
+    X-Content-Type-Options = "nosniff"
+
+    # Referrer privacy
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+    # Limit browser features
+    Permissions-Policy = "geolocation=(), camera=(), microphone=(), payment=()"
+
+    # HSTS (only applies over HTTPS — Netlify enforces HTTPS by default)
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"

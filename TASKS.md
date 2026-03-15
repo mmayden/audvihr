@@ -10,18 +10,22 @@
 
 ## Current Sprint
 
-**Branch:** `feature/phase-3-calendar`
-**Goal:** Build the Fight Calendar screen — upcoming events, card breakdowns, fighter links
+**Branch:** `feature/phase-5-news`
+**Goal:** Fighter News Feed — manual curated news items linked to fighter profiles
 
-### Tasks
-- [ ] Add static event data model (events array with card structure)
-- [ ] Build CalendarScreen component — event list with date/countdown
-- [ ] Event detail view: main event / co-main / prelims breakdown
-- [ ] Fighter name links from calendar → fighter profile
-- [ ] Filter by promotion (UFC / Bellator / PFL)
-- [ ] Run smoke test: calendar renders, fighter links navigate correctly
-- [ ] Commit and merge to `main`
-- [ ] Cut branch `feature/phase-4-markets`
+### Phase 5 — Fighter News Feed
+- [ ] Design NEWS data model (id, date, fighter_id, category, headline, body, source)
+- [ ] `src/data/news.js` with full schema comment and 10+ mock items
+- [ ] `src/screens/NewsScreen.jsx` — sorted news list with fighter links
+- [ ] Filter by category (fight / injury / camp / weigh-in / result)
+- [ ] Filter by fighter (select from roster)
+- [ ] `FighterName` links from news items → fighter profile
+- [ ] News CSS added to `app.css`
+- [ ] Menu badge updated to ACTIVE, version bumped to v0.5.0
+- [ ] Tests for any new utils/hooks
+- [ ] `npm run build` passes
+- [ ] Smoke test: filters work, fighter link navigates correctly
+- [ ] Commit and merge to `main`, tag v0.5.0
 
 ---
 
@@ -62,34 +66,23 @@
 - Manual odds entry with auto implied probability + line movement detection
 - Public bet % inflation warning
 
-### 🔲 Phase 3 — Fight Calendar
-**Branch:** `feature/phase-3-calendar`
+### ✅ Phase 3 — Fight Calendar (v0.4.0)
+- Fight calendar screen, EVENTS data, countdown, promotion filter, fighter links
 
-- Upcoming events list (manual data entry to start)
-- Event detail: card breakdown, main event / co-main / prelims
-- Fighter links from calendar → fighter profile
-- Basic date/countdown display
-- Filter by promotion (UFC / Bellator / PFL)
+### ✅ Phase 3a — Vite Migration (v0.4.0)
+- Full Vite + React project, 14 modular components, 0 CVEs, deployable to Netlify/Vercel
 
-**Migration note:** If file exceeds ~2000 lines before this phase, migrate to Vite first (see Phase 3a below).
-
-### 🔲 Phase 3a — Vite Migration (trigger-based)
-**Trigger:** File > ~2000 lines OR need for multi-file imports
-
-- `npm create vite@latest audwihr -- --template react`
-- Split into component files matching current structure
-- All functionality must pass smoke test before merge
-- No new features in this phase — migration only
-
-### 🔲 Phase 4 — Markets Dashboard
+### ✅ Phase 4 — Markets Dashboard (v0.4.0)
 **Branch:** `feature/phase-4-markets`
 
-- Live market prices pulled from Polymarket/Kalshi (public APIs where available)
-- Market list view: active UFC markets sorted by volume / closing time
-- Quick-add to watchlist
-- Implied probability tracker across platforms (arbitrage spotting)
+- 8 active UFC markets across Polymarket, Kalshi, Novig
+- Moneyline + implied % per platform per fighter
+- Cross-platform arb detection (best-of sum < 100%)
+- Method props per fight (KO/TKO, Sub, Dec odds)
+- Filter by platform, title fights, watchlist; sort by closing/volume/event
+- Watchlist persisted to localStorage
 
-### 🔲 Phase 5 — Fighter News Feed
+### 🔲 Phase 5 — Fighter News Feed (active)
 **Branch:** `feature/phase-5-news`
 
 - Aggregated fighter news (camp switches, injury reports, fight announcements)

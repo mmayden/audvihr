@@ -1,0 +1,95 @@
+import { useState, Fragment } from 'react';
+import { FIGHTERS } from '../data/fighters';
+import { ARCH_COLORS } from '../constants/archetypes';
+import { ChecklistPanel } from '../components/ChecklistPanel';
+
+/**
+ * CompareScreen — side-by-side fighter comparison screen.
+ * Allows selecting two fighters from dropdowns, renders a stat comparison
+ * table with win/lose highlights, and includes the trade checklist panel.
+ * @param {function} onBack - callback invoked when the back button is clicked
+ */
+export function CompareScreen({onBack}) {
+  const [f1id,setF1id]=useState('');
+  const [f2id,setF2id]=useState('');
+  const f1=FIGHTERS.find(f=>f.id===parseInt(f1id));
+  const f2=FIGHTERS.find(f=>f.id===parseInt(f2id));
+  const clKey=f1&&f2?`${Math.min(f1.id,f2.id)}_${Math.max(f1.id,f2.id)}`:'default';
+  let lastCat=null;
+  const rows=f1&&f2?[
+    {cat:'RECORD',  l:'Overall Record',       v1:`${f1.wins}-${f1.losses}`,v2:`${f2.wins}-${f2.losses}`,n1:f1.wins,n2:f2.wins,hi:true},
+    {cat:'RECORD',  l:'Win Streak',            v1:f1.streak,    v2:f2.streak,    n1:f1.streak,   n2:f2.streak,    hi:true},
+    {cat:'RECORD',  l:'Finish Rate %',         v1:f1.finish_rate+'%',v2:f2.finish_rate+'%',n1:f1.finish_rate,n2:f2.finish_rate,hi:true},
+    {cat:'STRIKING',l:'Sig Strikes / Min',     v1:f1.striking.slpm,    v2:f2.striking.slpm,    n1:f1.striking.slpm,  n2:f2.striking.slpm, hi:true},
+    {cat:'STRIKING',l:'Striking Accuracy %',   v1:f1.striking.str_acc+'%',v2:f2.striking.str_acc+'%',n1:f1.striking.str_acc,n2:f2.striking.str_acc,hi:true},
+    {cat:'STRIKING',l:'Str Absorbed / Min',    v1:f1.striking.sapm,    v2:f2.striking.sapm,    n1:f1.striking.sapm,  n2:f2.striking.sapm, hi:false},
+    {cat:'STRIKING',l:'Striking Defense %',    v1:f1.striking.str_def+'%',v2:f2.striking.str_def+'%',n1:f1.striking.str_def,n2:f2.striking.str_def,hi:true},
+    {cat:'STRIKING',l:'Knockdowns Landed',     v1:f1.striking.kd_landed,v2:f2.striking.kd_landed,n1:f1.striking.kd_landed,n2:f2.striking.kd_landed,hi:true},
+    {cat:'GRAPPLING',l:'TD Attempts / 15',     v1:f1.grappling.td_per15,v2:f2.grappling.td_per15,n1:f1.grappling.td_per15,n2:f2.grappling.td_per15,hi:true},
+    {cat:'GRAPPLING',l:'TD Accuracy %',        v1:f1.grappling.td_acc+'%',v2:f2.grappling.td_acc+'%',n1:f1.grappling.td_acc,n2:f2.grappling.td_acc,hi:true},
+    {cat:'GRAPPLING',l:'TD Defense %',         v1:f1.grappling.td_def+'%',v2:f2.grappling.td_def+'%',n1:f1.grappling.td_def,n2:f2.grappling.td_def,hi:true},
+    {cat:'GRAPPLING',l:'Sub Avg / 15 Min',     v1:f1.grappling.sub_per15,v2:f2.grappling.sub_per15,n1:f1.grappling.sub_per15,n2:f2.grappling.sub_per15,hi:true},
+    {cat:'GRAPPLING',l:'Ctrl Time / 15 Min',   v1:f1.grappling.ctrl_time_per15,v2:f2.grappling.ctrl_time_per15,n1:f1.grappling.ctrl_time_per15,n2:f2.grappling.ctrl_time_per15,hi:true},
+    {cat:'PHYSICAL', l:'Reach',                v1:f1.reach,v2:f2.reach,n1:parseInt(f1.reach),n2:parseInt(f2.reach),hi:true},
+    {cat:'PHYSICAL', l:'Age',                  v1:f1.age+' yrs',v2:f2.age+' yrs',n1:f1.age,n2:f2.age,hi:false},
+  ]:[];
+  return (
+    <div className="app">
+      <div className="topbar">
+        <span className="topbar-logo">AUDWIHR</span><span className="topbar-sep">/</span>
+        <span className="topbar-section">COMPARE</span>
+        <div className="topbar-right"><button className="topbar-back" onClick={onBack}>← MENU</button></div>
+      </div>
+      <div className="compare-layout">
+        <div className="compare-selector">
+          <select className="compare-select" value={f1id} onChange={e=>setF1id(e.target.value)}>
+            <option value="">— Fighter 1 —</option>
+            {FIGHTERS.map(f=><option key={f.id} value={f.id}>{f.name} ({f.record})</option>)}
+          </select>
+          <span className="vs-text">VS</span>
+          <select className="compare-select" value={f2id} onChange={e=>setF2id(e.target.value)}>
+            <option value="">— Fighter 2 —</option>
+            {FIGHTERS.map(f=><option key={f.id} value={f.id}>{f.name} ({f.record})</option>)}
+          </select>
+        </div>
+        <div className="compare-body">
+          <div className="compare-table-wrap">
+            {f1&&f2 ? (
+              <div className="anim-fade">
+                <div style={{display:'grid',gridTemplateColumns:'1fr 80px 1fr',marginBottom:1,gap:1,background:'var(--border)'}}>
+                  <div style={{background:'var(--surface)',padding:'12px 16px',borderBottom:'2px solid var(--accent)'}}>
+                    <div style={{fontSize:15,fontWeight:700,color:'var(--text-bright)'}}>{f1.name}</div>
+                    <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--accent)',marginTop:2}}>{f1.record} · {f1.rank}</div>
+                    <div style={{marginTop:6}}><span className="arch-tag" style={{borderColor:ARCH_COLORS[f1.archetype],color:ARCH_COLORS[f1.archetype],fontSize:9}}>{f1.archetype}</span></div>
+                  </div>
+                  <div style={{background:'var(--surface2)',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--mono)',fontSize:13,fontWeight:700,color:'var(--red)'}}>VS</div>
+                  <div style={{background:'var(--surface)',padding:'12px 16px',borderBottom:'2px solid var(--blue)',textAlign:'right'}}>
+                    <div style={{fontSize:15,fontWeight:700,color:'var(--text-bright)'}}>{f2.name}</div>
+                    <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--blue)',marginTop:2}}>{f2.record} · {f2.rank}</div>
+                    <div style={{marginTop:6,display:'flex',justifyContent:'flex-end'}}><span className="arch-tag" style={{borderColor:ARCH_COLORS[f2.archetype],color:ARCH_COLORS[f2.archetype],fontSize:9}}>{f2.archetype}</span></div>
+                  </div>
+                </div>
+                <table className="ctable">
+                  <thead><tr><th style={{textAlign:'left',width:'38%'}}>F1</th><th className="center" style={{width:'24%'}}>STAT</th><th style={{textAlign:'right',width:'38%'}}>F2</th></tr></thead>
+                  <tbody>{rows.map((r,i)=>{
+                    const sc=r.cat!==lastCat; lastCat=r.cat;
+                    const tie=r.n1===r.n2, f1w=r.hi?r.n1>r.n2:r.n1<r.n2;
+                    return <Fragment key={i}>
+                      {sc&&<tr className="cat-row"><td colSpan={3}>{r.cat}</td></tr>}
+                      <tr>
+                        <td className={tie?'':f1w?'win':'lose'}>{r.v1}</td>
+                        <td className="center">{r.l}</td>
+                        <td className={`r ${tie?'':!f1w?'win':'lose'}`}>{r.v2}</td>
+                      </tr>
+                    </Fragment>;
+                  })}</tbody>
+                </table>
+              </div>
+            ) : <div className="empty-state" style={{height:'100%'}}><div style={{fontSize:32,opacity:.2}}>⚔️</div><span>SELECT TWO FIGHTERS TO COMPARE</span></div>}
+          </div>
+          <div className="checklist-wrap"><ChecklistPanel storageKey={clKey}/></div>
+        </div>
+      </div>
+    </div>
+  );
+}

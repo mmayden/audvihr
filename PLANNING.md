@@ -6,30 +6,46 @@ This document is the primary reference for Claude and the developer during long-
 
 ## Architecture Philosophy
 
-**Single-file first.** The app is one HTML file with React via CDN and inline CSS. This is intentional for Phase 1–2. It means:
-- Zero build tooling
-- Opens in any browser, no server
+**Single-file first.** The app is one HTML file with React via CDN and inline CSS. This was intentional for Phase 1–3 (local dev). It means:
+- Zero build tooling during rapid prototyping
 - Fully portable, shareable by just sending a file
-- Trade-off: gets unwieldy past ~2000 lines
+- Trade-off: gets unwieldy past ~2000 lines; also not suitable for web deployment as-is
 
-**Migration trigger:** When the file exceeds ~2000 lines or we need multi-file imports, migrate to Vite + React. That is Phase 3 work. Do not migrate early.
+**Deployment target: web.** The app will be hosted publicly. This changes one constraint:
+
+> **`babel-standalone` is a hard blocker for production.** It is an ~860KB runtime JSX compiler that fires on every page load, causing 1–3s of blank screen before React renders. Acceptable locally; not acceptable on the web.
+
+**Migration trigger (updated):** Phase 3a Vite migration is now a **required pre-launch step**, not an optional trigger. It must happen before Phase 3 is deployed live. Triggers:
+- Deploying to the web (active) ← **this is the active trigger**
+- File exceeds ~2000 lines
+- Need for multi-file imports
+
+After migration to Vite + React:
+- Build output is a static site (`dist/`) — deployable to GitHub Pages, Netlify, or Vercel
+- No runtime JSX compilation
+- Proper React production build
+- Same component structure, just split across files
 
 ---
 
 ## Current File Structure (Single HTML)
 
 ```
-mma-trader.html
+mma-trader.html                1,185 lines (migration trigger: ~2000)
 ├── <style>                    CSS variables + all component styles
 └── <script type="text/babel">
     ├── Constants               ARCH_COLORS, MOD_COLORS, CHECKLIST
-    ├── Fighter Data            FIGHTERS array (all mock data)
+    │                           CHIN_COLOR, CARDIO_COLOR, CUT_COLOR, ORG_COLOR
+    ├── Fighter Data            FIGHTERS array (14 fighters, all mock data)
+    ├── Event Data              EVENTS array (5 events, static card data)
     ├── Utils                   mlToImplied(), lineMovement(), SBar, useLS()
     ├── ChecklistPanel          Reusable checklist with localStorage
+    ├── FighterName             Name → profile link resolver (calendar use)
     ├── Tab Components          TabOverview, TabStriking, TabGrappling,
     │                           TabPhysical, TabHistory, TabMarket
     ├── FighterScreen           Sidebar + hero card + tabs
     ├── CompareScreen           Selector + comparison table + checklist
+    ├── CalendarScreen          Event list sidebar + card detail view
     ├── ComingSoon              Placeholder screen for locked features
     ├── MenuScreen              Main navigation
     └── App (root)              Screen router via useState
@@ -162,10 +178,38 @@ Clean, functional, dark. Soft on the eyes. No animations beyond fade-in on tab s
 }
 ```
 
+### Market Object (Phase 4 — prediction markets dashboard)
+```javascript
+{
+  id:          String,    // unique slug e.g. 'ufc315-main'
+  event:       String,    // event name
+  eventDate:   String,    // ISO date
+  fighter1:    String,    // name (may match FIGHTERS roster)
+  fighter2:    String,
+  weight:      String,
+  isTitle:     Boolean,
+  closing:     String,    // ISO date — when market closes
+  platforms: [{
+    name:   String,       // 'Polymarket' | 'Kalshi' | 'Novig'
+    f1_ml:  String,       // American moneyline e.g. '-130'
+    f2_ml:  String,
+    volume: Number,       // USD 24h volume
+  }],
+  method_props: [{
+    label: String,        // 'KO/TKO' | 'Submission' | 'Decision'
+    ml:    String,        // American odds for fight ending this way
+  }],
+}
+```
+
+**Arbitrage detection:** `min(f1_implied across platforms) + min(f2_implied across platforms) < 100`
+= guaranteed profit by betting F1 on platform with lowest F1 implied and F2 on platform with lowest F2 implied.
+
 ### localStorage Key Schema
 ```
 cl_{storageKey}            checklist state (object: {id: boolean})
-mkt_{fighter.id}           market data for fighter (market object above)
+mkt_{fighter.id}           per-fighter market tab data (ml, odds, notes)
+watchlist_markets          array of market IDs added to watchlist
 ```
 Where `storageKey` for compare screen = `${Math.min(f1.id, f2.id)}_${Math.max(f1.id, f2.id)}`
 
@@ -204,6 +248,53 @@ Checklist persists per matchup via localStorage. Key = `cl_{f1id}_{f2id}`.
 
 ---
 
+## Security Model
+
+### Current State (pre-Vite, single HTML file)
+
+| Surface | Risk | Status |
+|---------|------|--------|
+| `babel-standalone` CDN | Runtime code execution (~860KB compiler, supply chain risk) | **Eliminated by Phase 3a** |
+| CDN scripts (React, ReactDOM) | No SRI — CDN compromise could inject arbitrary JS | **Mitigated by Phase 3a** (no CDN scripts post-build) |
+| Google Fonts CDN | No SRI — low risk (CSS/fonts only, no JS) | Acceptable; add SRI if CSP tightened |
+| `localStorage` reads | Malformed JSON parsed directly into state | **Mitigated** — `try/catch` with typed default fallback in `useLocalStorage` |
+| User inputs (odds fields, notes) | Reflected into UI | **Mitigated** — React JSX escapes by default; `parseInt`/`isNaN` guard on numeric fields |
+| `dangerouslySetInnerHTML` | XSS if used with user input | **Not used** — do not introduce |
+| Secrets / credentials | Hardcoded in source | **N/A currently** — no API keys yet. Phase 6 requires `.env` with `VITE_` prefix |
+| Search engine indexing | Personal trading tool exposed publicly | **Mitigated** — `noindex, nofollow` robots meta tag |
+
+### Post-Vite Requirements (Phase 3a+)
+
+**Content Security Policy** — configure at the hosting layer, not in HTML:
+
+```
+# netlify.toml or _headers
+Content-Security-Policy:
+  default-src 'self';
+  script-src 'self';
+  style-src 'self' https://fonts.googleapis.com;
+  font-src https://fonts.gstatic.com;
+  connect-src 'self';
+  img-src 'self' data:;
+  frame-ancestors 'none'
+```
+
+> Vite's build output is fully compiled static JS — no inline scripts, no `unsafe-inline` needed.
+
+**Additional headers (recommended at launch):**
+```
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: geolocation=(), camera=(), microphone=()
+```
+
+**`npm audit` policy:** Run before every merge to `main`. Block on critical/high severity. Document accepted moderate findings in the decisions log below.
+
+**Phase 6 API surface (future):** When live data is introduced, all external API calls must use server-side proxying or be made to APIs that support CORS explicitly. Do not expose API keys in client-side code.
+
+---
+
 ## Research Findings That Drive Design Decisions
 
 - **Most predictive stat:** significant strikes absorbed/min (defense > offense)
@@ -222,8 +313,11 @@ Checklist persists per matchup via localStorage. Key = `cl_{f1id}_{f2id}`.
 
 | Date | Decision | Reason |
 |------|----------|--------|
-| Phase 2 | Stay single-file | Not complex enough to justify build tooling yet |
+| Phase 2 | Stay single-file | Not complex enough to justify build tooling yet; local-file use case |
 | Phase 2 | Manual odds entry only | No free UFC odds API; user enters from Polymarket/Kalshi directly |
 | Phase 2 | Mock data in JS objects | Live data API (UFCStats, SportRadar) planned Phase 6 |
 | Phase 2 | No portrait images | Rights/hosting complexity; placeholder until Phase 5 |
 | Phase 2 | localStorage not IndexedDB | Data volume is small; no need for relational storage yet |
+| Phase 3 | Static EVENTS array | No live event API; user enters card data manually same as fighter data |
+| Phase 3 | FighterName at top-level | Was nested inside CalendarScreen (React anti-pattern); extracted to stable module-level component |
+| Phase 3a | Vite migration is now required | App will be hosted on web — babel-standalone is a production blocker (~860KB runtime compiler). Must migrate before live deployment. |

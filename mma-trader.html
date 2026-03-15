@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Personal research and decision-support tool for MMA prediction market trading. Fighter profiles, matchup comparison, trade checklist, fight calendar.">
+<meta name="theme-color" content="#12141a">
+<meta name="robots" content="noindex, nofollow">
 <title>AUDWIHR // MMA Trader</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
@@ -177,6 +180,32 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
 .coming-soon { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
 .anim-fade { animation: fadeIn .2s ease; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; } }
+/* CALENDAR */
+.cal-event-main-preview { font-size: 11px; color: var(--text-dim); margin-top: 3px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cal-countdown { font-family: var(--mono); font-size: 10px; font-weight: 700; flex-shrink: 0; letter-spacing: .04em; }
+.sidebar-fighter.past-event { opacity: .55; }
+.sidebar-fighter.past-event .sf-name { color: var(--text-dim); }
+.org-badge { font-size: 9px; font-family: var(--mono); font-weight: 700; padding: 1px 6px; border-radius: 2px; color: #fff; letter-spacing: .04em; display: inline-block; }
+.cal-event-header { padding: 20px 24px 18px; border-bottom: 1px solid var(--border); background: var(--surface); flex-shrink: 0; display: flex; align-items: flex-start; justify-content: space-between; }
+.cal-event-title { font-family: var(--mono); font-size: 22px; font-weight: 700; color: var(--text-bright); letter-spacing: .05em; margin-left: 10px; }
+.cal-event-meta { font-family: var(--mono); font-size: 11px; color: var(--text-dim); margin-top: 6px; }
+.cal-countdown-big { font-family: var(--mono); font-size: 28px; font-weight: 700; text-align: right; line-height: 1; }
+.cal-countdown-label { font-family: var(--mono); font-size: 9px; color: var(--text-dim); letter-spacing: .1em; text-align: right; margin-top: 3px; }
+.cal-main-bout { display: grid; grid-template-columns: 1fr 48px 1fr; gap: 0; margin-bottom: 8px; background: var(--border); gap: 1px; }
+.cmb-side { background: var(--surface2); padding: 16px 18px; display: flex; flex-direction: column; gap: 4px; }
+.cmb-side.right { align-items: flex-end; text-align: right; }
+.cmb-fighter-name { font-size: 15px; font-weight: 700; color: var(--text-bright); }
+.cmb-weight-tag { font-size: 9px; font-family: var(--mono); color: var(--text-dim); letter-spacing: .08em; }
+.cmb-vs { background: var(--surface); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--red); }
+.fighter-link { color: var(--accent); cursor: pointer; font-weight: 700; border-bottom: 1px solid var(--accent-dim); transition: color .12s, border-color .12s; }
+.fighter-link:hover { color: var(--text-bright); border-bottom-color: var(--text-bright); }
+.cal-bout { display: flex; align-items: center; gap: 10px; padding: 9px 14px; background: var(--surface); margin-bottom: 1px; font-size: 12px; }
+.cal-bout:hover { background: var(--surface2); }
+.cal-bout-name { flex: 1; font-weight: 600; color: var(--text); }
+.cal-bout-name.right { text-align: right; }
+.cal-bout-vs { font-family: var(--mono); font-size: 10px; color: var(--text-dim); flex-shrink: 0; }
+.cal-bout-weight { font-family: var(--mono); font-size: 9px; color: var(--text-dim); margin-left: auto; flex-shrink: 0; letter-spacing: .05em; }
+.cal-title-banner { text-align: center; font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: .14em; padding: 5px; border: 1px solid var(--accent-dim); background: rgba(212,168,67,.06); margin-bottom: 16px; }
 </style>
 </head>
 <body>
@@ -472,6 +501,85 @@ const FIGHTERS = [
     trader_notes:'Highest finishing rate among elite HW contenders. Extremely fast for the weight class — elite cardio is a major edge over aging division. Knee injury history warrants monitoring (suffered during Blaydes fight at UFC 304). Jones unification fight is the market event; currently priced as underdog but skillset gap is smaller than public believes.' },
 ];
 
+// ─── EVENTS ───
+const EVENTS = [
+  { id:1, name:'UFC 314', org:'UFC', date:'2026-02-15', venue:'Moody Center', city:'Austin, TX',
+    card:{
+      main:   {f1:'Islam Makhachev',  f2:'Dustin Poirier',       weight:'Lightweight',   title:true},
+      comain: {f1:'Dricus du Plessis',f2:'Sean Strickland',      weight:'Middleweight',  title:true},
+      prelims:[
+        {f1:'Justin Gaethje',       f2:'Dan Hooker',            weight:'Lightweight'},
+        {f1:'Paddy Pimblett',       f2:'Tony Ferguson',         weight:'Lightweight'},
+        {f1:'Cub Swanson',          f2:'Arnold Allen',          weight:'Featherweight'},
+        {f1:'Brendan Allen',        f2:'Joe Pyfer',             weight:'Middleweight'},
+      ],
+      early_prelims:[
+        {f1:'Aiemann Zahabi',       f2:'Cody Durden',           weight:'Flyweight'},
+      ],
+    }},
+  { id:2, name:'UFC 315', org:'UFC', date:'2026-03-21', venue:'Scotiabank Arena', city:'Toronto, Canada',
+    card:{
+      main:   {f1:'Arman Tsarukyan', f2:'Justin Gaethje',        weight:'Lightweight',   title:true},
+      comain: {f1:'Jack Della Maddalena',f2:'Gilbert Burns',     weight:'Welterweight',  title:false},
+      prelims:[
+        {f1:'Paddy Pimblett',       f2:'Michael Chandler',      weight:'Lightweight'},
+        {f1:"Sean O'Malley",        f2:'Marlon Vera',           weight:'Bantamweight'},
+        {f1:'Kevin Holland',        f2:'Caio Borralho',         weight:'Middleweight'},
+        {f1:'Arnold Allen',         f2:'Lerone Murphy',         weight:'Featherweight'},
+      ],
+      early_prelims:[
+        {f1:'Melsik Baghdasaryan',  f2:'Danny Silva',           weight:'Featherweight'},
+        {f1:'Aiemann Zahabi',       f2:'Jeff Molina',           weight:'Flyweight'},
+      ],
+    }},
+  { id:3, name:'UFC Fight Night', org:'UFC', date:'2026-03-28', venue:'UFC APEX', city:'Las Vegas, NV',
+    card:{
+      main:   {f1:'Charles Oliveira',f2:'Beneil Dariush',        weight:'Lightweight',   title:false},
+      comain: {f1:'Caio Borralho',  f2:'Roman Dolidze',          weight:'Middleweight',  title:false},
+      prelims:[
+        {f1:'Cub Swanson',          f2:'Edson Barboza',         weight:'Featherweight'},
+        {f1:'Kevin Jousset',        f2:'Josh Quinlan',          weight:'Welterweight'},
+        {f1:'Josiane Nunes',        f2:'Ketlen Vieira',         weight:'Bantamweight'},
+      ],
+      early_prelims:[],
+    }},
+  { id:4, name:'UFC 316', org:'UFC', date:'2026-04-18', venue:'Kaseya Center', city:'Miami, FL',
+    card:{
+      main:   {f1:'Merab Dvalishvili',f2:'Umar Nurmagomedov',   weight:'Bantamweight',  title:true},
+      comain: {f1:'Dricus du Plessis',f2:'Paulo Costa',          weight:'Middleweight',  title:true},
+      prelims:[
+        {f1:'Leon Edwards',         f2:'Ian Garry',             weight:'Welterweight'},
+        {f1:'Dustin Poirier',       f2:'Arman Tsarukyan',       weight:'Lightweight'},
+        {f1:'Jiri Prochazka',       f2:'Alex Pereira',          weight:'Light Heavyweight'},
+        {f1:'Bryce Mitchell',       f2:'Movsar Evloev',         weight:'Featherweight'},
+      ],
+      early_prelims:[
+        {f1:'Abus Magomedov',       f2:'Nassourdine Imavov',    weight:'Middleweight'},
+      ],
+    }},
+  { id:5, name:'UFC 317', org:'UFC', date:'2026-06-06', venue:'T-Mobile Arena', city:'Las Vegas, NV',
+    card:{
+      main:   {f1:'Jon Jones',      f2:'Tom Aspinall',           weight:'Heavyweight',   title:true},
+      comain: {f1:'Islam Makhachev',f2:'Charles Oliveira',       weight:'Lightweight',   title:true},
+      prelims:[
+        {f1:"Sean O'Malley",        f2:'Merab Dvalishvili',     weight:'Bantamweight'},
+        {f1:'Belal Muhammad',       f2:'Jack Della Maddalena',  weight:'Welterweight'},
+        {f1:'Paddy Pimblett',       f2:'Beneil Dariush',        weight:'Lightweight'},
+      ],
+      early_prelims:[
+        {f1:'Jamie Pickett',        f2:'Gregory Rodrigues',     weight:'Middleweight'},
+      ],
+    }},
+];
+
+// ─── QUALIFIER COLOR MAPS ───
+const CHIN_COLOR   = { Iron:'var(--green)', Solid:'var(--green)', Questionable:'var(--orange)', 'Stopped Before':'var(--red)' };
+const CARDIO_COLOR = { Elite:'var(--green)', Good:'var(--green)', Average:'var(--text)', Concern:'var(--red)' };
+const CUT_COLOR    = { Minimal:'var(--green)', Moderate:'var(--text)', 'Heavy Cutter':'var(--orange)', 'Drain Risk':'var(--red)' };
+
+// ─── ORG COLORS ───
+const ORG_COLOR = { UFC:'#d95f5f', Bellator:'#5b8dd9', PFL:'#d4804a' };
+
 // ─── UTILS ───
 function mlToImplied(ml) {
   const n = parseInt(ml); if (!n || isNaN(n)) return null;
@@ -535,9 +643,6 @@ function ChecklistPanel({storageKey}) {
 const TABS = ['OVERVIEW','STRIKING','GRAPPLING','PHYSICAL','HISTORY','MARKET'];
 
 function TabOverview({f}) {
-  const chinColor = {Iron:'var(--green)',Solid:'var(--green)',Questionable:'var(--orange)','Stopped Before':'var(--red)'};
-  const cardioColor = {Elite:'var(--green)',Good:'var(--green)',Average:'var(--text)',Concern:'var(--red)'};
-  const cutColor = {Minimal:'var(--green)',Moderate:'var(--text)','Heavy Cutter':'var(--orange)','Drain Risk':'var(--red)'};
   return <div className="anim-fade">
     <div className="sec-label">KEY NUMBERS</div>
     <div className="stat-grid">
@@ -554,9 +659,9 @@ function TabOverview({f}) {
     </div>
     <div className="sec-label">FLAGS</div>
     <div className="stat-grid" style={{gridTemplateColumns:'repeat(auto-fill,minmax(150px,1fr))'}}>
-      <div className="stat-cell"><div className="stat-cell-label">CHIN</div><div style={{fontSize:13,fontWeight:600,color:chinColor[f.chin]||'var(--text)',marginTop:4}}>{f.chin}</div></div>
-      <div className="stat-cell"><div className="stat-cell-label">CARDIO</div><div style={{fontSize:13,fontWeight:600,color:cardioColor[f.cardio]||'var(--text)',marginTop:4}}>{f.cardio}</div></div>
-      <div className="stat-cell"><div className="stat-cell-label">WEIGHT CUT</div><div style={{fontSize:13,fontWeight:600,color:cutColor[f.weight_cut]||'var(--text)',marginTop:4}}>{f.weight_cut}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">CHIN</div><div style={{fontSize:13,fontWeight:600,color:CHIN_COLOR[f.chin]||'var(--text)',marginTop:4}}>{f.chin}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">CARDIO</div><div style={{fontSize:13,fontWeight:600,color:CARDIO_COLOR[f.cardio]||'var(--text)',marginTop:4}}>{f.cardio}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">WEIGHT CUT</div><div style={{fontSize:13,fontWeight:600,color:CUT_COLOR[f.weight_cut]||'var(--text)',marginTop:4}}>{f.weight_cut}</div></div>
     </div>
     <div className="sec-label">TRADER NOTES</div>
     <div style={{background:'var(--surface)',padding:'14px',fontSize:'13px',lineHeight:1.7,color:'var(--text)',borderLeft:'2px solid var(--accent-dim)'}}>{f.trader_notes}</div>
@@ -625,9 +730,6 @@ function TabGrappling({f}) {
 }
 
 function TabPhysical({f}) {
-  const chinColor={Iron:'var(--green)',Solid:'var(--green)',Questionable:'var(--orange)','Stopped Before':'var(--red)'};
-  const cardioColor={Elite:'var(--green)',Good:'var(--green)',Average:'var(--text)',Concern:'var(--red)'};
-  const cutColor={Minimal:'var(--green)',Moderate:'var(--text)','Heavy Cutter':'var(--orange)','Drain Risk':'var(--red)'};
   return <div className="anim-fade">
     <div className="sec-label">PHYSICAL ATTRIBUTES</div>
     <div className="stat-grid">
@@ -638,9 +740,9 @@ function TabPhysical({f}) {
     <div className="stat-cell" style={{marginBottom:20}}><div className="stat-cell-label">CAMP / GYM</div><div style={{fontSize:13,color:'var(--text)',marginTop:4}}>{f.camp}</div></div>
     <div className="sec-label">DURABILITY FLAGS</div>
     <div className="stat-grid" style={{gridTemplateColumns:'repeat(auto-fill,minmax(150px,1fr))'}}>
-      <div className="stat-cell"><div className="stat-cell-label">CHIN RATING</div><div style={{fontSize:13,fontWeight:600,color:chinColor[f.chin]||'var(--text)',marginTop:4}}>{f.chin}</div></div>
-      <div className="stat-cell"><div className="stat-cell-label">CARDIO RATING</div><div style={{fontSize:13,fontWeight:600,color:cardioColor[f.cardio]||'var(--text)',marginTop:4}}>{f.cardio}</div></div>
-      <div className="stat-cell"><div className="stat-cell-label">WEIGHT CUT</div><div style={{fontSize:13,fontWeight:600,color:cutColor[f.weight_cut]||'var(--text)',marginTop:4}}>{f.weight_cut}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">CHIN RATING</div><div style={{fontSize:13,fontWeight:600,color:CHIN_COLOR[f.chin]||'var(--text)',marginTop:4}}>{f.chin}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">CARDIO RATING</div><div style={{fontSize:13,fontWeight:600,color:CARDIO_COLOR[f.cardio]||'var(--text)',marginTop:4}}>{f.cardio}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">WEIGHT CUT</div><div style={{fontSize:13,fontWeight:600,color:CUT_COLOR[f.weight_cut]||'var(--text)',marginTop:4}}>{f.weight_cut}</div></div>
     </div>
     <div className="sec-label">LOSS METHOD BREAKDOWN</div>
     <div className="stat-grid" style={{gridTemplateColumns:'repeat(3,1fr)'}}>
@@ -716,10 +818,10 @@ function TabMarket({f}) {
 }
 
 // ─── FIGHTER SCREEN ───
-function FighterScreen({onBack}) {
+function FighterScreen({onBack, initialFighter}) {
   const [search,setSearch]=useState('');
   const [wf,setWf]=useState('ALL');
-  const [sel,setSel]=useState(FIGHTERS[0]);
+  const [sel,setSel]=useState(initialFighter||FIGHTERS[0]);
   const [tab,setTab]=useState('OVERVIEW');
   const weights=['ALL',...new Set(FIGHTERS.map(f=>f.weight))];
   const filtered=useMemo(()=>FIGHTERS.filter(f=>{
@@ -882,6 +984,144 @@ function CompareScreen({onBack}) {
   );
 }
 
+// ─── FIGHTER NAME LINK ───
+// Resolves a fighter name to a clickable profile link if they exist in the roster.
+function FighterName({name, onGoFighter}) {
+  const f = FIGHTERS.find(f => f.name === name);
+  if (f) return <span className="fighter-link" onClick={() => onGoFighter(f)}>{name}</span>;
+  return <span>{name}</span>;
+}
+
+// ─── CALENDAR SCREEN ───
+function CalendarScreen({onBack, onGoFighter}) {
+  const today = useMemo(()=>{ const d=new Date(); d.setHours(0,0,0,0); return d; },[]);
+  const sorted = useMemo(()=>[...EVENTS].sort((a,b)=>new Date(a.date)-new Date(b.date)),[]);
+  const firstUpcoming = sorted.find(e=>new Date(e.date)>=today);
+  const [selId,setSelId] = useState((firstUpcoming||sorted[0]).id);
+  const [orgFilter,setOrgFilter] = useState('ALL');
+  const sel = EVENTS.find(e=>e.id===selId);
+  const orgs = ['ALL',...new Set(EVENTS.map(e=>e.org))];
+  const filtered = sorted.filter(e=>orgFilter==='ALL'||e.org===orgFilter);
+
+  function isPast(dateStr){ return new Date(dateStr)<today; }
+  function daysUntil(dateStr){ return Math.round((new Date(dateStr)-today)/(1000*60*60*24)); }
+  function countdown(dateStr){
+    const d=daysUntil(dateStr);
+    if(d<0) return 'PAST'; if(d===0) return 'TODAY'; if(d===1) return '1D';
+    return d+'D';
+  }
+  function fmtDate(dateStr){
+    return new Date(dateStr+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+  }
+
+  return (
+    <div className="app">
+      <div className="topbar">
+        <span className="topbar-logo">AUDWIHR</span><span className="topbar-sep">/</span>
+        <span className="topbar-section">CALENDAR</span>
+        <div className="topbar-right"><button className="topbar-back" onClick={onBack}>← MENU</button></div>
+      </div>
+      <div className="main-layout">
+        <div className="sidebar">
+          <div className="sidebar-header">EVENTS — {filtered.length}</div>
+          <div className="sidebar-filters">
+            {orgs.map(o=><button key={o} className={`filter-chip ${orgFilter===o?'on':''}`} onClick={()=>setOrgFilter(o)}>{o}</button>)}
+          </div>
+          <div className="sidebar-list">
+            {filtered.map(e=>{
+              const past=isPast(e.date);
+              const d=daysUntil(e.date);
+              const cdColor=past?'var(--text-dim)':d<=7?'var(--accent)':'var(--green)';
+              return (
+                <div key={e.id} className={`sidebar-fighter${sel?.id===e.id?' active':''}${past?' past-event':''}`} onClick={()=>setSelId(e.id)}>
+                  <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:3}}>
+                    <span className="sf-name">{e.name}</span>
+                    <span className="cal-countdown" style={{color:cdColor}}>{countdown(e.date)}</span>
+                  </div>
+                  <div className="sf-meta">
+                    <span className="org-badge" style={{background:ORG_COLOR[e.org]||'#444'}}>{e.org}</span>
+                    {' '}{fmtDate(e.date)}
+                  </div>
+                  <div className="cal-event-main-preview">{e.card.main.f1} vs {e.card.main.f2}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="fighter-area">
+          {sel && (
+            <div className="anim-fade" style={{display:'flex',flexDirection:'column',height:'100%'}}>
+              <div className="cal-event-header">
+                <div>
+                  <div style={{display:'flex',alignItems:'center'}}>
+                    <span className="org-badge" style={{background:ORG_COLOR[sel.org]||'#444'}}>{sel.org}</span>
+                    <span className="cal-event-title">{sel.name}</span>
+                  </div>
+                  <div className="cal-event-meta">{fmtDate(sel.date)} · {sel.venue} · {sel.city}</div>
+                </div>
+                <div>
+                  <div className="cal-countdown-big" style={{color:isPast(sel.date)?'var(--text-dim)':daysUntil(sel.date)<=7?'var(--accent)':'var(--green)'}}>{countdown(sel.date)}</div>
+                  <div className="cal-countdown-label">{isPast(sel.date)?'COMPLETED':'DAYS UNTIL EVENT'}</div>
+                </div>
+              </div>
+
+              <div className="tab-content">
+                <div className="sec-label">MAIN EVENT{sel.card.main.title?' — TITLE FIGHT':''}</div>
+                <div className="cal-main-bout">
+                  <div className="cmb-side">
+                    <div className="cmb-fighter-name"><FighterName name={sel.card.main.f1} onGoFighter={onGoFighter}/></div>
+                    <div className="cmb-weight-tag">{sel.card.main.weight.toUpperCase()}</div>
+                  </div>
+                  <div className="cmb-vs">VS</div>
+                  <div className="cmb-side right">
+                    <div className="cmb-fighter-name"><FighterName name={sel.card.main.f2} onGoFighter={onGoFighter}/></div>
+                    <div className="cmb-weight-tag">{sel.card.main.weight.toUpperCase()}</div>
+                  </div>
+                </div>
+                {sel.card.main.title && <div className="cal-title-banner">TITLE FIGHT — {sel.card.main.weight.toUpperCase()} CHAMPIONSHIP</div>}
+
+                <div className="sec-label">CO-MAIN EVENT{sel.card.comain.title?' — TITLE FIGHT':''}</div>
+                <div className="cal-bout">
+                  <span className="cal-bout-name"><FighterName name={sel.card.comain.f1} onGoFighter={onGoFighter}/></span>
+                  <span className="cal-bout-vs">vs</span>
+                  <span className="cal-bout-name"><FighterName name={sel.card.comain.f2} onGoFighter={onGoFighter}/></span>
+                  <span className="cal-bout-weight">{sel.card.comain.weight.toUpperCase()}</span>
+                </div>
+                {sel.card.comain.title && <div className="cal-title-banner" style={{marginTop:-1}}>TITLE FIGHT — {sel.card.comain.weight.toUpperCase()} CHAMPIONSHIP</div>}
+
+                {sel.card.prelims.length>0 && <>
+                  <div className="sec-label">PRELIMS</div>
+                  {sel.card.prelims.map((b,i)=>(
+                    <div className="cal-bout" key={i}>
+                      <span className="cal-bout-name"><FighterName name={b.f1} onGoFighter={onGoFighter}/></span>
+                      <span className="cal-bout-vs">vs</span>
+                      <span className="cal-bout-name"><FighterName name={b.f2} onGoFighter={onGoFighter}/></span>
+                      <span className="cal-bout-weight">{b.weight.toUpperCase()}</span>
+                    </div>
+                  ))}
+                </>}
+
+                {sel.card.early_prelims.length>0 && <>
+                  <div className="sec-label">EARLY PRELIMS</div>
+                  {sel.card.early_prelims.map((b,i)=>(
+                    <div className="cal-bout" key={i}>
+                      <span className="cal-bout-name"><FighterName name={b.f1} onGoFighter={onGoFighter}/></span>
+                      <span className="cal-bout-vs">vs</span>
+                      <span className="cal-bout-name"><FighterName name={b.f2} onGoFighter={onGoFighter}/></span>
+                      <span className="cal-bout-weight">{b.weight.toUpperCase()}</span>
+                    </div>
+                  ))}
+                </>}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── COMING SOON ───
 function ComingSoon({label,onBack}) {
   return (
@@ -905,7 +1145,7 @@ function MenuScreen({onSelect}) {
   const items=[
     {id:'fighters',label:'FIGHTERS',      badge:'ACTIVE', active:true},
     {id:'compare', label:'COMPARE',       badge:'ACTIVE', active:true},
-    {id:'calendar',label:'FIGHT CALENDAR',badge:'PHASE 3',active:false},
+    {id:'calendar',label:'FIGHT CALENDAR',badge:'ACTIVE', active:true},
     {id:'markets', label:'MARKETS',       badge:'PHASE 4',active:false},
     {id:'news',    label:'FIGHTER NEWS',  badge:'PHASE 5',active:false},
   ];
@@ -913,7 +1153,7 @@ function MenuScreen({onSelect}) {
     <div className="app">
       <div className="topbar">
         <span className="topbar-logo">AUDWIHR // MMA TRADER</span>
-        <div className="topbar-right"><span style={{fontFamily:'var(--mono)',fontSize:10,color:'var(--text-dim)',letterSpacing:'.08em'}}>v0.2.0 — MOCK DATA</span></div>
+        <div className="topbar-right"><span style={{fontFamily:'var(--mono)',fontSize:10,color:'var(--text-dim)',letterSpacing:'.08em'}}>v0.3.0 — MOCK DATA</span></div>
       </div>
       <div className="menu-screen">
         <div className="menu-wordmark">AUDWIHR</div>
@@ -935,11 +1175,14 @@ function MenuScreen({onSelect}) {
 // ─── ROOT ───
 function App() {
   const [screen,setScreen]=useState('menu');
-  if(screen==='fighters') return <FighterScreen onBack={()=>setScreen('menu')}/>;
-  if(screen==='compare')  return <CompareScreen onBack={()=>setScreen('menu')}/>;
-  if(screen==='calendar') return <ComingSoon label="FIGHT CALENDAR" onBack={()=>setScreen('menu')}/>;
-  if(screen==='markets')  return <ComingSoon label="MARKETS" onBack={()=>setScreen('menu')}/>;
-  if(screen==='news')     return <ComingSoon label="FIGHTER NEWS" onBack={()=>setScreen('menu')}/>;
+  const [deepFighter,setDeepFighter]=useState(null);
+  function goFighter(f){ setDeepFighter(f); setScreen('fighters'); }
+  function backToMenu(){ setDeepFighter(null); setScreen('menu'); }
+  if(screen==='fighters') return <FighterScreen onBack={backToMenu} initialFighter={deepFighter}/>;
+  if(screen==='compare')  return <CompareScreen onBack={backToMenu}/>;
+  if(screen==='calendar') return <CalendarScreen onBack={backToMenu} onGoFighter={goFighter}/>;
+  if(screen==='markets')  return <ComingSoon label="MARKETS" onBack={backToMenu}/>;
+  if(screen==='news')     return <ComingSoon label="FIGHTER NEWS" onBack={backToMenu}/>;
   return <MenuScreen onSelect={setScreen}/>;
 }
 ReactDOM.createRoot(document.getElementById('root')).render(<App/>);

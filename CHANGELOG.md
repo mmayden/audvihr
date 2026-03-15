@@ -4,6 +4,62 @@ All notable changes to this project. Format: [version] — date — description.
 
 ---
 
+## [0.4.0] — 2026-03-15
+
+### Added
+- `MarketsScreen` — full prediction market dashboard with filter bar and sorted market list
+- `src/data/markets.js` — 8 mock markets across UFC 315, Fight Night, UFC 316, UFC 317
+- `src/hooks/useWatchlist.js` — localStorage-persisted watchlist by market ID
+- Moneyline + implied probability display per platform per fighter
+- Cross-platform arbitrage detection: best-of implied sum < 100% triggers ⚡ ARB ALERT
+- Method props per fight (KO/TKO, Submission, Decision odds)
+- Filter by platform (Polymarket / Kalshi / Novig), title fights only, watchlist only
+- Sort by closing date, total volume, or event date (cycling toggle)
+- Platform color badges: Polymarket (blue), Kalshi (green), Novig (purple)
+- Markets menu item activated (badge: ACTIVE), version bumped to v0.4.0 in menu
+
+### Testing & Tooling
+- Vitest 4.1.0 test suite: 32 tests across 5 files, all passing
+- ESLint 9 flat config (`eslint.config.js`) — 0 errors on `npm run lint`
+- `src/test/setup.js` — in-memory localStorage mock fixes jsdom environment issue
+- Test coverage: odds utils (7), StatBar (5), FighterName (4), useLocalStorage (6), useWatchlist (5)
+- Testing standards documented in CLAUDE.md
+
+---
+
+## [Unreleased] — Phase 3 + Phase 3a
+
+### Added — Phase 3 (Fight Calendar)
+- Fight Calendar screen with full card breakdowns (main event, co-main, prelims, early prelims)
+- Static EVENTS data model: 5 events across UFC 314–317 + Fight Night
+- Countdown display per event (days until / PAST / TODAY)
+- Promotion filter (UFC / Bellator / PFL)
+- Fighter name links from calendar → fighter profile (deep navigation)
+- Past event styling (dimmed, labeled PAST)
+
+### Added — Phase 3a (Vite Migration)
+- Full Vite + React project structure (`package.json`, `vite.config.js`, `index.html`)
+- `src/` split into `constants/`, `data/`, `hooks/`, `utils/`, `components/`, `tabs/`, `screens/`
+- All 14 components extracted as named exports with JSDoc headers
+- Data files with schema comments (`fighters.js`, `events.js`)
+- `useLS` renamed to `useLocalStorage` throughout
+- `SBar` renamed to `StatBar` throughout
+- Security meta tags in `index.html` (`noindex`, `theme-color`, `description`)
+- App runs in React StrictMode
+- Build output (`dist/`) deployable to GitHub Pages, Netlify, or Vercel
+- `netlify.toml` and `vercel.json` with full security header suite (CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy)
+- Upgraded to Vite 6.4.1 + @vitejs/plugin-react 4.7.0 — resolves esbuild CVE GHSA-67mh-4wv8-2f99 (0 vulnerabilities)
+
+### Fixed — Phase 3
+- `FighterName` extracted from inside `CalendarScreen` (nested component = remounts on every render)
+- Duplicate qualifier color maps removed from `TabOverview` and `TabPhysical` — now shared constants in `src/constants/qualifiers.js`
+
+### Project Standards Established
+- Security model documented in PLANNING.md (SRI, CSP plan, supply chain risks)
+- CLAUDE.md rewritten with enforced standards for all future sessions: security, code quality, documentation, modular design
+
+---
+
 ## [0.3.0] — 2026-03-10
 
 ### Added
