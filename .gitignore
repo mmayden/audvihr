@@ -1,3 +1,6 @@
+# ── Scraper cache (build-time data fetcher output, not committed) ─────────────
+*.raw.json
+
 # ── Draft / scratch files ─────────────────────────────────────────────────────
 *.zip
 *.bak

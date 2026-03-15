@@ -10,10 +10,32 @@
 
 ## Current Sprint
 
-**Branch:** `feature/phase-5-news`
-**Goal:** Fighter News Feed — manual curated news items linked to fighter profiles
+**Branch:** `feature/phase-6-live-data`
+**Goal:** Live Data Layer — UFCStats build-time scraper replaces all hand-authored fighter/event data
 
-### Phase 5 — Fighter News Feed
+### Phase 6 — Live Data Layer
+- [x] `scripts/fighter-seed.json` — 14 fighters with editorial fields + `ufcstats_url`
+- [x] Discover and verify all 14 UFCStats fighter URLs (letter-browse + event page scraping)
+- [x] `scripts/fetch-data.js` — UFCStats scraper (Node ESM, cheerio, native fetch)
+  - [x] Fighter stats: record, age, height, reach, stance, SLpM, str_acc, sapm, str_def, TD/15, TD acc, TD def, sub/15
+  - [x] Derived stats: streak, finishes (ko/sub/dec), losses_by, finish_rate
+  - [x] Fight history: result, opponent, method, round, event, year
+  - [x] Cache layer: `*.raw.json` per fighter, `--fresh` flag to bypass
+  - [x] Validation: all required fields checked; non-zero exit on error in CI mode
+  - [x] `--dry-run`, `--ci`, `--fresh` CLI flags
+- [x] `npm run fetch-data` / `fetch-data:dry` / `fetch-data:fresh` / `prebuild` scripts
+- [x] `cheerio ^1.2.0` devDependency
+- [x] `.env.example` committed with `VITE_ODDS_API_KEY` placeholder
+- [x] `*.raw.json` gitignored (scraper cache)
+- [x] `src/data/fighters.js` generated with live data — 14/14 verified correct
+- [x] ESLint clean (0 errors)
+- [x] All 32 tests passing
+- [x] Version bumped to v0.6.0, menu badge updated to `LIVE DATA`
+- [ ] Commit and merge to `master`, tag v0.6.0
+
+---
+
+### ✅ Phase 5 — Fighter News Feed (v0.5.0) — complete
 - [x] Design NEWS data model (id, date, fighter_id, category, headline, body, source, relevance)
 - [x] `src/data/news.js` with full schema comment and 12 mock items
 - [x] `src/screens/NewsScreen.jsx` — sorted news list with fighter links
@@ -25,7 +47,7 @@
 - [x] `npm run build` passes — 66 kB gzipped
 - [x] ESLint clean (0 errors, 0 warnings)
 - [x] Smoke test: filters work, fighter link navigates correctly
-- [ ] Commit and merge to `main`, tag v0.5.0
+- [x] Commit and merge to `master`, tag v0.5.0
 
 ---
 
@@ -85,13 +107,15 @@
 ### ✅ Phase 5 — Fighter News Feed (v0.5.0)
 - 12 mock news items, category + fighter filters, relevance signal, fighter deep links
 
-### 🔲 Phase 6 — Live Data Layer
+### ✅ Phase 6 — Live Data Layer (v0.6.0)
 **Branch:** `feature/phase-6-live-data`
 
-- UFCStats scraper or SportRadar API integration
-- Fighter stats auto-populated and updated
-- Fight history pulled automatically
-- Remove all mock data; FIGHTERS array becomes an API response shape
+- UFCStats build-time scraper (cheerio, native fetch) — no API key required
+- Fighter stats auto-populated from live UFCStats pages at build time
+- Fight history parsed from full career records
+- `scripts/fighter-seed.json` provides editorial fields scraper can't source
+- `prebuild` hook: scraper runs automatically before every `npm run build`
+- Cache layer for incremental rebuilds; `--fresh` flag for full refresh
 
 ---
 
