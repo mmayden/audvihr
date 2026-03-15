@@ -10,12 +10,12 @@
 
 ## Current Sprint
 
-**Branch:** `feature/phase-7-live-odds` (built, pending merge to master + tag v0.7.0)
-**Status:** All must-haves complete. Smoke test, then merge. Should-haves to follow.
+**Branch:** `feature/phase-7-should-haves`
+**Status:** Phase 7 must-haves merged + tagged v0.7.0. Working through should-haves.
 
 ---
 
-### ✅ Phase 7 — Live Odds + Market Intelligence (v0.7.0) — complete
+### ✅ Phase 7 — Live Odds + Market Intelligence (v0.7.0) — merged to master
 
 **Must Have — done:**
 - [x] Cut branch `feature/phase-7-live-odds`
@@ -35,9 +35,9 @@
 - [x] `VITE_KALSHI_API_KEY` in `.env.example`; CSP updated in `netlify.toml` + `vercel.json`
 - [x] 142 tests, 0 lint errors, `npm run build` passes (71 kB gzipped)
 - [x] `MenuScreen` version badge → `v0.7.0 — LIVE ODDS`
-- [ ] Merge to `master`, tag v0.7.0
+- [x] Merge to `master`, tag v0.7.0
 
-### Phase 7 — Should Have (next)
+### Phase 7 — Should Have (active)
 
 - [ ] Move compare stat rows to `src/constants/compareRows.js` (config-driven, zero behavior change)
 - [ ] Add `opp_quality` field to fight history entries in `scripts/fighter-seed.json` (elite / contender / gatekeeper / unknown)
