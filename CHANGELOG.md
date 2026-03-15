@@ -6,6 +6,11 @@ All notable changes to this project. Format: [version] — date — description.
 
 ## [Unreleased]
 
+### Code Quality
+- `qualifiers.js`: `ORG_COLOR` hex values replaced with CSS variables (`var(--red)`, `var(--blue)`, `var(--orange)`)
+- `checklist.js`: `cc` field hex colors replaced with CSS variables (`var(--accent)`, `var(--green)`, `var(--purple)`, `var(--red)`, `var(--blue)`)
+- `CalendarScreen`: `'#444'` fallback on `ORG_COLOR` badge replaced with `var(--border2)`
+
 ---
 
 ## [0.6.0] — 2026-03-15

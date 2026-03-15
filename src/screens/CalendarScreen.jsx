@@ -69,7 +69,7 @@ export function CalendarScreen({onBack, onGoFighter}) {
                     <span className="cal-countdown" style={{color:cdColor}}>{countdown(e.date, today)}</span>
                   </div>
                   <div className="sf-meta">
-                    <span className="org-badge" style={{background:ORG_COLOR[e.org]||'#444'}}>{e.org}</span>
+                    <span className="org-badge" style={{background:ORG_COLOR[e.org]||'var(--border2)'}}>{e.org}</span>
                     {' '}{fmtDate(e.date)}
                   </div>
                   <div className="cal-event-main-preview">{e.card.main.f1} vs {e.card.main.f2}</div>
@@ -85,7 +85,7 @@ export function CalendarScreen({onBack, onGoFighter}) {
               <div className="cal-event-header">
                 <div>
                   <div style={{display:'flex',alignItems:'center'}}>
-                    <span className="org-badge" style={{background:ORG_COLOR[sel.org]||'#444'}}>{sel.org}</span>
+                    <span className="org-badge" style={{background:ORG_COLOR[sel.org]||'var(--border2)'}}>{sel.org}</span>
                     <span className="cal-event-title">{sel.name}</span>
                   </div>
                   <div className="cal-event-meta">{fmtDate(sel.date)} · {sel.venue} · {sel.city}</div>
