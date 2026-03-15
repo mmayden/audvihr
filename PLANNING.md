@@ -19,7 +19,7 @@ This document is the primary reference for Claude and the developer during long-
 
 ---
 
-## Current File Structure (Vite + React — v0.6.0)
+## Current File Structure (Vite + React — v0.6.1)
 
 The single-file prototype (`mma-trader.html`) was retired at Phase 3a. The project is now a Vite + React app with the following modular layout:
 
@@ -45,11 +45,13 @@ src/
 │   ├── useLocalStorage.js    useLocalStorage — JSON-serialised state with try/catch
 │   └── useWatchlist.js       useWatchlist — watchlist set over useLocalStorage (Phase 4)
 ├── utils/
-│   └── odds.js               mlToImplied(), lineMovement()
+│   ├── odds.js               mlToImplied(), lineMovement()
+│   └── date.js               daysUntil(), isPast() — shared date helpers
 ├── components/
 │   ├── StatBar.jsx           Horizontal proportional fill bar
 │   ├── FighterName.jsx       Name → profile link resolver (calendar + news)
-│   └── ChecklistPanel.jsx    17-item trade checklist with progress bar
+│   ├── ChecklistPanel.jsx    17-item trade checklist with progress bar
+│   └── ErrorBoundary.jsx     Class component error boundary wrapping all screens
 ├── tabs/
 │   ├── TabOverview.jsx       Key numbers, flags, trader notes
 │   ├── TabStriking.jsx       Striking volume, accuracy, knockdowns, position
@@ -310,7 +312,7 @@ Permissions-Policy: geolocation=(), camera=(), microphone=()
 
 **`npm audit` policy:** Run before every merge to `main`. Block on critical/high severity. Document accepted moderate findings in the decisions log below.
 
-**Phase 6 API surface (future):** When live data is introduced, all external API calls must use server-side proxying or be made to APIs that support CORS explicitly. Do not expose API keys in client-side code.
+**Phase 7 API surface:** The Odds API (`https://api.the-odds-api.com`) will be added via `useOdds` hook. Key in `VITE_ODDS_API_KEY` (`.env`, gitignored). Add `connect-src https://api.the-odds-api.com` to CSP when implementing. Cache response in `sessionStorage` to respect the 500 req/month free tier. Degrade silently to manual entry if key is absent or quota is exceeded.
 
 ---
 
@@ -350,3 +352,6 @@ Permissions-Policy: geolocation=(), camera=(), microphone=()
 | Phase 6 | `ufcstats_url` stored in seed file | UFCStats search endpoint returns all fighters alphabetically (not filtered). Direct URL per fighter is the only reliable lookup strategy. |
 | Phase 6 | Hybrid seed + scrape data model | UFCStats provides career stats, record, history. Seed provides: archetype, mods, chin, cardio, weight_cut, camp, country, extended striking/grappling breakdowns, trader_notes. Separation of concerns: live source vs editorial judgment. |
 | Phase 6 | `prebuild` npm hook runs scraper | Guarantees `fighters.js` and `events.js` are fresh before every `npm run build` in CI. Local dev can use cached `.raw.json` files (500ms per-fighter delay only on cache miss). |
+| v0.6.1 | `date.js` extracted from CalendarScreen / MarketsScreen | `daysUntil` and `isPast` were duplicated across two screens. Extracted to `src/utils/date.js` as shared utilities; 6 tests added. |
+| v0.6.1 | `ErrorBoundary.jsx` added | Class component error boundary wraps all screens in `App.jsx`. A single screen crash no longer takes down the full app. Includes RETRY button. |
+| v0.6.1 | CompareScreen `hi` property bug fixed | Row property `hi: true/false` was silently ignored (line 75 reads `r.higherIsBetter`). All rows now use `higherIsBetter` consistently. Win/lose highlights now correct for Win Streak, SLpM, Str Absorbed rows. |
