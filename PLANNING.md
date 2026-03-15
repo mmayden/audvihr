@@ -312,7 +312,12 @@ Permissions-Policy: geolocation=(), camera=(), microphone=()
 
 **`npm audit` policy:** Run before every merge to `main`. Block on critical/high severity. Document accepted moderate findings in the decisions log below.
 
-**Phase 7 API surface:** The Odds API (`https://api.the-odds-api.com`) will be added via `useOdds` hook. Key in `VITE_ODDS_API_KEY` (`.env`, gitignored). Add `connect-src https://api.the-odds-api.com` to CSP when implementing. Cache response in `sessionStorage` to respect the 500 req/month free tier. Degrade silently to manual entry if key is absent or quota is exceeded.
+**Phase 7 API surfaces (three hooks):**
+- **The Odds API** (`https://api.the-odds-api.com`) via `useOdds` — sportsbook moneylines. Key in `VITE_ODDS_API_KEY`. Cache in `sessionStorage`. 500 req/month free tier. Degrade silently.
+- **Polymarket CLOB API** (`https://clob.polymarket.com`) via `usePolymarket` — no auth for reads. Fetch current prices + `/prices-history` for probability movement charts. Cache current prices in `sessionStorage`; persist snapshots for CLV to `localStorage`.
+- **Kalshi REST API** (`https://trading-api.kalshi.com`) via `useKalshi` — key in `VITE_KALSHI_API_KEY`. Fetch current + historical market prices. Degrade silently if key absent.
+
+Add `connect-src` entries for all three domains to CSP in `netlify.toml` and `vercel.json` at Phase 7.
 
 ---
 
@@ -327,6 +332,61 @@ Permissions-Policy: geolocation=(), camera=(), microphone=()
 - **RLM (Reverse Line Movement)** = key sharp signal
 - **Weight regain after weigh-in** correlates with winner status
 - **Judging hierarchy:** Effective striking → Effective aggressiveness → Octagon control
+- **Community workflow (r/MMAbetting, 2026):** Minimum 4–5 tabs to research one fight — UFCStats, BestFightOdds, Tapology, sportsbook tabs, Polymarket. Audwihr's entire existence is justified by this single pain point.
+- **Editorial layer > raw stats:** Community consistently notes that archetype and qualitative flags (chin, cardio, cut) capture information that UFCStats numbers alone cannot. Unique to Audwihr.
+- **CLV for prediction markets is untracked:** No tool stores Polymarket/Kalshi closing prices for MMA. Bettors manually screenshot prices. Snapshot + history fetch creates the first personal prediction-market CLV log for MMA.
+
+---
+
+## Competitive Landscape (March 2026)
+
+### Key Platforms
+
+| Tool | Strength | Gap |
+|---|---|---|
+| BestFightOdds | Sportsbook line history, consensus view | No prediction markets, no notes, no fighter analytics, decade-old UI |
+| UFCStats | Authoritative stats, every round | No comparison, no odds, no trend data, unusable mobile |
+| Tapology | Community pick % (useful as fade signal), event layout | No odds, shallow stats, aggressive ads |
+| OddsJam | Sportsbook arb/EV scanner | No prediction markets, expensive, MMA secondary, no research layer |
+| Polymarket | UFC prediction markets; `/prices-history` CLOB endpoint; TKO/UFC deal | Zero fighter context, no cross-platform view |
+| Kalshi | CFTC-regulated; full historical API; added "Predictive Insights" | Zero fighter context, no cross-platform view |
+| Oddible (2026) | Multi-sport odds + Kalshi sync + CLV tracking + basic stats | Broad/shallow, no archetypes, no checklist, no fighter depth — a tracker, not a research OS |
+
+### Audwihr's Unoccupied Intersection
+
+```
+Deep Fighter Analytics  +  Multi-Source Market Intelligence (sportsbook + prediction markets)
+  +  Historical Price Charts  +  Personal Research Workflow  +  Editorial Archetype Layer
+```
+
+As of March 2026, this intersection remains empty. The Oddible launch validates the market is moving toward prediction market aggregation but confirms no one has combined it with deep fighter analytics and a structured research workflow.
+
+### New API Capabilities (Phase 7 unlocks)
+
+**Polymarket CLOB API `/prices-history`**
+Now live. Returns price history at configurable intervals or custom timestamp ranges. No authentication required for reads. Enables real probability movement charts. Market slug maps to fight.
+
+**Kalshi historical market endpoints**
+Full historical market price data via REST API. Free API key required. Same chart capability as Polymarket history.
+
+**Tapology community % (quasi-public endpoint)**
+Tapology's community pick aggregate % is accessible. Useful as a "public money" column — showing recreational consensus alongside sharp market prices lets users identify and fade inflated public lines.
+
+---
+
+## Edge Score Architecture
+
+A simple client-side "edge score" per matchup — no ML, no backend. Weighted rules derived entirely from existing seed data and market data. Surfaces in CompareScreen and fighter Market tab.
+
+**Inputs:**
+- Archetype mismatch severity (e.g., WRESTLER vs COUNTER STRIKER → high mismatch)
+- Market discrepancy (sportsbook implied % vs Polymarket implied % — divergence = potential edge)
+- Qualitative flag count (chin risk + cardio concern + heavy cut = elevated risk multiplier)
+- Public money skew (Tapology % vs market implied — if rec crowd is heavy on one side, fade signal)
+
+**Output:** A single score (0–100) or directional signal per fighter in the matchup. Not a pick — a research prompt. "This matchup has high edge potential — review RISK checklist items."
+
+**Why rules-based, not ML:** The seed data is editorial, not large enough for training. Rule transparency matters — a sharp needs to understand *why* the score is what it is, not trust a black box. Rules are auditable, explainable, and adjustable per fight.
 
 ---
 
@@ -355,3 +415,10 @@ Permissions-Policy: geolocation=(), camera=(), microphone=()
 | v0.6.1 | `date.js` extracted from CalendarScreen / MarketsScreen | `daysUntil` and `isPast` were duplicated across two screens. Extracted to `src/utils/date.js` as shared utilities; 6 tests added. |
 | v0.6.1 | `ErrorBoundary.jsx` added | Class component error boundary wraps all screens in `App.jsx`. A single screen crash no longer takes down the full app. Includes RETRY button. |
 | v0.6.1 | CompareScreen `hi` property bug fixed | Row property `hi: true/false` was silently ignored (line 75 reads `r.higherIsBetter`). All rows now use `higherIsBetter` consistently. Win/lose highlights now correct for Win Streak, SLpM, Str Absorbed rows. |
+| 2026-03-15 | Phase 7 scope expanded to three APIs | Original plan was The Odds API only. Grok analysis + community sentiment confirmed that the unique differentiator requires sportsbook + Polymarket + Kalshi in one unified view. No existing tool does this. Polymarket CLOB `/prices-history` endpoint (now live, no auth) enables probability movement charts — changes the ceiling of what Phase 7 can deliver. |
+| 2026-03-15 | CLV tracking added to Phase 7 scope | Polymarket/Kalshi CLV tracking is entirely unserved. Community bettors screenshot prices manually. Price snapshots via localStorage (existing infrastructure) + API history fetch = first personal prediction-market CLV log for MMA. Low-code, high-value. |
+| 2026-03-15 | "Archetype unknown" fallback required for Phase 7 | The Odds API will return fights with fighters not in the 14-fighter seed. Must render a stub profile (stats only, no editorial layer) rather than crashing. Prevents roster constraint from breaking the markets screen. |
+| 2026-03-15 | Edge score deferred to Phase 7 "should have" | Weighted rules-based score (archetype mismatch + market discrepancy + flag count). No ML. Inputs are all available from existing seed data. Valuable but not core to the "oh shit" unlock — which is the unified market view + price history charts. |
+| 2026-03-15 | Oddible (2026 competitor) assessed, no threat to core position | Oddible is a multi-sport odds tracker with CLV and Kalshi sync. Lacks deep fighter profiles, archetypes, qualitative flags, trade checklist. Different product category (tracker vs research OS). Validates the market direction but does not occupy the Audwihr intersection. |
+| 2026-03-15 | App stays personal-only through Phase 7 | No URL routing, no shareable links, noindex tag stays. Personal lean = faster velocity. React Router deferred to Phase 8+ pending a deliberate decision on whether sharing is ever in scope. |
+| 2026-03-15 | Pre-fight focus only through Phase 7 | Live round-by-round data is expensive, requires official data partner (Sportradar/SportsDataIO), and is a different product category. Post-fight review requires historical result storage. Both deferred indefinitely. |

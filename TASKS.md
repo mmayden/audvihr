@@ -119,43 +119,82 @@
 
 ---
 
-## 🔲 Phase 7 — Live Odds Integration
+## 🔲 Phase 7 — Live Odds + Market Intelligence
 
 **Branch:** `feature/phase-7-live-odds` (not yet cut)
-**API:** The Odds API — `VITE_ODDS_API_KEY` placeholder already in `.env.example`
-**Free tier:** 500 requests/month
+**Scope revision:** Expanded from The Odds API only → full three-API unified market view + historical price charts + personal CLV log. See BRAINSTORMING.md §8 for full rationale.
 
-### Planned tasks
-- [ ] Cut branch `feature/phase-7-live-odds`
-- [ ] `src/hooks/useOdds.js` — fetch + cache odds from The Odds API at session start
-- [ ] Display live moneylines in TabMarket (supplement manual entry, not replace)
-- [ ] Inject live lines into MarketsScreen alongside Polymarket/Kalshi/Novig rows
-- [ ] Rate-limit guard: cache response in sessionStorage, one fetch per session
-- [ ] Graceful degradation: if key missing or quota exceeded, fall back to manual entry silently
-- [ ] `VITE_ODDS_API_KEY` documented in `.env.example`, validated at startup with warning if absent
-- [ ] CSP: add `connect-src https://api.the-odds-api.com` to `netlify.toml` / `vercel.json`
-- [ ] Write tests for `useOdds` hook (mock fetch, quota error, empty response)
-- [ ] Lint, tests, build, merge, tag v0.7.0
+**APIs:**
+- The Odds API — `VITE_ODDS_API_KEY` (placeholder in `.env.example`). 500 req/month free.
+- Polymarket CLOB API — no auth for reads. `https://clob.polymarket.com`. `/prices-history` endpoint live.
+- Kalshi REST API — `VITE_KALSHI_API_KEY` (add to `.env.example`). Free API key at trading-api.kalshi.com.
+
+### Must Have — Core Differentiator
+
+**Hooks (data layer)**
+- [x] Cut branch `feature/phase-7-live-odds`
+- [x] `src/hooks/useOdds.js` — The Odds API moneylines; cache in `sessionStorage`; graceful degradation if key absent or quota exceeded
+- [x] `src/hooks/usePolymarket.js` — Polymarket CLOB current prices + `/prices-history`; cache current prices in `sessionStorage`; persist CLV snapshots to `localStorage`
+- [x] `src/hooks/useKalshi.js` — Kalshi current + historical prices; cache in `sessionStorage`; graceful degradation if key absent
+
+**Transform / validation utils**
+- [x] `src/utils/normalizeOdds.js` — `normalizeOddsApiResponse()`, `normalizePolymarketMarket()`, `normalizeKalshiMarket()`, `normalizePriceHistory()`, `fightKey()`, `probToML()`: validate + reshape raw API responses; 29 tests covering all shapes
+
+**Display**
+- [x] Unified market row in MarketsScreen — one row per fight, columns: Sportsbook | Polymarket | Kalshi + arb alert
+- [x] Arb detection updated to compare across all three live sources (not just mock platforms)
+- [x] Probability movement line chart in MarketsScreen (Polymarket + Kalshi price history, lazy-loaded per card)
+- [x] Same price history chart in fighter Market tab for roster fighters
+- [x] Personal CLV log view in MarketsScreen — top-100 recent snapshots (toggle button in topbar)
+
+**Fallback + roster handling**
+- [x] All three hooks degrade silently to mock/manual data if API unavailable
+- [ ] "Archetype unknown — stats only" stub fighter shape for non-roster fighters returned by The Odds API (live-only fights shown as stubs in MarketsScreen — name + prices, no editorial layer)
+
+**Infrastructure**
+- [x] `VITE_KALSHI_API_KEY` added to `.env.example` with documentation comment
+- [x] CSP updated: `connect-src https://api.the-odds-api.com https://clob.polymarket.com https://trading-api.kalshi.com` in `netlify.toml` + `vercel.json`
+- [x] Tests: all three hooks (mock fetch, error/quota, empty response, malformed response) — 29 normalizer + 20 hook tests
+- [x] Lint clean, all tests pass, `npm run build` passes
+- [ ] Merge to `master`, tag v0.7.0
+
+### Should Have — High Value, Low Lift
+
+- [ ] Move compare stat rows to `src/constants/compareRows.js` (zero behavior change, config-driven)
+- [ ] Add `opp_quality` field to fight history entries in `scripts/fighter-seed.json` per fighter (elite / contender / gatekeeper / unknown)
+- [ ] Add `weigh_in` result field to event fight card entries in `scripts/fighter-seed.json` (missed / made / under)
+- [ ] Add `judges: []` field to event card data in seed (manual curation — enables decision prop research)
+- [ ] Simple client-side edge score in CompareScreen — weighted rules: archetype mismatch + market discrepancy + flag count → displayed as research prompt, not a pick
+
+### Nice to Have — If Time Allows
+
+- [ ] Tapology community % column in MarketsScreen as "public money" fade signal
+- [ ] Export checklist + notes + CLV log as markdown (download link)
 
 ---
 
 ## Backlog (Unscheduled)
 
 ### High value
-- [ ] Matchup context engine — archetype-aware auto-warnings in compare view (e.g. "WRESTLER vs COUNTER STRIKER — takedown threat flagged")
-- [ ] Fighter portrait images — hosting solution TBD (Cloudinary / repo assets)
+- [ ] Matchup context engine — archetype-aware auto-warnings in compare view ("WRESTLER vs COUNTER STRIKER — takedown threat flagged + judge venue bias noted")
+- [ ] Trend lines in fighter history — stat trajectory over last N fights (requires scraper enhancement to store per-fight stats, not just career averages)
+- [ ] Fighter portrait images — hosting solution TBD (Cloudinary / repo assets); even UFC site headshots would make profiles feel premium
 - [ ] Add more fighters — expand to full top-15 per division
 - [ ] Fighter search by stat range (e.g. "TD def > 80%", "SLpM > 5")
+- [ ] Chart.js for fighter stat visualizations — stat bars are good but trend charts would make profiles feel modern
 
 ### Medium value
-- [ ] Mobile responsive layout — sidebar collapses to bottom nav on narrow viewports
-- [ ] Export trade notes as PDF or markdown
-- [ ] Dark/light theme toggle — CSS variable swap, all colors already tokenized
+- [ ] Mobile responsive layout — sidebar collapses to bottom nav on narrow viewports; blocked until inline styles → CSS classes pass is done
+- [ ] Inline styles → named CSS classes systematic extraction — required for mobile and theming; currently JSX carries layout/typography decisions that belong in app.css
+- [ ] React Router / URL state — bookmarkable fighter profiles, shareable compare URLs; defer until personal/shareable decision is made
+- [ ] Export trade notes as PDF or markdown (checklist + notes + CLV log)
+- [ ] Dark/light theme toggle — CSS variable swap, all colors already tokenized; blocked on inline styles pass
 
 ### Low / nice-to-have
 - [ ] Keyboard navigation — arrow keys in sidebar, tab key across screens
-- [ ] Visual reskin pass — final art direction, consider typographic hierarchy update
+- [ ] Visual reskin pass — final art direction, typographic hierarchy audit (mono vs sans consistency across all stat displays)
 - [ ] Sound design pass — click feedback, confirmation sounds (user opt-in only)
+- [ ] Manual "refresh data" button in app — re-runs scraper locally for same-day stat updates without full rebuild
 
 ---
 

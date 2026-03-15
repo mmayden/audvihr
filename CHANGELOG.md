@@ -6,6 +6,41 @@ All notable changes to this project. Format: [version] — date — description.
 
 ## [Unreleased]
 
+### Phase 7 — Live Odds + Market Intelligence
+
+#### Added
+- `src/hooks/useOdds.js` — The Odds API hook: fetches live UFC moneylines; caches in `sessionStorage` (15-min TTL); degrades silently when `VITE_ODDS_API_KEY` is absent or quota exceeded; `refetch()` for manual refresh
+- `src/hooks/usePolymarket.js` — Polymarket CLOB hook: fetches active UFC markets (no auth); caches current prices in `sessionStorage` (10-min TTL); persists CLV snapshots to `localStorage` on every fresh fetch; `fetchHistory(conditionId, tokenId)` for lazy-loaded price history
+- `src/hooks/useKalshi.js` — Kalshi REST API hook: fetches markets across UFC series tickers; caches in `sessionStorage`; appends CLV snapshots to localStorage; `fetchHistory(ticker)` lazy-loaded; degrades silently when `VITE_KALSHI_API_KEY` absent
+- `src/utils/normalizeOdds.js` — five transform/validation functions: `fightKey()`, `probToML()`, `normalizeOddsApiResponse()`, `normalizePolymarketMarket()`, `normalizeKalshiMarket()`, `normalizePriceHistory()` — all return null/[] on invalid input, never throw
+- `src/utils/normalizeOdds.test.js` — 29 tests covering all normalizer functions (valid input, null/bad input, malformed shapes, out-of-range values)
+- `src/hooks/useOdds.test.js` — 6 tests: absent key, placeholder key, successful fetch, HTTP 401, HTTP 422, sessionStorage cache hit, malformed response
+- `src/hooks/usePolymarket.test.js` — 7 tests: successful fetch, non-UFC market filtering, HTTP error, cache hit, network failure, empty response, CLV snapshot persistence
+- `src/hooks/useKalshi.test.js` — 7 tests: absent key, placeholder key, successful fetch, HTTP 401 soft degradation, cache hit, malformed response, CLV snapshot persistence
+- `src/components/PriceChart.jsx` — SVG sparkline for probability-over-time charts; 50% reference line; area fill; terminal dot; configurable color and height; handles < 2 data points gracefully
+- `VITE_KALSHI_API_KEY` added to `.env.example` with documentation comment
+
+#### Changed
+- `src/screens/MarketsScreen.jsx` — redesigned with unified three-column live market row (Sportsbook | Polymarket | Kalshi); `LivePriceCell` component for each column; arb detection updated to compare across all three live sources; lazy-loaded price history charts on per-card expand/collapse toggle; CLV log panel (top-100 recent snapshots, sortable); live markets merged with mock MARKETS (live-only fights appended as stubs); `● LIVE` indicator when any API is active; falls back to existing mock platform rows when no live data
+- `src/tabs/TabMarket.jsx` — live market prices section added (Polymarket + Kalshi current price when fighter is matched by name); price history charts auto-loaded for matched roster fighters; manual entry section unchanged
+- `netlify.toml` — CSP `connect-src` updated: added `https://api.the-odds-api.com`, `https://clob.polymarket.com`, `https://trading-api.kalshi.com`
+- `vercel.json` — same CSP `connect-src` update
+- `eslint.config.js` — added browser globals: `sessionStorage`, `fetch`, `setTimeout`, `clearTimeout`, `Promise`, `Date`, `JSON`, `Math`, `parseInt`, `parseFloat`, `isNaN`, `Array`, `Object`, `String`, `Boolean`, `Number`; added test-file config with `global` and `process` Node globals
+
+---
+
+## [Unreleased — Planning]
+
+### Planning (2026-03-15)
+- Full design + competitive landscape assessment conducted
+- Phase 7 scope revised: expanded from The Odds API only → three-API unified market view (The Odds API + Polymarket CLOB + Kalshi) + historical price charts + personal CLV log
+- Polymarket CLOB `/prices-history` endpoint confirmed live (no auth) — enables probability movement charts
+- Kalshi historical market endpoints confirmed available (free API key)
+- Oddible (2026 iOS/Android) assessed — confirmed different product category (tracker vs research OS), no overlap with core Audwihr differentiators
+- Polymarket × TKO/UFC multiyear deal noted — liquidity on big cards increasing
+- `BRAINSTORMING.md` created — full strategy reference with competitive landscape, community sentiment, gap analysis, revised Phase 7 scope, and open design questions
+- `PLANNING.md` updated: competitive landscape section added, edge score architecture documented, three-API Phase 7 surface documented, decisions log extended with six new entries
+
 ---
 
 ## [0.6.2] — 2026-03-15

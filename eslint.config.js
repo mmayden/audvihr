@@ -14,10 +14,26 @@ export default [
       ecmaVersion: 2022,
       sourceType: 'module',
       globals: {
-        window: 'readonly',
-        document: 'readonly',
-        localStorage: 'readonly',
-        console: 'readonly',
+        window:          'readonly',
+        document:        'readonly',
+        localStorage:    'readonly',
+        sessionStorage:  'readonly',
+        fetch:           'readonly',
+        console:         'readonly',
+        setTimeout:      'readonly',
+        clearTimeout:    'readonly',
+        Promise:         'readonly',
+        Date:            'readonly',
+        JSON:            'readonly',
+        Math:            'readonly',
+        parseInt:        'readonly',
+        parseFloat:      'readonly',
+        isNaN:           'readonly',
+        Array:           'readonly',
+        Object:          'readonly',
+        String:          'readonly',
+        Boolean:         'readonly',
+        Number:          'readonly',
       },
       parserOptions: {
         ecmaFeatures: { jsx: true },
@@ -40,6 +56,16 @@ export default [
       'no-console': 'warn',
       'eqeqeq': ['error', 'always'],
       'no-eval': 'error',
+    },
+  },
+  {
+    // Test files: add Node/Vitest globals (global, process, etc.)
+    files: ['src/**/*.test.{js,jsx}'],
+    languageOptions: {
+      globals: {
+        global:  'readonly',
+        process: 'readonly',
+      },
     },
   },
   {
