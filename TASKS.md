@@ -37,13 +37,13 @@
 - [x] `MenuScreen` version badge → `v0.7.0 — LIVE ODDS`
 - [x] Merge to `master`, tag v0.7.0
 
-### Phase 7 — Should Have (active)
+### ✅ Phase 7 — Should Have — complete
 
-- [ ] Move compare stat rows to `src/constants/compareRows.js` (config-driven, zero behavior change)
-- [ ] Add `opp_quality` field to fight history entries in `scripts/fighter-seed.json` (elite / contender / gatekeeper / unknown)
-- [ ] Add `weigh_in` result field to event fight card entries in `scripts/fighter-seed.json` (missed / made / under)
-- [ ] Add `judges: []` field to event card data in seed (manual — enables decision prop research)
-- [ ] Simple client-side edge score in CompareScreen — weighted rules: archetype mismatch + market discrepancy + flag count → displayed as research prompt, not a pick
+- [x] Move compare stat rows to `src/constants/compareRows.js` (config-driven, zero behavior change)
+- [x] Add `opp_quality` field to fight history entries in `scripts/fighter-seed.json` (elite / contender / gatekeeper / unknown)
+- [x] Add `weigh_in` result field to event fight card entries in `scripts/fighter-seed.json` (missed / made / under)
+- [x] Add `judges: []` field to event card data in seed (manual — enables decision prop research)
+- [x] Simple client-side edge score in CompareScreen — stat rows + archetype + flags + market discrepancy → research prompt panel, not a pick
 
 ---
 
