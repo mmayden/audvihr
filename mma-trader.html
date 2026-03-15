@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Personal research and decision-support tool for MMA prediction market trading. Fighter profiles, matchup comparison, trade checklist, fight calendar.">
+<meta name="theme-color" content="#12141a">
+<meta name="robots" content="noindex, nofollow">
 <title>AUDWIHR // MMA Trader</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
@@ -569,6 +572,14 @@ const EVENTS = [
     }},
 ];
 
+// ─── QUALIFIER COLOR MAPS ───
+const CHIN_COLOR   = { Iron:'var(--green)', Solid:'var(--green)', Questionable:'var(--orange)', 'Stopped Before':'var(--red)' };
+const CARDIO_COLOR = { Elite:'var(--green)', Good:'var(--green)', Average:'var(--text)', Concern:'var(--red)' };
+const CUT_COLOR    = { Minimal:'var(--green)', Moderate:'var(--text)', 'Heavy Cutter':'var(--orange)', 'Drain Risk':'var(--red)' };
+
+// ─── ORG COLORS ───
+const ORG_COLOR = { UFC:'#d95f5f', Bellator:'#5b8dd9', PFL:'#d4804a' };
+
 // ─── UTILS ───
 function mlToImplied(ml) {
   const n = parseInt(ml); if (!n || isNaN(n)) return null;
@@ -632,9 +643,6 @@ function ChecklistPanel({storageKey}) {
 const TABS = ['OVERVIEW','STRIKING','GRAPPLING','PHYSICAL','HISTORY','MARKET'];
 
 function TabOverview({f}) {
-  const chinColor = {Iron:'var(--green)',Solid:'var(--green)',Questionable:'var(--orange)','Stopped Before':'var(--red)'};
-  const cardioColor = {Elite:'var(--green)',Good:'var(--green)',Average:'var(--text)',Concern:'var(--red)'};
-  const cutColor = {Minimal:'var(--green)',Moderate:'var(--text)','Heavy Cutter':'var(--orange)','Drain Risk':'var(--red)'};
   return <div className="anim-fade">
     <div className="sec-label">KEY NUMBERS</div>
     <div className="stat-grid">
@@ -651,9 +659,9 @@ function TabOverview({f}) {
     </div>
     <div className="sec-label">FLAGS</div>
     <div className="stat-grid" style={{gridTemplateColumns:'repeat(auto-fill,minmax(150px,1fr))'}}>
-      <div className="stat-cell"><div className="stat-cell-label">CHIN</div><div style={{fontSize:13,fontWeight:600,color:chinColor[f.chin]||'var(--text)',marginTop:4}}>{f.chin}</div></div>
-      <div className="stat-cell"><div className="stat-cell-label">CARDIO</div><div style={{fontSize:13,fontWeight:600,color:cardioColor[f.cardio]||'var(--text)',marginTop:4}}>{f.cardio}</div></div>
-      <div className="stat-cell"><div className="stat-cell-label">WEIGHT CUT</div><div style={{fontSize:13,fontWeight:600,color:cutColor[f.weight_cut]||'var(--text)',marginTop:4}}>{f.weight_cut}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">CHIN</div><div style={{fontSize:13,fontWeight:600,color:CHIN_COLOR[f.chin]||'var(--text)',marginTop:4}}>{f.chin}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">CARDIO</div><div style={{fontSize:13,fontWeight:600,color:CARDIO_COLOR[f.cardio]||'var(--text)',marginTop:4}}>{f.cardio}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">WEIGHT CUT</div><div style={{fontSize:13,fontWeight:600,color:CUT_COLOR[f.weight_cut]||'var(--text)',marginTop:4}}>{f.weight_cut}</div></div>
     </div>
     <div className="sec-label">TRADER NOTES</div>
     <div style={{background:'var(--surface)',padding:'14px',fontSize:'13px',lineHeight:1.7,color:'var(--text)',borderLeft:'2px solid var(--accent-dim)'}}>{f.trader_notes}</div>
@@ -722,9 +730,6 @@ function TabGrappling({f}) {
 }
 
 function TabPhysical({f}) {
-  const chinColor={Iron:'var(--green)',Solid:'var(--green)',Questionable:'var(--orange)','Stopped Before':'var(--red)'};
-  const cardioColor={Elite:'var(--green)',Good:'var(--green)',Average:'var(--text)',Concern:'var(--red)'};
-  const cutColor={Minimal:'var(--green)',Moderate:'var(--text)','Heavy Cutter':'var(--orange)','Drain Risk':'var(--red)'};
   return <div className="anim-fade">
     <div className="sec-label">PHYSICAL ATTRIBUTES</div>
     <div className="stat-grid">
@@ -735,9 +740,9 @@ function TabPhysical({f}) {
     <div className="stat-cell" style={{marginBottom:20}}><div className="stat-cell-label">CAMP / GYM</div><div style={{fontSize:13,color:'var(--text)',marginTop:4}}>{f.camp}</div></div>
     <div className="sec-label">DURABILITY FLAGS</div>
     <div className="stat-grid" style={{gridTemplateColumns:'repeat(auto-fill,minmax(150px,1fr))'}}>
-      <div className="stat-cell"><div className="stat-cell-label">CHIN RATING</div><div style={{fontSize:13,fontWeight:600,color:chinColor[f.chin]||'var(--text)',marginTop:4}}>{f.chin}</div></div>
-      <div className="stat-cell"><div className="stat-cell-label">CARDIO RATING</div><div style={{fontSize:13,fontWeight:600,color:cardioColor[f.cardio]||'var(--text)',marginTop:4}}>{f.cardio}</div></div>
-      <div className="stat-cell"><div className="stat-cell-label">WEIGHT CUT</div><div style={{fontSize:13,fontWeight:600,color:cutColor[f.weight_cut]||'var(--text)',marginTop:4}}>{f.weight_cut}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">CHIN RATING</div><div style={{fontSize:13,fontWeight:600,color:CHIN_COLOR[f.chin]||'var(--text)',marginTop:4}}>{f.chin}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">CARDIO RATING</div><div style={{fontSize:13,fontWeight:600,color:CARDIO_COLOR[f.cardio]||'var(--text)',marginTop:4}}>{f.cardio}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">WEIGHT CUT</div><div style={{fontSize:13,fontWeight:600,color:CUT_COLOR[f.weight_cut]||'var(--text)',marginTop:4}}>{f.weight_cut}</div></div>
     </div>
     <div className="sec-label">LOSS METHOD BREAKDOWN</div>
     <div className="stat-grid" style={{gridTemplateColumns:'repeat(3,1fr)'}}>
@@ -979,6 +984,14 @@ function CompareScreen({onBack}) {
   );
 }
 
+// ─── FIGHTER NAME LINK ───
+// Resolves a fighter name to a clickable profile link if they exist in the roster.
+function FighterName({name, onGoFighter}) {
+  const f = FIGHTERS.find(f => f.name === name);
+  if (f) return <span className="fighter-link" onClick={() => onGoFighter(f)}>{name}</span>;
+  return <span>{name}</span>;
+}
+
 // ─── CALENDAR SCREEN ───
 function CalendarScreen({onBack, onGoFighter}) {
   const today = useMemo(()=>{ const d=new Date(); d.setHours(0,0,0,0); return d; },[]);
@@ -999,13 +1012,6 @@ function CalendarScreen({onBack, onGoFighter}) {
   }
   function fmtDate(dateStr){
     return new Date(dateStr+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
-  }
-  const ORG_COLOR = {UFC:'#d95f5f', Bellator:'#5b8dd9', PFL:'#d4804a'};
-
-  function FighterName({name}){
-    const f=FIGHTERS.find(f=>f.name===name);
-    if(f) return <span className="fighter-link" onClick={()=>onGoFighter(f)}>{name}</span>;
-    return <span>{name}</span>;
   }
 
   return (
@@ -1064,12 +1070,12 @@ function CalendarScreen({onBack, onGoFighter}) {
                 <div className="sec-label">MAIN EVENT{sel.card.main.title?' — TITLE FIGHT':''}</div>
                 <div className="cal-main-bout">
                   <div className="cmb-side">
-                    <div className="cmb-fighter-name"><FighterName name={sel.card.main.f1}/></div>
+                    <div className="cmb-fighter-name"><FighterName name={sel.card.main.f1} onGoFighter={onGoFighter}/></div>
                     <div className="cmb-weight-tag">{sel.card.main.weight.toUpperCase()}</div>
                   </div>
                   <div className="cmb-vs">VS</div>
                   <div className="cmb-side right">
-                    <div className="cmb-fighter-name"><FighterName name={sel.card.main.f2}/></div>
+                    <div className="cmb-fighter-name"><FighterName name={sel.card.main.f2} onGoFighter={onGoFighter}/></div>
                     <div className="cmb-weight-tag">{sel.card.main.weight.toUpperCase()}</div>
                   </div>
                 </div>
@@ -1077,9 +1083,9 @@ function CalendarScreen({onBack, onGoFighter}) {
 
                 <div className="sec-label">CO-MAIN EVENT{sel.card.comain.title?' — TITLE FIGHT':''}</div>
                 <div className="cal-bout">
-                  <span className="cal-bout-name"><FighterName name={sel.card.comain.f1}/></span>
+                  <span className="cal-bout-name"><FighterName name={sel.card.comain.f1} onGoFighter={onGoFighter}/></span>
                   <span className="cal-bout-vs">vs</span>
-                  <span className="cal-bout-name"><FighterName name={sel.card.comain.f2}/></span>
+                  <span className="cal-bout-name"><FighterName name={sel.card.comain.f2} onGoFighter={onGoFighter}/></span>
                   <span className="cal-bout-weight">{sel.card.comain.weight.toUpperCase()}</span>
                 </div>
                 {sel.card.comain.title && <div className="cal-title-banner" style={{marginTop:-1}}>TITLE FIGHT — {sel.card.comain.weight.toUpperCase()} CHAMPIONSHIP</div>}
@@ -1088,9 +1094,9 @@ function CalendarScreen({onBack, onGoFighter}) {
                   <div className="sec-label">PRELIMS</div>
                   {sel.card.prelims.map((b,i)=>(
                     <div className="cal-bout" key={i}>
-                      <span className="cal-bout-name"><FighterName name={b.f1}/></span>
+                      <span className="cal-bout-name"><FighterName name={b.f1} onGoFighter={onGoFighter}/></span>
                       <span className="cal-bout-vs">vs</span>
-                      <span className="cal-bout-name"><FighterName name={b.f2}/></span>
+                      <span className="cal-bout-name"><FighterName name={b.f2} onGoFighter={onGoFighter}/></span>
                       <span className="cal-bout-weight">{b.weight.toUpperCase()}</span>
                     </div>
                   ))}
@@ -1100,9 +1106,9 @@ function CalendarScreen({onBack, onGoFighter}) {
                   <div className="sec-label">EARLY PRELIMS</div>
                   {sel.card.early_prelims.map((b,i)=>(
                     <div className="cal-bout" key={i}>
-                      <span className="cal-bout-name"><FighterName name={b.f1}/></span>
+                      <span className="cal-bout-name"><FighterName name={b.f1} onGoFighter={onGoFighter}/></span>
                       <span className="cal-bout-vs">vs</span>
-                      <span className="cal-bout-name"><FighterName name={b.f2}/></span>
+                      <span className="cal-bout-name"><FighterName name={b.f2} onGoFighter={onGoFighter}/></span>
                       <span className="cal-bout-weight">{b.weight.toUpperCase()}</span>
                     </div>
                   ))}

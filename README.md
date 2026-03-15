@@ -13,20 +13,29 @@ Not a sportsbook. Not a fantasy app. A war room for finding and sizing edges in 
 
 ## Tech Stack
 
-| Layer | Choice | Reason |
-|-------|--------|--------|
-| Runtime | Single HTML file | Zero install, runs in any browser, fully portable |
-| UI | React 18 via CDN | Component model without a build step |
-| Styling | Vanilla CSS (CSS variables) | No framework dependency, easy to reskin |
-| Fonts | Inter + JetBrains Mono via Google Fonts | Clean, readable, data-display friendly |
-| Persistence | localStorage | Per-session odds, notes, checklist state |
-| Data | Static JS objects in file | Mock data now; API layer planned in Phase 6 |
+| Layer | Current (Phase 1–3) | Post-Migration (Phase 3a+) |
+|-------|---------------------|---------------------------|
+| Runtime | Single HTML file | Vite + React (static build) |
+| UI | React 18 via CDN + Babel standalone | React 18 (compiled) |
+| Styling | Vanilla CSS (CSS variables) | Same — no framework dependency |
+| Fonts | Inter + JetBrains Mono via Google Fonts | Same |
+| Persistence | localStorage | Same |
+| Data | Static JS objects | Mock data now; API layer planned in Phase 6 |
+| Deployment | Local file only | GitHub Pages / Netlify / Vercel |
+
+> **Note:** The current single-file build uses `babel-standalone` to compile JSX at runtime (~860KB, fires on every load). This is fine locally but is a production blocker. Phase 3a migrates to a proper Vite build before web deployment.
 
 ## How to Run
 
+**Local (current):**
 1. Download `mma-trader.html`
 2. Open it in any modern browser
 3. No server, no install, no dependencies
+
+**Web (after Phase 3a Vite migration):**
+1. `npm install && npm run build`
+2. Deploy `dist/` to GitHub Pages, Netlify, or Vercel
+3. All three platforms support static SPA deployment with zero config
 
 ## Project Structure
 
@@ -41,7 +50,7 @@ Audwihr/
 
 ## Current Status
 
-**v0.2.0** — Phase 2 complete. See `TASKS.md` for what's next.
+**v0.3.0 / Phase 3 in progress** — Fight Calendar built and active. See `TASKS.md` for sprint status and `CHANGELOG.md` for version history.
 
 ## Git Workflow
 

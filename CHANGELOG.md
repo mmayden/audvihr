@@ -4,6 +4,39 @@ All notable changes to this project. Format: [version] — date — description.
 
 ---
 
+## [Unreleased] — Phase 3 + Phase 3a
+
+### Added — Phase 3 (Fight Calendar)
+- Fight Calendar screen with full card breakdowns (main event, co-main, prelims, early prelims)
+- Static EVENTS data model: 5 events across UFC 314–317 + Fight Night
+- Countdown display per event (days until / PAST / TODAY)
+- Promotion filter (UFC / Bellator / PFL)
+- Fighter name links from calendar → fighter profile (deep navigation)
+- Past event styling (dimmed, labeled PAST)
+
+### Added — Phase 3a (Vite Migration)
+- Full Vite + React project structure (`package.json`, `vite.config.js`, `index.html`)
+- `src/` split into `constants/`, `data/`, `hooks/`, `utils/`, `components/`, `tabs/`, `screens/`
+- All 14 components extracted as named exports with JSDoc headers
+- Data files with schema comments (`fighters.js`, `events.js`)
+- `useLS` renamed to `useLocalStorage` throughout
+- `SBar` renamed to `StatBar` throughout
+- Security meta tags in `index.html` (`noindex`, `theme-color`, `description`)
+- App runs in React StrictMode
+- Build output (`dist/`) deployable to GitHub Pages, Netlify, or Vercel
+- `netlify.toml` and `vercel.json` with full security header suite (CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy)
+- Upgraded to Vite 6.4.1 + @vitejs/plugin-react 4.7.0 — resolves esbuild CVE GHSA-67mh-4wv8-2f99 (0 vulnerabilities)
+
+### Fixed — Phase 3
+- `FighterName` extracted from inside `CalendarScreen` (nested component = remounts on every render)
+- Duplicate qualifier color maps removed from `TabOverview` and `TabPhysical` — now shared constants in `src/constants/qualifiers.js`
+
+### Project Standards Established
+- Security model documented in PLANNING.md (SRI, CSP plan, supply chain risks)
+- CLAUDE.md rewritten with enforced standards for all future sessions: security, code quality, documentation, modular design
+
+---
+
 ## [0.3.0] — 2026-03-10
 
 ### Added

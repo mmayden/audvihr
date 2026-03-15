@@ -10,16 +10,34 @@
 
 ## Current Sprint
 
-**Branch:** `feature/phase-3-calendar`
-**Goal:** Build the Fight Calendar screen — upcoming events, card breakdowns, fighter links
+**Branch:** `feature/phase-3-calendar` → merge pending, then `feature/phase-3a-vite`
+**Goal:** Complete Phase 3 merge + Phase 3a Vite migration for web deployment
 
-### Tasks
-- [ ] Add static event data model (events array with card structure)
-- [ ] Build CalendarScreen component — event list with date/countdown
-- [ ] Event detail view: main event / co-main / prelims breakdown
-- [ ] Fighter name links from calendar → fighter profile
-- [ ] Filter by promotion (UFC / Bellator / PFL)
-- [ ] Run smoke test: calendar renders, fighter links navigate correctly
+### Phase 3 — Calendar (close out)
+- [x] Add static event data model (events array with card structure)
+- [x] Build CalendarScreen component — event list with date/countdown
+- [x] Event detail view: main event / co-main / prelims breakdown
+- [x] Fighter name links from calendar → fighter profile
+- [x] Filter by promotion (UFC / Bellator / PFL)
+- [ ] Run smoke test on `mma-trader.html`: calendar renders, fighter links navigate correctly
+- [ ] Commit and merge to `main`
+
+### Phase 3a — Vite Migration
+- [x] Create Vite project structure (`package.json`, `vite.config.js`, `index.html`)
+- [x] Extract CSS to `src/styles/app.css`
+- [x] Extract constants to `src/constants/` (archetypes, checklist, qualifiers)
+- [x] Extract data to `src/data/` (fighters, events) with schema comments
+- [x] Extract hooks to `src/hooks/useLocalStorage.js`
+- [x] Extract utils to `src/utils/odds.js`
+- [x] Extract shared components to `src/components/` (StatBar, FighterName, ChecklistPanel)
+- [x] Extract tab components to `src/tabs/`
+- [x] Extract screens to `src/screens/`
+- [x] Create `src/App.jsx` and `src/main.jsx`
+- [x] `npm install` — 0 vulnerabilities (upgraded to Vite 6.4.1 + plugin-react 4.7.0)
+- [x] `npm run build` passes — 205 kB JS / 61 kB gzipped
+- [x] Add CSP and security headers (`netlify.toml`, `vercel.json`)
+- [ ] Smoke test all screens in Vite dev server (`npm run dev`)
+- [ ] `npm run preview` against production build
 - [ ] Commit and merge to `main`
 - [ ] Cut branch `feature/phase-4-markets`
 
@@ -71,15 +89,15 @@
 - Basic date/countdown display
 - Filter by promotion (UFC / Bellator / PFL)
 
-**Migration note:** If file exceeds ~2000 lines before this phase, migrate to Vite first (see Phase 3a below).
-
-### 🔲 Phase 3a — Vite Migration (trigger-based)
-**Trigger:** File > ~2000 lines OR need for multi-file imports
+### 🔲 Phase 3a — Vite Migration ⚠️ REQUIRED before web deployment
+**Branch:** `feature/phase-3a-vite`
+**Trigger:** Web hosting target (active) — `babel-standalone` is a production blocker
 
 - `npm create vite@latest audwihr -- --template react`
-- Split into component files matching current structure
+- Split `mma-trader.html` into component files matching current structure
 - All functionality must pass smoke test before merge
 - No new features in this phase — migration only
+- Deploy output: static site (`dist/`) → GitHub Pages / Netlify / Vercel
 
 ### 🔲 Phase 4 — Markets Dashboard
 **Branch:** `feature/phase-4-markets`
