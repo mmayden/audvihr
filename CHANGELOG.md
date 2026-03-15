@@ -8,6 +8,19 @@ All notable changes to this project. Format: [version] — date — description.
 
 ---
 
+## [0.6.2] — 2026-03-15
+
+### Code Quality
+- All components converted from `export function` to `export const` arrow function style (CLAUDE.md standard): `StatBar`, `FighterName`, `TabOverview`, `TabStriking`, `TabGrappling`, `TabPhysical`, `TabHistory`, `TabMarket`, `MenuScreen`, `NewsScreen`
+- `RELEVANCE_COLOR` and `CATEGORY_COLOR` extracted from `NewsScreen` into `src/constants/qualifiers.js` alongside `CHIN_COLOR`, `CARDIO_COLOR`, etc. (CLAUDE.md: shared constants belong in `src/constants/`)
+- `MenuScreen` version badge updated to `v0.6.2`
+
+### Documentation
+- `CLAUDE.md`: file structure updated to match actual source tree (added `ErrorBoundary`, `date.js`, `useWatchlist`, `markets.js`, `news.js`, `scripts/`, `test/`; removed retired `ComingSoon.jsx`); Key Constraints rewritten to reflect current state (Vite done, live data live, Phase 7 next); testing note updated; `main` → `master`
+- `PLANNING.md`: file structure heading bumped; `utils/` and `components/` blocks updated; security section updated with Phase 7 Odds API guidance; decisions log extended with three v0.6.1 entries
+
+---
+
 ## [0.6.1] — 2026-03-15
 
 ### Added
