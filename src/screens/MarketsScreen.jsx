@@ -215,9 +215,8 @@ export function MarketsScreen({ onBack }) {
         <span className="topbar-section">MARKETS</span>
         <div className="topbar-right">
           <button
-            className={`topbar-back${showCLV ? ' active' : ''}`}
+            className={`topbar-back topbar-back--mr${showCLV ? ' active' : ''}`}
             onClick={() => setShowCLV((v) => !v)}
-            style={{ marginRight: 8 }}
           >
             CLV LOG
           </button>
@@ -228,11 +227,11 @@ export function MarketsScreen({ onBack }) {
       {/* CLV Log panel */}
       {showCLV && (
         <div className="markets-clv-panel">
-          <div className="sec-label" style={{ marginBottom: 8 }}>
+          <div className="sec-label sec-label--mb-8">
             PERSONAL CLV LOG — {clvLog.length} SNAPSHOTS
           </div>
           {clvLog.length === 0 ? (
-            <div style={{ color: 'var(--text-dim)', fontFamily: 'var(--mono)', fontSize: 11 }}>
+            <div className="mono-status-dim">
               No snapshots yet. CLV entries are recorded automatically when live market data is fetched.
             </div>
           ) : (
@@ -246,19 +245,19 @@ export function MarketsScreen({ onBack }) {
               </div>
               {[...clvLog].reverse().slice(0, 100).map((entry, i) => (
                 <div key={i} className="clv-row">
-                  <span style={{ color: 'var(--text-bright)' }}>
+                  <span className="clv-fight-name">
                     {entry.fighter1?.split(' ').pop()} vs {entry.fighter2?.split(' ').pop()}
                   </span>
                   <span className={`mkt-platform-badge platform-${(entry.source || '').toLowerCase()}`}>
                     {(entry.source || '—').toUpperCase()}
                   </span>
-                  <span style={{ color: 'var(--text-dim)' }}>
+                  <span className="clv-val--time">
                     {entry.ts ? new Date(entry.ts).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
                   </span>
-                  <span style={{ color: 'var(--green)' }}>
+                  <span className="clv-val--f1">
                     {typeof entry.f1Price === 'number' ? `${(entry.f1Price * 100).toFixed(1)}%` : '—'}
                   </span>
-                  <span style={{ color: 'var(--blue)' }}>
+                  <span className="clv-val--f2">
                     {typeof entry.f2Price === 'number' ? `${(entry.f2Price * 100).toFixed(1)}%` : '—'}
                   </span>
                 </div>
@@ -296,7 +295,7 @@ export function MarketsScreen({ onBack }) {
             SORT: {sortKey} ↕
           </button>
           {liveAvailable && (
-            <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--green)', alignSelf: 'center', marginLeft: 8 }}>
+            <span className="live-indicator">
               ● LIVE
             </span>
           )}
@@ -306,7 +305,7 @@ export function MarketsScreen({ onBack }) {
         <div className="markets-list">
           {filtered.length === 0 && (
             <div className="mkt-empty">
-              <div style={{ fontSize: 28, opacity: .2 }}>📊</div>
+              <div className="empty-state-icon">📊</div>
               <span>NO MARKETS MATCH FILTER</span>
             </div>
           )}
@@ -353,9 +352,9 @@ export function MarketsScreen({ onBack }) {
                   >
                     {watched ? '★' : '☆'}
                   </button>
-                  <div style={{ flex: 1 }}>
+                  <div className="mkt-card-header-body">
                     <div className="mkt-fight-name">
-                      {market.fighter1} <span style={{ color: 'var(--text-dim)', fontWeight: 400 }}>vs</span> {market.fighter2}
+                      {market.fighter1} <span className="mkt-fight-name-vs">vs</span> {market.fighter2}
                     </div>
                     <div className="mkt-fight-meta">
                       {market.event} · {market.weight.toUpperCase()}{market.isTitle ? ' · TITLE' : ''}
@@ -482,12 +481,12 @@ export function MarketsScreen({ onBack }) {
                 {isExpanded && (
                   <div className="mkt-chart-area">
                     {!hist && (
-                      <div style={{ color: 'var(--text-dim)', fontFamily: 'var(--mono)', fontSize: 11 }}>
+                      <div className="mono-status-dim">
                         LOADING HISTORY…
                       </div>
                     )}
                     {hist && hist.poly.length < 2 && hist.kalshi.length < 2 && (
-                      <div style={{ color: 'var(--text-dim)', fontFamily: 'var(--mono)', fontSize: 11 }}>
+                      <div className="mono-status-dim">
                         NO HISTORY DATA AVAILABLE
                       </div>
                     )}
@@ -541,9 +540,9 @@ const LivePriceCell = ({ label, colorClass, f1Name, f2Name, f1Val, f2Val, format
 
   return (
     <div className="mkt-live-cell">
-      <div style={{ marginBottom: 4 }}>
+      <div className="mkt-live-cell-header">
         <span className={`mkt-platform-badge ${colorClass}`}>{label}</span>
-        {sublabel && <span style={{ fontFamily: 'var(--mono)', fontSize: 9, color: 'var(--text-dim)', marginLeft: 4 }}>{sublabel}</span>}
+        {sublabel && <span className="mkt-live-sublabel">{sublabel}</span>}
       </div>
       {available ? (
         <>
@@ -557,7 +556,7 @@ const LivePriceCell = ({ label, colorClass, f1Name, f2Name, f1Val, f2Val, format
           </div>
         </>
       ) : (
-        <div style={{ color: 'var(--text-dim)', fontFamily: 'var(--mono)', fontSize: 10, paddingTop: 4 }}>—</div>
+        <div className="mkt-live-unavailable">—</div>
       )}
     </div>
   );

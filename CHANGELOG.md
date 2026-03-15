@@ -6,7 +6,10 @@ All notable changes to this project. Format: [version] — date — description.
 
 ## [Unreleased]
 
-### Added
+### Changed
+- Inline styles → named CSS classes extraction across all 13 affected files (Phase 8). ~33 static `style={{}}` blocks replaced with 35 new semantic CSS classes in `app.css`. Dynamic/computed styles (archetype colors, countdown colors, org badge colors, stat conditional colors) correctly kept inline. Unblocks mobile layout and theming work. JS bundle −2 kB; CSS +4 kB.
+
+### Added (Phase 7 should-haves, merged 2026-03-15)
 - `src/constants/compareRows.js` — 15 stat-row definitions extracted from `CompareScreen`; each is a `(f1, f2) → row` function; zero behavior change
 - `opp_quality` field on fight history entries — editorial label (elite / contender / gatekeeper / unknown) per opponent; stored in `scripts/fighter-seed.json` as `history_overrides` and merged at build time; emitted in `fighters.js`
 - `weigh_in` and `judges` fields on event card fight entries — stored in `scripts/fighter-seed.json` as `event_overrides`; applied by `applyEventOverrides()` in `fetch-data.js`; UFC 314–317 covered

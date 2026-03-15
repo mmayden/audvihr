@@ -75,7 +75,7 @@ export const TabMarket = ({ fighter }) => {
 
       {/* Live market prices (when available) */}
       {hasLive && (
-        <div style={{ marginBottom: 16 }}>
+        <div className="section-mb-16">
           <div className="sec-label">LIVE MARKET PRICES</div>
           <div className="market-grid">
             {polyMatch && (
@@ -83,7 +83,7 @@ export const TabMarket = ({ fighter }) => {
                 <div className="mc-label">
                   <span className="mkt-platform-badge platform-polymarket">POLYMARKET</span>
                 </div>
-                <div style={{ marginTop: 6, fontFamily: 'var(--mono)', fontSize: 22, color: 'var(--text-bright)' }}>
+                <div className="mc-live-price">
                   {polyPct}
                 </div>
                 <div className="mc-implied">{polyMatch.polymarket.f1_ml} ML equiv.</div>
@@ -94,7 +94,7 @@ export const TabMarket = ({ fighter }) => {
                 <div className="mc-label">
                   <span className="mkt-platform-badge platform-kalshi">KALSHI</span>
                 </div>
-                <div style={{ marginTop: 6, fontFamily: 'var(--mono)', fontSize: 22, color: 'var(--text-bright)' }}>
+                <div className="mc-live-price">
                   {kalshiPct}
                 </div>
                 <div className="mc-implied">{kalshiMatch.kalshi.f1_ml} ML equiv.</div>
@@ -106,7 +106,7 @@ export const TabMarket = ({ fighter }) => {
 
       {/* Price history charts */}
       {hasLive && (polyHistory || kalshiHistory) && (
-        <div style={{ marginBottom: 16 }}>
+        <div className="section-mb-16">
           <div className="sec-label">PRICE HISTORY</div>
           <div className="mkt-chart-area">
             {polyHistory && polyHistory.length >= 2 && (
@@ -125,7 +125,7 @@ export const TabMarket = ({ fighter }) => {
               />
             )}
             {polyHistory?.length < 2 && kalshiHistory?.length < 2 && (
-              <div style={{ color: 'var(--text-dim)', fontFamily: 'var(--mono)', fontSize: 11 }}>
+              <div className="mono-status-dim">
                 NO HISTORY DATA AVAILABLE
               </div>
             )}
@@ -133,7 +133,7 @@ export const TabMarket = ({ fighter }) => {
         </div>
       )}
       {hasLive && !polyHistory && !kalshiHistory && chartLoaded && (
-        <div style={{ color: 'var(--text-dim)', fontFamily: 'var(--mono)', fontSize: 11, marginBottom: 16 }}>
+        <div className="mono-status-dim section-mb-16">
           LOADING PRICE HISTORY…
         </div>
       )}
@@ -155,7 +155,7 @@ export const TabMarket = ({ fighter }) => {
         ))}
       </div>
       {mv && (
-        <div style={{ padding: '8px 12px', background: 'var(--surface)', marginBottom: 16, fontFamily: 'var(--mono)', fontSize: 11, color: mv.dir === 'up' ? 'var(--green)' : 'var(--red)' }}>
+        <div className="line-movement-bar" style={{ color: mv.dir === 'up' ? 'var(--green)' : 'var(--red)' }}>
           {mv.dir === 'up' ? '▲' : '▼'} LINE MOVEMENT: {mv.label}
         </div>
       )}
@@ -177,18 +177,17 @@ export const TabMarket = ({ fighter }) => {
       </div>
 
       <div className="sec-label">PUBLIC MONEY %</div>
-      <div className="market-grid" style={{ gridTemplateColumns: '1fr' }}>
+      <div className="market-grid market-grid--single">
         <div className="market-card">
           <div className="mc-label">PUBLIC BET % (if available from tracker)</div>
           <input
             className="mc-input"
-            style={{ fontSize: 18 }}
             placeholder="65"
             value={data.public_pct}
             onChange={(e) => upd('public_pct', e.target.value)}
           />
           {data.public_pct && data.ml_current && (
-            <div className="mc-implied" style={{ marginTop: 6 }}>
+            <div className="mc-implied mc-implied--mt">
               {!isNaN(parseInt(data.public_pct)) && parseInt(data.public_pct) > 70
                 ? <span style={{ color: 'var(--orange)' }}>⚠ Heavy public action — potential price inflation</span>
                 : <span style={{ color: 'var(--green)' }}>Public distribution within normal range</span>}

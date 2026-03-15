@@ -74,14 +74,14 @@ export function FighterScreen({onBack, initialFighter}) {
               <div className="card-record">
                 <div className="record-big">{sel.record}</div>
                 <div className="record-breakdown">
-                  <div className="rb"><div className="rb-n" style={{color:'var(--green)'}}>{sel.wins}</div><div className="rb-l">W</div></div>
-                  <div className="rb"><div className="rb-n" style={{color:'var(--red)'}}>{sel.losses}</div><div className="rb-l">L</div></div>
+                  <div className="rb"><div className="rb-n rb-n--win">{sel.wins}</div><div className="rb-l">W</div></div>
+                  <div className="rb"><div className="rb-n rb-n--loss">{sel.losses}</div><div className="rb-l">L</div></div>
                   <div className="rb"><div className="rb-n">{sel.streak}</div><div className="rb-l">STRK</div></div>
                 </div>
                 <div className="finish-row">
-                  <div className="fin-chip"><div className="fin-n" style={{color:'var(--red)'}}>{sel.finishes.ko}</div><div className="fin-l">KO</div></div>
-                  <div className="fin-chip"><div className="fin-n" style={{color:'var(--green)'}}>{sel.finishes.sub}</div><div className="fin-l">SUB</div></div>
-                  <div className="fin-chip"><div className="fin-n" style={{color:'var(--text-dim)'}}>{sel.finishes.dec}</div><div className="fin-l">DEC</div></div>
+                  <div className="fin-chip"><div className="fin-n fin-n--ko">{sel.finishes.ko}</div><div className="fin-l">KO</div></div>
+                  <div className="fin-chip"><div className="fin-n fin-n--sub">{sel.finishes.sub}</div><div className="fin-l">SUB</div></div>
+                  <div className="fin-chip"><div className="fin-n fin-n--dec">{sel.finishes.dec}</div><div className="fin-l">DEC</div></div>
                 </div>
               </div>
             </div>
@@ -95,7 +95,7 @@ export function FighterScreen({onBack, initialFighter}) {
               {tab==='MARKET'    && <TabMarket    fighter={sel}/>}
             </div>
           </div>
-        ) : <div className="empty-state"><div style={{fontSize:32,opacity:.2}}>👊</div><span>SELECT A FIGHTER</span></div>}
+        ) : <div className="empty-state"><div className="empty-state-icon">👊</div><span>SELECT A FIGHTER</span></div>}
       </div>
     </div>
   );

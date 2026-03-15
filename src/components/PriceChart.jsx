@@ -18,7 +18,7 @@ export const PriceChart = ({ series, color = 'var(--green)', label, height = 72 
 
   if (!series || series.length < 2) {
     return (
-      <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--text-dim)', padding: '8px 0' }}>
+      <div className="price-chart-no-data">
         NO HISTORY DATA
       </div>
     );
@@ -48,9 +48,9 @@ export const PriceChart = ({ series, color = 'var(--green)', label, height = 72 
   const currentPct = (lastPt.p * 100).toFixed(1);
 
   return (
-    <div style={{ width: '100%' }}>
+    <div className="price-chart-wrapper">
       {label && (
-        <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--text-dim)', marginBottom: 4 }}>
+        <div className="price-chart-label">
           {label} — CURRENT: <span style={{ color }}>{currentPct}%</span>
         </div>
       )}

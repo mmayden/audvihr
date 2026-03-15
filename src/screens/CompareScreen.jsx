@@ -142,21 +142,21 @@ export function CompareScreen({onBack}) {
           <div className="compare-table-wrap">
             {f1&&f2 ? (
               <div className="anim-fade">
-                <div style={{display:'grid',gridTemplateColumns:'1fr 80px 1fr',marginBottom:1,gap:1,background:'var(--border)'}}>
-                  <div style={{background:'var(--surface)',padding:'12px 16px',borderBottom:'2px solid var(--accent)'}}>
-                    <div style={{fontSize:15,fontWeight:700,color:'var(--text-bright)'}}>{f1.name}</div>
-                    <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--accent)',marginTop:2}}>{f1.record} · {f1.rank}</div>
-                    <div style={{marginTop:6}}><span className="arch-tag" style={{borderColor:ARCH_COLORS[f1.archetype],color:ARCH_COLORS[f1.archetype],fontSize:9}}>{f1.archetype}</span></div>
+                <div className="compare-fighter-header">
+                  <div className="compare-fighter-col">
+                    <div className="compare-fighter-name">{f1.name}</div>
+                    <div className="compare-fighter-record compare-fighter-record--f1">{f1.record} · {f1.rank}</div>
+                    <div className="compare-fighter-arch"><span className="arch-tag arch-tag--sm" style={{borderColor:ARCH_COLORS[f1.archetype],color:ARCH_COLORS[f1.archetype]}}>{f1.archetype}</span></div>
                   </div>
-                  <div style={{background:'var(--surface2)',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--mono)',fontSize:13,fontWeight:700,color:'var(--red)'}}>VS</div>
-                  <div style={{background:'var(--surface)',padding:'12px 16px',borderBottom:'2px solid var(--blue)',textAlign:'right'}}>
-                    <div style={{fontSize:15,fontWeight:700,color:'var(--text-bright)'}}>{f2.name}</div>
-                    <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--blue)',marginTop:2}}>{f2.record} · {f2.rank}</div>
-                    <div style={{marginTop:6,display:'flex',justifyContent:'flex-end'}}><span className="arch-tag" style={{borderColor:ARCH_COLORS[f2.archetype],color:ARCH_COLORS[f2.archetype],fontSize:9}}>{f2.archetype}</span></div>
+                  <div className="compare-vs-col">VS</div>
+                  <div className="compare-fighter-col compare-fighter-col--right">
+                    <div className="compare-fighter-name">{f2.name}</div>
+                    <div className="compare-fighter-record compare-fighter-record--f2">{f2.record} · {f2.rank}</div>
+                    <div className="compare-fighter-arch compare-fighter-arch--right"><span className="arch-tag arch-tag--sm" style={{borderColor:ARCH_COLORS[f2.archetype],color:ARCH_COLORS[f2.archetype]}}>{f2.archetype}</span></div>
                   </div>
                 </div>
                 <table className="ctable">
-                  <thead><tr><th style={{textAlign:'left',width:'38%'}}>F1</th><th className="center" style={{width:'24%'}}>STAT</th><th style={{textAlign:'right',width:'38%'}}>F2</th></tr></thead>
+                  <thead><tr><th className="ctable-col--wide" style={{textAlign:'left'}}>F1</th><th className="center ctable-col--center">STAT</th><th className="ctable-col--wide" style={{textAlign:'right'}}>F2</th></tr></thead>
                   <tbody>{rows.map((r,i)=>{
                     const sc=i===0||rows[i-1].cat!==r.cat;
                     const tie=r.n1===r.n2, f1w=r.higherIsBetter?r.n1>r.n2:r.n1<r.n2;
@@ -182,7 +182,7 @@ export function CompareScreen({onBack}) {
                   </div>
                 )}
               </div>
-            ) : <div className="empty-state" style={{height:'100%'}}><div style={{fontSize:32,opacity:.2}}>⚔️</div><span>SELECT TWO FIGHTERS TO COMPARE</span></div>}
+            ) : <div className="empty-state empty-state--fill"><div className="empty-state-icon">⚔️</div><span>SELECT TWO FIGHTERS TO COMPARE</span></div>}
           </div>
           <div className="checklist-wrap"><ChecklistPanel storageKey={clKey}/></div>
         </div>
