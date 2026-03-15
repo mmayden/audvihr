@@ -4,6 +4,21 @@ All notable changes to this project. Format: [version] — date — description.
 
 ---
 
+## [0.5.0] — 2026-03-15
+
+### Added
+- `NewsScreen` — fighter news feed with category and fighter filters
+- `src/data/news.js` — 12 mock news items across injury, camp, fight booking, weigh-in, and result categories
+- Category filter chips (ALL / FIGHT / INJURY / CAMP / WEIGH-IN / RESULT) with color-coded badges
+- Fighter filter dropdown (populated from news roster)
+- Relevance signal per item: HIGH (amber) / MEDIUM (blue) / LOW (dim) — trading signal strength
+- `FighterName` links from news items navigate directly to fighter profile
+- All 5 menu items now ACTIVE — `ComingSoon` screen no longer used
+- News CSS added to `app.css`
+- Menu version bumped to v0.5.0
+
+---
+
 ## [0.4.0] — 2026-03-15
 
 ### Added

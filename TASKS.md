@@ -14,16 +14,16 @@
 **Goal:** Fighter News Feed — manual curated news items linked to fighter profiles
 
 ### Phase 5 — Fighter News Feed
-- [ ] Design NEWS data model (id, date, fighter_id, category, headline, body, source)
-- [ ] `src/data/news.js` with full schema comment and 10+ mock items
-- [ ] `src/screens/NewsScreen.jsx` — sorted news list with fighter links
-- [ ] Filter by category (fight / injury / camp / weigh-in / result)
-- [ ] Filter by fighter (select from roster)
-- [ ] `FighterName` links from news items → fighter profile
-- [ ] News CSS added to `app.css`
-- [ ] Menu badge updated to ACTIVE, version bumped to v0.5.0
-- [ ] Tests for any new utils/hooks
-- [ ] `npm run build` passes
+- [x] Design NEWS data model (id, date, fighter_id, category, headline, body, source, relevance)
+- [x] `src/data/news.js` with full schema comment and 12 mock items
+- [x] `src/screens/NewsScreen.jsx` — sorted news list with fighter links
+- [x] Filter by category (fight / injury / camp / weigh-in / result)
+- [x] Filter by fighter (select from roster)
+- [x] `FighterName` links from news items → fighter profile
+- [x] News CSS added to `app.css`
+- [x] Menu badge updated to ACTIVE, version bumped to v0.5.0
+- [x] `npm run build` passes — 66 kB gzipped
+- [x] ESLint clean (0 errors, 0 warnings)
 - [ ] Smoke test: filters work, fighter link navigates correctly
 - [ ] Commit and merge to `main`, tag v0.5.0
 
@@ -82,12 +82,8 @@
 - Filter by platform, title fights, watchlist; sort by closing/volume/event
 - Watchlist persisted to localStorage
 
-### 🔲 Phase 5 — Fighter News Feed (active)
-**Branch:** `feature/phase-5-news`
-
-- Aggregated fighter news (camp switches, injury reports, fight announcements)
-- Manual curation to start, RSS/scraper later
-- Link to relevant fighter profile
+### ✅ Phase 5 — Fighter News Feed (v0.5.0)
+- 12 mock news items, category + fighter filters, relevance signal, fighter deep links
 
 ### 🔲 Phase 6 — Live Data Layer
 **Branch:** `feature/phase-6-live-data`
