@@ -6,7 +6,37 @@ All notable changes to this project. Format: [version] — date — description.
 
 ## [Unreleased]
 
-### Code Quality
+---
+
+## [0.6.0] — 2026-03-15
+
+### Added
+- `scripts/fetch-data.js` — UFCStats build-time scraper (Node 18+ ESM, cheerio, native fetch)
+  - Fetches fighter stats directly from `ufcstats_url` stored per fighter in seed file
+  - Parses: record, age (from DOB), height, reach, stance, all career stat averages
+  - Parses full fight history: result, opponent, method, round, event, year
+  - Derives: win streak, finish counts (ko/sub/dec), losses_by, finish_rate
+  - Normalizes method strings ("TKO - Punches" → "TKO", "U-DEC" → "DEC", etc.)
+  - Merges live stats with `scripts/fighter-seed.json` editorial fields (archetype, mods, trader_notes, etc.)
+  - Validates all required fields before write; exits non-zero on any error in CI mode
+  - 500ms request delay (100ms in CI) to be polite to UFCStats
+  - Cache layer: `*.raw.json` per fighter (gitignored) for incremental rebuilds
+  - CLI flags: `--dry-run`, `--fresh`, `--ci`
+- `scripts/fighter-seed.json` — editorial seed data for 14 fighters
+  - `ufcstats_url`, `ufcstats_name`, archetype, mods, camp, country, chin, cardio, weight_cut, trader_notes
+  - Extended striking/grappling fields not available from UFCStats (zone distribution, ctrl time, etc.)
+- `npm run fetch-data` / `fetch-data:dry` / `fetch-data:fresh` scripts
+- `prebuild` hook — scraper runs automatically before `npm run build`
+- `cheerio ^1.2.0` added as devDependency
+- `.env.example` — documents `VITE_ODDS_API_KEY` placeholder for future Phase 7+ live odds
+- `*.raw.json` added to `.gitignore` (scraper cache, not committed)
+
+### Changed
+- `src/data/fighters.js` — now a generated file (overwritten by scraper); all 14 fighters use live UFCStats stats
+- `src/data/events.js` — now a generated file; upcoming events scraped from UFCStats (0 listed when no scheduled cards)
+- Menu version badge: `v0.5.0 — MOCK DATA` → `v0.6.0 — LIVE DATA`
+
+### Code Quality (standards cleanup from Phase 5 branch)
 - `CompareScreen`: wrap `rows` derived array in `useMemo` (was rebuilt on every render)
 - `FighterScreen`: `function pick` → `const pick` arrow (CLAUDE.md component-scope rule)
 - `FighterScreen`: replace hardcoded `'#555'` fallback with `var(--border2)` / `var(--text-dim)` CSS variables
