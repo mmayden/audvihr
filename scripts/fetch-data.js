@@ -397,8 +397,11 @@ function mergeFighter(scraped, seed) {
       reversal_rate:   seed.grappling_extended.reversal_rate,
     },
 
-    // Last 6 fights from full scraped history
-    history: scraped.fullHistory.slice(0, 6),
+    // Last 6 fights from full scraped history, with optional editorial overrides
+    history: scraped.fullHistory.slice(0, 6).map(h => {
+      const ov = (seed.history_overrides || {})[h.opponent];
+      return ov ? { ...h, ...ov } : h;
+    }),
 
     // Always empty — user-entered via localStorage Market tab
     market: { ml_open: '', ml_current: '', odds_ko: '', odds_sub: '', odds_dec: '', public_pct: '', notes: '' },
@@ -632,7 +635,7 @@ const FIGHTERS_SCHEMA_COMMENT = `/**
  *     pass_rate: Number,      // from seed
  *     reversal_rate: Number,  // from seed
  *   },
- *   history: [{ result: 'W'|'L', opponent: String, method: String, round: Number, event: String, year: Number }],
+ *   history: [{ result: 'W'|'L', opponent: String, method: String, round: Number, event: String, year: Number, opp_quality?: 'elite'|'contender'|'gatekeeper'|'unknown' }],
  *   market: { ml_open: '', ml_current: '', odds_ko: '', odds_sub: '', odds_dec: '', public_pct: '', notes: '' },
  *   trader_notes: String,     // from seed
  * }
@@ -651,10 +654,10 @@ const EVENTS_SCHEMA_COMMENT = `/**
  *   venue: String,
  *   city: String,
  *   card: {
- *     main:         { f1: String, f2: String, weight: String, title: Boolean },
- *     comain:       { f1: String, f2: String, weight: String, title: Boolean },
- *     prelims:      [{ f1: String, f2: String, weight: String }],
- *     early_prelims:[{ f1: String, f2: String, weight: String }],
+ *     main:         { f1: String, f2: String, weight: String, title: Boolean, weigh_in?: String|null, judges?: String[] },
+ *     comain:       { f1: String, f2: String, weight: String, title: Boolean, weigh_in?: String|null, judges?: String[] },
+ *     prelims:      [{ f1: String, f2: String, weight: String, weigh_in?: String|null, judges?: String[] }],
+ *     early_prelims:[{ f1: String, f2: String, weight: String, weigh_in?: String|null, judges?: String[] }],
  *   }
  * }
  */`;
@@ -666,7 +669,7 @@ const EVENTS_SCHEMA_COMMENT = `/**
  */
 function serializeFighter(f) {
   const history = f.history
-    .map(h => `{result:'${h.result}',opponent:${JSON.stringify(h.opponent)},method:'${h.method}',round:${h.round},event:${JSON.stringify(h.event)},year:${h.year}}`)
+    .map(h => `{result:'${h.result}',opponent:${JSON.stringify(h.opponent)},method:'${h.method}',round:${h.round},event:${JSON.stringify(h.event)},year:${h.year}${h.opp_quality ? `,opp_quality:'${h.opp_quality}'` : ''}}`)
     .join(',\n      ');
 
   return `  { id:${f.id}, name:${JSON.stringify(f.name)}, nickname:${JSON.stringify(f.nickname)}, weight:${JSON.stringify(f.weight)}, org:'${f.org}', rank:${JSON.stringify(f.rank)},
@@ -691,11 +694,40 @@ function generateFightersFile(fighters, timestamp) {
 function serializeFight(fight, includeTitle = false) {
   if (!fight) return 'null';
   const base = `{f1:${JSON.stringify(fight.f1)},f2:${JSON.stringify(fight.f2)},weight:${JSON.stringify(fight.weight)}`;
-  return includeTitle ? `${base},title:${fight.title || false}}` : `${base}}`;
+  const titlePart   = includeTitle ? `,title:${fight.title || false}` : '';
+  const weighInPart = fight.weigh_in != null ? `,weigh_in:${JSON.stringify(fight.weigh_in)}` : '';
+  const judgesPart  = fight.judges && fight.judges.length > 0 ? `,judges:${JSON.stringify(fight.judges)}` : '';
+  return `${base}${titlePart}${weighInPart}${judgesPart}}`;
 }
 
-function generateEventsFile(events, timestamp) {
-  const body = events.map((e, i) => {
+function applyEventOverrides(events, overrides) {
+  if (!overrides || !overrides.length) return events;
+  return events.map(ev => {
+    const ovEntry = overrides.find(o => o.event_name === ev.name);
+    if (!ovEntry) return ev;
+    const applyFightOv = (fight) => {
+      if (!fight) return fight;
+      const ov = ovEntry.fights.find(f =>
+        f.f1.toLowerCase() === fight.f1.toLowerCase() &&
+        f.f2.toLowerCase() === fight.f2.toLowerCase()
+      );
+      return ov ? { ...fight, weigh_in: ov.weigh_in, judges: ov.judges } : fight;
+    };
+    return {
+      ...ev,
+      card: {
+        main:          applyFightOv(ev.card.main),
+        comain:        applyFightOv(ev.card.comain),
+        prelims:       (ev.card.prelims      || []).map(applyFightOv),
+        early_prelims: (ev.card.early_prelims || []).map(applyFightOv),
+      },
+    };
+  });
+}
+
+function generateEventsFile(events, timestamp, overrides) {
+  const enriched = applyEventOverrides(events, overrides);
+  const body = enriched.map((e, i) => {
     const prelims      = (e.card.prelims      || []).map(f => `        ${serializeFight(f)}`).join(',\n');
     const earlyPrelims = (e.card.early_prelims || []).map(f => `        ${serializeFight(f)}`).join(',\n');
     return `  { id:${i + 1}, name:${JSON.stringify(e.name)}, org:'${e.org}', date:'${e.date}', venue:${JSON.stringify(e.venue)}, city:${JSON.stringify(e.city)},
@@ -802,7 +834,7 @@ async function main() {
   // ── Output ─────────────────────────────────────────────────────────────────
 
   const fightersJs = generateFightersFile(fighters, timestamp);
-  const eventsJs   = generateEventsFile(events,   timestamp);
+  const eventsJs   = generateEventsFile(events, timestamp, seed.event_overrides);
 
   if (DRY_RUN) {
     console.log('\n── DRY RUN: fighters.js preview (first 25 lines) ───────────────────────────');

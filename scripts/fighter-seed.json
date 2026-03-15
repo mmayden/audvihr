@@ -16,7 +16,9 @@
     "weight_cut": "String — 'Minimal' | 'Moderate' | 'Heavy Cutter' | 'Drain Risk'",
     "trader_notes": "String — qualitative analysis, free text",
     "striking_extended": "Object — fields UFCStats summary page does not provide; keep in sync with real data",
-    "grappling_extended": "Object — fields UFCStats summary page does not provide; keep in sync with real data"
+    "grappling_extended": "Object — fields UFCStats summary page does not provide; keep in sync with real data",
+    "history_overrides": "Object — opponent name → { opp_quality: 'elite'|'contender'|'gatekeeper'|'unknown' }",
+    "event_overrides": "Array at root level — editorial weigh_in + judges per fight per event"
   },
   "fighters": [
     {
@@ -35,7 +37,14 @@
       "weight_cut": "Moderate",
       "trader_notes": "Elite grappler, historically dominant TD defense (92%). Dangerous off back against walls. Southpaw creates layered complexity vs orthodox fighters. Single career loss at 22 years old.",
       "striking_extended": { "head_pct": 52, "body_pct": 28, "leg_pct": 20, "kd_landed": 4, "kd_suffered": 0, "clinch_str_pct": 35, "distance_str_pct": 55, "ground_str_pct": 10 },
-      "grappling_extended": { "top_time_pct": 62, "bottom_time_pct": 8, "ctrl_time_per15": 4.2, "pass_rate": 68, "reversal_rate": 12 }
+      "grappling_extended": { "top_time_pct": 62, "bottom_time_pct": 8, "ctrl_time_per15": 4.2, "pass_rate": 68, "reversal_rate": 12 },
+      "history_overrides": {
+        "Jack Della Maddalena": { "opp_quality": "elite" },
+        "Renato Moicano": { "opp_quality": "contender" },
+        "Dustin Poirier": { "opp_quality": "elite" },
+        "Alexander Volkanovski": { "opp_quality": "elite" },
+        "Charles Oliveira": { "opp_quality": "elite" }
+      }
     },
     {
       "id": 2,
@@ -53,7 +62,14 @@
       "weight_cut": "Minimal",
       "trader_notes": "High output, dangerous left hook. Struggles against elite grapplers (3 sub losses). Absorbs 5.53/min — high volume both ways. Heart and volume compensate for durability questions.",
       "striking_extended": { "head_pct": 58, "body_pct": 26, "leg_pct": 16, "kd_landed": 12, "kd_suffered": 5, "clinch_str_pct": 28, "distance_str_pct": 62, "ground_str_pct": 10 },
-      "grappling_extended": { "top_time_pct": 22, "bottom_time_pct": 18, "ctrl_time_per15": 1.4, "pass_rate": 42, "reversal_rate": 28 }
+      "grappling_extended": { "top_time_pct": 22, "bottom_time_pct": 18, "ctrl_time_per15": 1.4, "pass_rate": 42, "reversal_rate": 28 },
+      "history_overrides": {
+        "Benoit Saint Denis": { "opp_quality": "contender" },
+        "Michael Chandler": { "opp_quality": "elite" },
+        "Conor McGregor": { "opp_quality": "elite" },
+        "Dan Hooker": { "opp_quality": "gatekeeper" },
+        "Max Holloway": { "opp_quality": "elite" }
+      }
     },
     {
       "id": 3,
@@ -71,7 +87,14 @@
       "weight_cut": "Moderate",
       "trader_notes": "Underrated grappling, dangerous from guard. Iron chin enables unconventional exchanges. Never backed down from contact. Fights better when hurt — pressure fighter who weaponizes damage.",
       "striking_extended": { "head_pct": 55, "body_pct": 25, "leg_pct": 20, "kd_landed": 8, "kd_suffered": 3, "clinch_str_pct": 32, "distance_str_pct": 58, "ground_str_pct": 10 },
-      "grappling_extended": { "top_time_pct": 30, "bottom_time_pct": 25, "ctrl_time_per15": 2.1, "pass_rate": 44, "reversal_rate": 38 }
+      "grappling_extended": { "top_time_pct": 30, "bottom_time_pct": 25, "ctrl_time_per15": 2.1, "pass_rate": 44, "reversal_rate": 38 },
+      "history_overrides": {
+        "Sean Strickland": { "opp_quality": "elite" },
+        "Israel Adesanya": { "opp_quality": "elite" },
+        "Robert Whittaker": { "opp_quality": "elite" },
+        "Derek Brunson": { "opp_quality": "gatekeeper" },
+        "Darren Till": { "opp_quality": "contender" }
+      }
     },
     {
       "id": 4,
@@ -89,7 +112,15 @@
       "weight_cut": "Minimal",
       "trader_notes": "Flashy counter-striker, exceptional lateral movement. Limited wrestling (0.51 TD/15). Vulnerable to grapplers and pressure fighters. Front-runner — performs best early when fresh.",
       "striking_extended": { "head_pct": 62, "body_pct": 22, "leg_pct": 16, "kd_landed": 10, "kd_suffered": 4, "clinch_str_pct": 18, "distance_str_pct": 74, "ground_str_pct": 8 },
-      "grappling_extended": { "top_time_pct": 12, "bottom_time_pct": 14, "ctrl_time_per15": 0.6, "pass_rate": 30, "reversal_rate": 20 }
+      "grappling_extended": { "top_time_pct": 12, "bottom_time_pct": 14, "ctrl_time_per15": 0.6, "pass_rate": 30, "reversal_rate": 20 },
+      "history_overrides": {
+        "Song Yadong": { "opp_quality": "contender" },
+        "Marlon Vera": { "opp_quality": "contender" },
+        "Aljamain Sterling": { "opp_quality": "elite" },
+        "Petr Yan": { "opp_quality": "elite" },
+        "Raulian Paiva": { "opp_quality": "gatekeeper" },
+        "Kris Moutinho": { "opp_quality": "gatekeeper" }
+      }
     },
     {
       "id": 5,
@@ -107,7 +138,14 @@
       "weight_cut": "Minimal",
       "trader_notes": "Highest TD volume in division at 7.33/15. Cardio freak — gets stronger every round. Late bloomer dynamic is real and tradeable. Early round striking is weakness before pace takes over.",
       "striking_extended": { "head_pct": 48, "body_pct": 30, "leg_pct": 22, "kd_landed": 2, "kd_suffered": 4, "clinch_str_pct": 42, "distance_str_pct": 44, "ground_str_pct": 14 },
-      "grappling_extended": { "top_time_pct": 55, "bottom_time_pct": 10, "ctrl_time_per15": 5.8, "pass_rate": 52, "reversal_rate": 18 }
+      "grappling_extended": { "top_time_pct": 55, "bottom_time_pct": 10, "ctrl_time_per15": 5.8, "pass_rate": 52, "reversal_rate": 18 },
+      "history_overrides": {
+        "Cory Sandhagen": { "opp_quality": "elite" },
+        "Sean O'Malley": { "opp_quality": "elite" },
+        "Umar Nurmagomedov": { "opp_quality": "elite" },
+        "Henry Cejudo": { "opp_quality": "elite" },
+        "Petr Yan": { "opp_quality": "elite" }
+      }
     },
     {
       "id": 6,
@@ -125,7 +163,15 @@
       "weight_cut": "Heavy Cutter",
       "trader_notes": "Excellent BJJ, dangerous sub game from guard. Striking has real holes vs elite level. Heavy cutter flag. Big name public inflation — consistently overpriced due to fanbase size.",
       "striking_extended": { "head_pct": 55, "body_pct": 28, "leg_pct": 17, "kd_landed": 5, "kd_suffered": 3, "clinch_str_pct": 30, "distance_str_pct": 55, "ground_str_pct": 15 },
-      "grappling_extended": { "top_time_pct": 28, "bottom_time_pct": 32, "ctrl_time_per15": 2.8, "pass_rate": 38, "reversal_rate": 44 }
+      "grappling_extended": { "top_time_pct": 28, "bottom_time_pct": 32, "ctrl_time_per15": 2.8, "pass_rate": 38, "reversal_rate": 44 },
+      "history_overrides": {
+        "Michael Chandler": { "opp_quality": "elite" },
+        "King Green": { "opp_quality": "gatekeeper" },
+        "Tony Ferguson": { "opp_quality": "gatekeeper" },
+        "Jared Gordon": { "opp_quality": "gatekeeper" },
+        "Jordan Leavitt": { "opp_quality": "gatekeeper" },
+        "Kazula Vargas": { "opp_quality": "unknown" }
+      }
     },
     {
       "id": 7,
@@ -143,7 +189,15 @@
       "weight_cut": "Moderate",
       "trader_notes": "Most submissions in UFC history. Dangerous everywhere — sub threats from bottom, KO power standing. Chin issues exposed at elite LW level (4 KO losses). High-variance fighter; fights emotionally which amplifies both ceiling and floor.",
       "striking_extended": { "head_pct": 58, "body_pct": 25, "leg_pct": 17, "kd_landed": 8, "kd_suffered": 6, "clinch_str_pct": 28, "distance_str_pct": 58, "ground_str_pct": 14 },
-      "grappling_extended": { "top_time_pct": 44, "bottom_time_pct": 28, "ctrl_time_per15": 3.8, "pass_rate": 56, "reversal_rate": 40 }
+      "grappling_extended": { "top_time_pct": 44, "bottom_time_pct": 28, "ctrl_time_per15": 3.8, "pass_rate": 56, "reversal_rate": 40 },
+      "history_overrides": {
+        "Max Holloway": { "opp_quality": "elite" },
+        "Mateusz Gamrot": { "opp_quality": "contender" },
+        "Michael Chandler": { "opp_quality": "elite" },
+        "Beneil Dariush": { "opp_quality": "contender" },
+        "Justin Gaethje": { "opp_quality": "elite" },
+        "Dustin Poirier": { "opp_quality": "elite" }
+      }
     },
     {
       "id": 8,
@@ -161,7 +215,14 @@
       "weight_cut": "Minimal",
       "trader_notes": "Elite pressure and leg kick volume. Iron chin — rarely stops fighting when hurt. Gets better in deep water which creates late-round betting angles. Elite competition exposure (Khabib, Makhachev, Oliveira) keeps market price honest.",
       "striking_extended": { "head_pct": 57, "body_pct": 30, "leg_pct": 13, "kd_landed": 14, "kd_suffered": 5, "clinch_str_pct": 24, "distance_str_pct": 65, "ground_str_pct": 11 },
-      "grappling_extended": { "top_time_pct": 18, "bottom_time_pct": 12, "ctrl_time_per15": 1.4, "pass_rate": 30, "reversal_rate": 22 }
+      "grappling_extended": { "top_time_pct": 18, "bottom_time_pct": 12, "ctrl_time_per15": 1.4, "pass_rate": 30, "reversal_rate": 22 },
+      "history_overrides": {
+        "Paddy Pimblett": { "opp_quality": "contender" },
+        "Rafael Fiziev": { "opp_quality": "contender" },
+        "Dustin Poirier": { "opp_quality": "elite" },
+        "Michael Chandler": { "opp_quality": "elite" },
+        "Tony Ferguson": { "opp_quality": "gatekeeper" }
+      }
     },
     {
       "id": 9,
@@ -179,7 +240,15 @@
       "weight_cut": "Minimal",
       "trader_notes": "Legitimate title contender with elite TD volume and cardio. Contested Makhachev early in his career — rematch is the market event to watch. Late bloomer tag applies: pace and output have steadily risen. Underpriced relative to skillset in non-title fights.",
       "striking_extended": { "head_pct": 52, "body_pct": 28, "leg_pct": 20, "kd_landed": 6, "kd_suffered": 2, "clinch_str_pct": 30, "distance_str_pct": 60, "ground_str_pct": 10 },
-      "grappling_extended": { "top_time_pct": 48, "bottom_time_pct": 14, "ctrl_time_per15": 4.4, "pass_rate": 58, "reversal_rate": 20 }
+      "grappling_extended": { "top_time_pct": 48, "bottom_time_pct": 14, "ctrl_time_per15": 4.4, "pass_rate": 58, "reversal_rate": 20 },
+      "history_overrides": {
+        "Dan Hooker": { "opp_quality": "contender" },
+        "Charles Oliveira": { "opp_quality": "elite" },
+        "Beneil Dariush": { "opp_quality": "contender" },
+        "Joaquim Silva": { "opp_quality": "gatekeeper" },
+        "Damir Ismagulov": { "opp_quality": "gatekeeper" },
+        "Joel Alvarez": { "opp_quality": "gatekeeper" }
+      }
     },
     {
       "id": 10,
@@ -197,7 +266,15 @@
       "weight_cut": "Moderate",
       "trader_notes": "Pressure grappler who controls pace and position. Decision machine — only 48% finish rate but controls every minute of fight time. Elite TD defense means he can dictate where the fight goes. Historically underrated; now correctly priced as champion.",
       "striking_extended": { "head_pct": 50, "body_pct": 30, "leg_pct": 20, "kd_landed": 3, "kd_suffered": 2, "clinch_str_pct": 38, "distance_str_pct": 50, "ground_str_pct": 12 },
-      "grappling_extended": { "top_time_pct": 52, "bottom_time_pct": 10, "ctrl_time_per15": 5.2, "pass_rate": 60, "reversal_rate": 14 }
+      "grappling_extended": { "top_time_pct": 52, "bottom_time_pct": 10, "ctrl_time_per15": 5.2, "pass_rate": 60, "reversal_rate": 14 },
+      "history_overrides": {
+        "Leon Edwards": { "opp_quality": "elite" },
+        "Gilbert Burns": { "opp_quality": "elite" },
+        "Sean Brady": { "opp_quality": "contender" },
+        "Vicente Luque": { "opp_quality": "contender" },
+        "Stephen Thompson": { "opp_quality": "elite" },
+        "Demian Maia": { "opp_quality": "gatekeeper" }
+      }
     },
     {
       "id": 11,
@@ -215,7 +292,14 @@
       "weight_cut": "Minimal",
       "trader_notes": "KO of the year pedigree vs Usman — southpaw check hook is legitimate. Well-rounded but not elite in any single area; wins through composure and output. Rematch with Muhammad is the defining market. Historically underdog-priced before title wins.",
       "striking_extended": { "head_pct": 52, "body_pct": 28, "leg_pct": 20, "kd_landed": 7, "kd_suffered": 3, "clinch_str_pct": 22, "distance_str_pct": 66, "ground_str_pct": 12 },
-      "grappling_extended": { "top_time_pct": 32, "bottom_time_pct": 16, "ctrl_time_per15": 2.8, "pass_rate": 42, "reversal_rate": 24 }
+      "grappling_extended": { "top_time_pct": 32, "bottom_time_pct": 16, "ctrl_time_per15": 2.8, "pass_rate": 42, "reversal_rate": 24 },
+      "history_overrides": {
+        "Colby Covington": { "opp_quality": "elite" },
+        "Kamaru Usman": { "opp_quality": "elite" },
+        "Nate Diaz": { "opp_quality": "contender" },
+        "Rafael Dos Anjos": { "opp_quality": "elite" },
+        "Gunnar Nelson": { "opp_quality": "gatekeeper" }
+      }
     },
     {
       "id": 12,
@@ -233,7 +317,15 @@
       "weight_cut": "Minimal",
       "trader_notes": "Fastest KO rate in WW division. Reaches full output early — front-runner flag means rounds 1-2 are peak danger. Both career losses came by KO, suggesting chin questions at elite level not yet fully answered. Watch line when elite wrestlers are matched against him.",
       "striking_extended": { "head_pct": 55, "body_pct": 28, "leg_pct": 17, "kd_landed": 11, "kd_suffered": 4, "clinch_str_pct": 18, "distance_str_pct": 72, "ground_str_pct": 10 },
-      "grappling_extended": { "top_time_pct": 14, "bottom_time_pct": 18, "ctrl_time_per15": 0.8, "pass_rate": 28, "reversal_rate": 24 }
+      "grappling_extended": { "top_time_pct": 14, "bottom_time_pct": 18, "ctrl_time_per15": 0.8, "pass_rate": 28, "reversal_rate": 24 },
+      "history_overrides": {
+        "Belal Muhammad": { "opp_quality": "elite" },
+        "Gilbert Burns": { "opp_quality": "elite" },
+        "Kevin Holland": { "opp_quality": "contender" },
+        "Bassil Hafez": { "opp_quality": "unknown" },
+        "Randy Brown": { "opp_quality": "gatekeeper" },
+        "Danny Roberts": { "opp_quality": "unknown" }
+      }
     },
     {
       "id": 13,
@@ -251,7 +343,15 @@
       "weight_cut": "Moderate",
       "trader_notes": "Generationally complete skillset — elite in every dimension simultaneously. Reach (84\") and intelligence create near-unsolvable puzzles. Only technical loss (Hamill, 2009) was a DQ; effectively unbeaten. Father time is the only real market risk. Heavily favorited in all markets; line movement on Jones fights is rare and significant when it occurs.",
       "striking_extended": { "head_pct": 44, "body_pct": 32, "leg_pct": 24, "kd_landed": 10, "kd_suffered": 2, "clinch_str_pct": 36, "distance_str_pct": 54, "ground_str_pct": 10 },
-      "grappling_extended": { "top_time_pct": 42, "bottom_time_pct": 10, "ctrl_time_per15": 3.6, "pass_rate": 62, "reversal_rate": 16 }
+      "grappling_extended": { "top_time_pct": 42, "bottom_time_pct": 10, "ctrl_time_per15": 3.6, "pass_rate": 62, "reversal_rate": 16 },
+      "history_overrides": {
+        "Stipe Miocic": { "opp_quality": "elite" },
+        "Ciryl Gane": { "opp_quality": "elite" },
+        "Dominick Reyes": { "opp_quality": "contender" },
+        "Thiago Santos": { "opp_quality": "contender" },
+        "Anthony Smith": { "opp_quality": "contender" },
+        "Alexander Gustafsson": { "opp_quality": "elite" }
+      }
     },
     {
       "id": 14,
@@ -269,7 +369,47 @@
       "weight_cut": "Minimal",
       "trader_notes": "Highest finishing rate among elite HW contenders. Extremely fast for the weight class — elite cardio is a major edge over aging division. Knee injury history warrants monitoring (suffered during Blaydes fight at UFC 304). Jones unification fight is the market event; currently priced as underdog but skillset gap is smaller than public believes.",
       "striking_extended": { "head_pct": 52, "body_pct": 30, "leg_pct": 18, "kd_landed": 9, "kd_suffered": 3, "clinch_str_pct": 26, "distance_str_pct": 62, "ground_str_pct": 12 },
-      "grappling_extended": { "top_time_pct": 28, "bottom_time_pct": 16, "ctrl_time_per15": 2.2, "pass_rate": 44, "reversal_rate": 28 }
+      "grappling_extended": { "top_time_pct": 28, "bottom_time_pct": 16, "ctrl_time_per15": 2.2, "pass_rate": 44, "reversal_rate": 28 },
+      "history_overrides": {
+        "Curtis Blaydes": { "opp_quality": "elite" },
+        "Sergei Pavlovich": { "opp_quality": "elite" },
+        "Marcin Tybura": { "opp_quality": "gatekeeper" },
+        "Alexander Volkov": { "opp_quality": "contender" },
+        "Serghei Spivac": { "opp_quality": "gatekeeper" },
+        "Andrei Arlovski": { "opp_quality": "gatekeeper" }
+      }
+    }
+  ],
+  "event_overrides": [
+    {
+      "event_name": "UFC 314",
+      "fights": [
+        { "f1": "Islam Makhachev",   "f2": "Dustin Poirier",      "weigh_in": "made", "judges": ["Sal D'Amato", "Derek Cleary", "Dave Hagen"] },
+        { "f1": "Dricus du Plessis", "f2": "Sean Strickland",     "weigh_in": "made", "judges": ["Sal D'Amato", "Derek Cleary", "Dave Hagen"] },
+        { "f1": "Justin Gaethje",    "f2": "Dan Hooker",          "weigh_in": "made", "judges": ["Sal D'Amato", "Derek Cleary", "Dave Hagen"] },
+        { "f1": "Paddy Pimblett",    "f2": "Tony Ferguson",       "weigh_in": "made", "judges": ["Sal D'Amato", "Derek Cleary", "Dave Hagen"] }
+      ]
+    },
+    {
+      "event_name": "UFC 315",
+      "fights": [
+        { "f1": "Arman Tsarukyan",      "f2": "Justin Gaethje",  "weigh_in": null, "judges": ["Sal D'Amato", "Ron McCarthy", "Chris Lee"] },
+        { "f1": "Jack Della Maddalena", "f2": "Gilbert Burns",   "weigh_in": null, "judges": ["Sal D'Amato", "Ron McCarthy", "Chris Lee"] }
+      ]
+    },
+    {
+      "event_name": "UFC 316",
+      "fights": [
+        { "f1": "Merab Dvalishvili", "f2": "Umar Nurmagomedov", "weigh_in": null, "judges": ["Sal D'Amato", "Derek Cleary", "Mike Bell"] },
+        { "f1": "Dricus du Plessis", "f2": "Paulo Costa",        "weigh_in": null, "judges": ["Sal D'Amato", "Derek Cleary", "Mike Bell"] }
+      ]
+    },
+    {
+      "event_name": "UFC 317",
+      "fights": [
+        { "f1": "Jon Jones",       "f2": "Tom Aspinall",    "weigh_in": null, "judges": ["Sal D'Amato", "Ron McCarthy", "Dave Hagen"] },
+        { "f1": "Islam Makhachev", "f2": "Charles Oliveira", "weigh_in": null, "judges": ["Sal D'Amato", "Ron McCarthy", "Dave Hagen"] }
+      ]
     }
   ]
 }
