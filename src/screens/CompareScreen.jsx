@@ -17,11 +17,11 @@ export function CompareScreen({onBack}) {
   const clKey=f1&&f2?`${Math.min(f1.id,f2.id)}_${Math.max(f1.id,f2.id)}`:'default';
   const rows=useMemo(()=>f1&&f2?[
     {cat:'RECORD',  l:'Overall Record',       v1:`${f1.wins}-${f1.losses}`,v2:`${f2.wins}-${f2.losses}`,n1:f1.wins,n2:f2.wins,higherIsBetter:true},
-    {cat:'RECORD',  l:'Win Streak',            v1:f1.streak,    v2:f2.streak,    n1:f1.streak,   n2:f2.streak,    hi:true},
+    {cat:'RECORD',  l:'Win Streak',            v1:f1.streak,    v2:f2.streak,    n1:f1.streak,   n2:f2.streak,    higherIsBetter:true},
     {cat:'RECORD',  l:'Finish Rate %',         v1:f1.finish_rate+'%',v2:f2.finish_rate+'%',n1:f1.finish_rate,n2:f2.finish_rate,higherIsBetter:true},
-    {cat:'STRIKING',l:'Sig Strikes / Min',     v1:f1.striking.slpm,    v2:f2.striking.slpm,    n1:f1.striking.slpm,  n2:f2.striking.slpm, hi:true},
+    {cat:'STRIKING',l:'Sig Strikes / Min',     v1:f1.striking.slpm,    v2:f2.striking.slpm,    n1:f1.striking.slpm,  n2:f2.striking.slpm, higherIsBetter:true},
     {cat:'STRIKING',l:'Striking Accuracy %',   v1:f1.striking.str_acc+'%',v2:f2.striking.str_acc+'%',n1:f1.striking.str_acc,n2:f2.striking.str_acc,higherIsBetter:true},
-    {cat:'STRIKING',l:'Str Absorbed / Min',    v1:f1.striking.sapm,    v2:f2.striking.sapm,    n1:f1.striking.sapm,  n2:f2.striking.sapm, hi:false},
+    {cat:'STRIKING',l:'Str Absorbed / Min',    v1:f1.striking.sapm,    v2:f2.striking.sapm,    n1:f1.striking.sapm,  n2:f2.striking.sapm, higherIsBetter:false},
     {cat:'STRIKING',l:'Striking Defense %',    v1:f1.striking.str_def+'%',v2:f2.striking.str_def+'%',n1:f1.striking.str_def,n2:f2.striking.str_def,higherIsBetter:true},
     {cat:'STRIKING',l:'Knockdowns Landed',     v1:f1.striking.kd_landed,v2:f2.striking.kd_landed,n1:f1.striking.kd_landed,n2:f2.striking.kd_landed,higherIsBetter:true},
     {cat:'GRAPPLING',l:'TD Attempts / 15',     v1:f1.grappling.td_per15,v2:f2.grappling.td_per15,n1:f1.grappling.td_per15,n2:f2.grappling.td_per15,higherIsBetter:true},

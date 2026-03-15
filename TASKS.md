@@ -10,8 +10,8 @@
 
 ## Current Sprint
 
-**Branch:** `feature/phase-6-live-data`
-**Goal:** Live Data Layer — UFCStats build-time scraper replaces all hand-authored fighter/event data
+**Branch:** `feature/phase-7-live-odds` (not yet cut)
+**Goal:** Live Odds Integration — The Odds API hook, live moneylines in TabMarket and MarketsScreen
 
 ### Phase 6 — Live Data Layer
 - [x] `scripts/fighter-seed.json` — 14 fighters with editorial fields + `ufcstats_url`
@@ -31,7 +31,7 @@
 - [x] ESLint clean (0 errors)
 - [x] All 32 tests passing
 - [x] Version bumped to v0.6.0, menu badge updated to `LIVE DATA`
-- [ ] Commit and merge to `master`, tag v0.6.0
+- [x] Commit and merge to `master`, tag v0.6.0
 
 ---
 

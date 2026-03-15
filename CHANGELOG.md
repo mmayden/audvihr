@@ -6,13 +6,20 @@ All notable changes to this project. Format: [version] — date — description.
 
 ## [Unreleased]
 
+---
+
+## [0.6.1] — 2026-03-15
+
 ### Added
 - `src/components/ErrorBoundary.jsx` — class component error boundary; wraps all screens in `App.jsx` so a single screen crash cannot take down the entire app; includes RETRY button
 - `src/utils/date.js` — shared `daysUntil` / `isPast` utilities extracted from `CalendarScreen` and `MarketsScreen` (was duplicated); `src/utils/date.test.js` with 6 tests
 
+### Fixed
+- `CompareScreen`: row property `hi` was silently ignored at line 75 (`r.higherIsBetter` read); all rows now consistently use `higherIsBetter` — Win/lose highlights now correctly apply to Win Streak, SLpM, and Str Absorbed rows
+
 ### Code Quality
 - `MarketsScreen`: add `isNaN` guard to `parseInt(p.f1_ml)` (CLAUDE.md pattern — maintain `parseInt` with `isNaN` guard)
-- `CompareScreen`: rename `f1id`/`f2id` → `fighter1Id`/`fighter2Id`; rename row property `hi` → `higherIsBetter`
+- `CompareScreen`: rename `f1id`/`f2id` → `fighter1Id`/`fighter2Id`
 - `FighterScreen`: rename `wf` → `weightFilter`; pre-compute `q = search.toLowerCase()` outside the inner loop
 - `ChecklistPanel`: wrap `done` in `useMemo([checked])`; wrap `toggle` / `reset` in `useCallback`; memoize `cats`; add `useCallback` import
 
