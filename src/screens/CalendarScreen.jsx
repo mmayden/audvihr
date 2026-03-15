@@ -2,20 +2,13 @@ import { useState, useMemo } from 'react';
 import { EVENTS } from '../data/events';
 import { ORG_COLOR } from '../constants/qualifiers';
 import { FighterName } from '../components/FighterName';
+import { daysUntil, isPast } from '../utils/date';
 
 /** Format an ISO date string as a human-readable event date (e.g. 'Sat, Apr 12, 2026'). */
 function fmtDate(dateStr) {
   return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', {
     weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
   });
-}
-
-/** Returns true if the event date is in the past relative to today. */
-function isPast(dateStr, today) { return new Date(dateStr) < today; }
-
-/** Returns days until an event date from the given today reference. */
-function daysUntil(dateStr, today) {
-  return Math.round((new Date(dateStr) - today) / (1000 * 60 * 60 * 24));
 }
 
 /** Returns a compact countdown label for an event date. */

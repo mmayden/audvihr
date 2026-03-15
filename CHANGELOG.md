@@ -6,10 +6,18 @@ All notable changes to this project. Format: [version] — date — description.
 
 ## [Unreleased]
 
+### Added
+- `src/components/ErrorBoundary.jsx` — class component error boundary; wraps all screens in `App.jsx` so a single screen crash cannot take down the entire app; includes RETRY button
+- `src/utils/date.js` — shared `daysUntil` / `isPast` utilities extracted from `CalendarScreen` and `MarketsScreen` (was duplicated); `src/utils/date.test.js` with 6 tests
+
 ### Code Quality
-- `qualifiers.js`: `ORG_COLOR` hex values replaced with CSS variables (`var(--red)`, `var(--blue)`, `var(--orange)`)
-- `checklist.js`: `cc` field hex colors replaced with CSS variables (`var(--accent)`, `var(--green)`, `var(--purple)`, `var(--red)`, `var(--blue)`)
-- `CalendarScreen`: `'#444'` fallback on `ORG_COLOR` badge replaced with `var(--border2)`
+- `MarketsScreen`: add `isNaN` guard to `parseInt(p.f1_ml)` (CLAUDE.md pattern — maintain `parseInt` with `isNaN` guard)
+- `CompareScreen`: rename `f1id`/`f2id` → `fighter1Id`/`fighter2Id`; rename row property `hi` → `higherIsBetter`
+- `FighterScreen`: rename `wf` → `weightFilter`; pre-compute `q = search.toLowerCase()` outside the inner loop
+- `ChecklistPanel`: wrap `done` in `useMemo([checked])`; wrap `toggle` / `reset` in `useCallback`; memoize `cats`; add `useCallback` import
+
+### Testing
+- `ChecklistPanel.test.jsx` — 8 tests covering: renders all 17 items and 5 categories, progress counter, toggle on/off, reset, localStorage persistence, per-storageKey isolation
 
 ---
 

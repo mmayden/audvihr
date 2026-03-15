@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { MARKETS } from '../data/markets';
 import { useWatchlist } from '../hooks/useWatchlist';
 import { mlToImplied } from '../utils/odds';
+import { daysUntil } from '../utils/date';
 
 const SORT_LABELS = ['CLOSING', 'VOLUME', 'EVENT'];
 const PLATFORMS = ['ALL', 'Polymarket', 'Kalshi', 'Novig'];
@@ -30,11 +31,6 @@ function computeArb(market) {
   const sum = bestF1 + bestF2;
   const edge = parseFloat((100 - sum).toFixed(1));
   return { bestF1: bestF1.toFixed(1), bestF2: bestF2.toFixed(1), sum: sum.toFixed(1), edge, hasArb: edge > 0 };
-}
-
-/** Returns days until a date string from the given today reference. */
-function daysUntil(dateStr, today) {
-  return Math.round((new Date(dateStr) - today) / (1000 * 60 * 60 * 24));
 }
 
 /** Returns a compact countdown label for a closing date. */
@@ -177,7 +173,8 @@ export function MarketsScreen({ onBack }) {
                   {market.platforms.map((p) => {
                     const f1Impl = mlToImplied(p.f1_ml);
                     const f2Impl = mlToImplied(p.f2_ml);
-                    const f1IsFav = parseInt(p.f1_ml) < 0;
+                    const f1Num = parseInt(p.f1_ml);
+                    const f1IsFav = !isNaN(f1Num) && f1Num < 0;
                     return (
                       <div className="mkt-platform-row" key={p.name}>
                         <span className={`mkt-platform-badge platform-${p.name.toLowerCase()}`}>

@@ -10,27 +10,27 @@ import { ChecklistPanel } from '../components/ChecklistPanel';
  * @param {function} onBack - callback invoked when the back button is clicked
  */
 export function CompareScreen({onBack}) {
-  const [f1id,setF1id]=useState('');
-  const [f2id,setF2id]=useState('');
-  const f1=FIGHTERS.find(f=>f.id===parseInt(f1id));
-  const f2=FIGHTERS.find(f=>f.id===parseInt(f2id));
+  const [fighter1Id, setFighter1Id] = useState('');
+  const [fighter2Id, setFighter2Id] = useState('');
+  const f1 = FIGHTERS.find(f => f.id === parseInt(fighter1Id));
+  const f2 = FIGHTERS.find(f => f.id === parseInt(fighter2Id));
   const clKey=f1&&f2?`${Math.min(f1.id,f2.id)}_${Math.max(f1.id,f2.id)}`:'default';
   const rows=useMemo(()=>f1&&f2?[
-    {cat:'RECORD',  l:'Overall Record',       v1:`${f1.wins}-${f1.losses}`,v2:`${f2.wins}-${f2.losses}`,n1:f1.wins,n2:f2.wins,hi:true},
+    {cat:'RECORD',  l:'Overall Record',       v1:`${f1.wins}-${f1.losses}`,v2:`${f2.wins}-${f2.losses}`,n1:f1.wins,n2:f2.wins,higherIsBetter:true},
     {cat:'RECORD',  l:'Win Streak',            v1:f1.streak,    v2:f2.streak,    n1:f1.streak,   n2:f2.streak,    hi:true},
-    {cat:'RECORD',  l:'Finish Rate %',         v1:f1.finish_rate+'%',v2:f2.finish_rate+'%',n1:f1.finish_rate,n2:f2.finish_rate,hi:true},
+    {cat:'RECORD',  l:'Finish Rate %',         v1:f1.finish_rate+'%',v2:f2.finish_rate+'%',n1:f1.finish_rate,n2:f2.finish_rate,higherIsBetter:true},
     {cat:'STRIKING',l:'Sig Strikes / Min',     v1:f1.striking.slpm,    v2:f2.striking.slpm,    n1:f1.striking.slpm,  n2:f2.striking.slpm, hi:true},
-    {cat:'STRIKING',l:'Striking Accuracy %',   v1:f1.striking.str_acc+'%',v2:f2.striking.str_acc+'%',n1:f1.striking.str_acc,n2:f2.striking.str_acc,hi:true},
+    {cat:'STRIKING',l:'Striking Accuracy %',   v1:f1.striking.str_acc+'%',v2:f2.striking.str_acc+'%',n1:f1.striking.str_acc,n2:f2.striking.str_acc,higherIsBetter:true},
     {cat:'STRIKING',l:'Str Absorbed / Min',    v1:f1.striking.sapm,    v2:f2.striking.sapm,    n1:f1.striking.sapm,  n2:f2.striking.sapm, hi:false},
-    {cat:'STRIKING',l:'Striking Defense %',    v1:f1.striking.str_def+'%',v2:f2.striking.str_def+'%',n1:f1.striking.str_def,n2:f2.striking.str_def,hi:true},
-    {cat:'STRIKING',l:'Knockdowns Landed',     v1:f1.striking.kd_landed,v2:f2.striking.kd_landed,n1:f1.striking.kd_landed,n2:f2.striking.kd_landed,hi:true},
-    {cat:'GRAPPLING',l:'TD Attempts / 15',     v1:f1.grappling.td_per15,v2:f2.grappling.td_per15,n1:f1.grappling.td_per15,n2:f2.grappling.td_per15,hi:true},
-    {cat:'GRAPPLING',l:'TD Accuracy %',        v1:f1.grappling.td_acc+'%',v2:f2.grappling.td_acc+'%',n1:f1.grappling.td_acc,n2:f2.grappling.td_acc,hi:true},
-    {cat:'GRAPPLING',l:'TD Defense %',         v1:f1.grappling.td_def+'%',v2:f2.grappling.td_def+'%',n1:f1.grappling.td_def,n2:f2.grappling.td_def,hi:true},
-    {cat:'GRAPPLING',l:'Sub Avg / 15 Min',     v1:f1.grappling.sub_per15,v2:f2.grappling.sub_per15,n1:f1.grappling.sub_per15,n2:f2.grappling.sub_per15,hi:true},
-    {cat:'GRAPPLING',l:'Ctrl Time / 15 Min',   v1:f1.grappling.ctrl_time_per15,v2:f2.grappling.ctrl_time_per15,n1:f1.grappling.ctrl_time_per15,n2:f2.grappling.ctrl_time_per15,hi:true},
-    {cat:'PHYSICAL', l:'Reach',                v1:f1.reach,v2:f2.reach,n1:parseInt(f1.reach),n2:parseInt(f2.reach),hi:true},
-    {cat:'PHYSICAL', l:'Age',                  v1:f1.age+' yrs',v2:f2.age+' yrs',n1:f1.age,n2:f2.age,hi:false},
+    {cat:'STRIKING',l:'Striking Defense %',    v1:f1.striking.str_def+'%',v2:f2.striking.str_def+'%',n1:f1.striking.str_def,n2:f2.striking.str_def,higherIsBetter:true},
+    {cat:'STRIKING',l:'Knockdowns Landed',     v1:f1.striking.kd_landed,v2:f2.striking.kd_landed,n1:f1.striking.kd_landed,n2:f2.striking.kd_landed,higherIsBetter:true},
+    {cat:'GRAPPLING',l:'TD Attempts / 15',     v1:f1.grappling.td_per15,v2:f2.grappling.td_per15,n1:f1.grappling.td_per15,n2:f2.grappling.td_per15,higherIsBetter:true},
+    {cat:'GRAPPLING',l:'TD Accuracy %',        v1:f1.grappling.td_acc+'%',v2:f2.grappling.td_acc+'%',n1:f1.grappling.td_acc,n2:f2.grappling.td_acc,higherIsBetter:true},
+    {cat:'GRAPPLING',l:'TD Defense %',         v1:f1.grappling.td_def+'%',v2:f2.grappling.td_def+'%',n1:f1.grappling.td_def,n2:f2.grappling.td_def,higherIsBetter:true},
+    {cat:'GRAPPLING',l:'Sub Avg / 15 Min',     v1:f1.grappling.sub_per15,v2:f2.grappling.sub_per15,n1:f1.grappling.sub_per15,n2:f2.grappling.sub_per15,higherIsBetter:true},
+    {cat:'GRAPPLING',l:'Ctrl Time / 15 Min',   v1:f1.grappling.ctrl_time_per15,v2:f2.grappling.ctrl_time_per15,n1:f1.grappling.ctrl_time_per15,n2:f2.grappling.ctrl_time_per15,higherIsBetter:true},
+    {cat:'PHYSICAL', l:'Reach',                v1:f1.reach,v2:f2.reach,n1:parseInt(f1.reach),n2:parseInt(f2.reach),higherIsBetter:true},
+    {cat:'PHYSICAL', l:'Age',                  v1:f1.age+' yrs',v2:f2.age+' yrs',n1:f1.age,n2:f2.age,higherIsBetter:false},
   ]:[], [f1, f2]);
   return (
     <div className="app">
@@ -41,12 +41,12 @@ export function CompareScreen({onBack}) {
       </div>
       <div className="compare-layout">
         <div className="compare-selector">
-          <select className="compare-select" value={f1id} onChange={e=>setF1id(e.target.value)}>
+          <select className="compare-select" value={fighter1Id} onChange={e=>setFighter1Id(e.target.value)}>
             <option value="">— Fighter 1 —</option>
             {FIGHTERS.map(f=><option key={f.id} value={f.id}>{f.name} ({f.record})</option>)}
           </select>
           <span className="vs-text">VS</span>
-          <select className="compare-select" value={f2id} onChange={e=>setF2id(e.target.value)}>
+          <select className="compare-select" value={fighter2Id} onChange={e=>setFighter2Id(e.target.value)}>
             <option value="">— Fighter 2 —</option>
             {FIGHTERS.map(f=><option key={f.id} value={f.id}>{f.name} ({f.record})</option>)}
           </select>
@@ -72,7 +72,7 @@ export function CompareScreen({onBack}) {
                   <thead><tr><th style={{textAlign:'left',width:'38%'}}>F1</th><th className="center" style={{width:'24%'}}>STAT</th><th style={{textAlign:'right',width:'38%'}}>F2</th></tr></thead>
                   <tbody>{rows.map((r,i)=>{
                     const sc=i===0||rows[i-1].cat!==r.cat;
-                    const tie=r.n1===r.n2, f1w=r.hi?r.n1>r.n2:r.n1<r.n2;
+                    const tie=r.n1===r.n2, f1w=r.higherIsBetter?r.n1>r.n2:r.n1<r.n2;
                     return <Fragment key={i}>
                       {sc&&<tr className="cat-row"><td colSpan={3}>{r.cat}</td></tr>}
                       <tr>

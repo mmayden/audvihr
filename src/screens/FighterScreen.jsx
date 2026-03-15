@@ -20,14 +20,17 @@ const WEIGHT_FILTERS = ['ALL', ...new Set(FIGHTERS.map(f => f.weight))];
  * @param {object|null} initialFighter - fighter object to pre-select on mount
  */
 export function FighterScreen({onBack, initialFighter}) {
-  const [search,setSearch]=useState('');
-  const [wf,setWf]=useState('ALL');
-  const [sel,setSel]=useState(initialFighter||FIGHTERS[0]);
-  const [tab,setTab]=useState('OVERVIEW');
-  const filtered=useMemo(()=>FIGHTERS.filter(f=>{
-    const s=search.toLowerCase();
-    return (f.name.toLowerCase().includes(s)||f.nickname.toLowerCase().includes(s))&&(wf==='ALL'||f.weight===wf);
-  }),[search,wf]);
+  const [search, setSearch] = useState('');
+  const [weightFilter, setWeightFilter] = useState('ALL');
+  const [sel, setSel] = useState(initialFighter || FIGHTERS[0]);
+  const [tab, setTab] = useState('OVERVIEW');
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase();
+    return FIGHTERS.filter(f =>
+      (f.name.toLowerCase().includes(q) || f.nickname.toLowerCase().includes(q)) &&
+      (weightFilter === 'ALL' || f.weight === weightFilter)
+    );
+  }, [search, weightFilter]);
   const pick = (f) => { setSel(f); setTab('OVERVIEW'); };
   const ac = sel ? ARCH_COLORS[sel.archetype] : null;
   return (
@@ -41,7 +44,7 @@ export function FighterScreen({onBack, initialFighter}) {
         <div className="sidebar">
           <div className="sidebar-header">ROSTER — {filtered.length}</div>
           <div className="sidebar-search"><input className="sidebar-input" placeholder="Search..." value={search} onChange={e=>setSearch(e.target.value)}/></div>
-          <div className="sidebar-filters">{WEIGHT_FILTERS.map(w=><button key={w} className={`filter-chip ${wf===w?'on':''}`} onClick={()=>setWf(w)}>{w==='ALL'?'ALL':w.split(' ')[0].toUpperCase()}</button>)}</div>
+          <div className="sidebar-filters">{WEIGHT_FILTERS.map(w=><button key={w} className={`filter-chip ${weightFilter===w?'on':''}`} onClick={()=>setWeightFilter(w)}>{w==='ALL'?'ALL':w.split(' ')[0].toUpperCase()}</button>)}</div>
           <div className="sidebar-list">{filtered.map(f=>(
             <div key={f.id} className={`sidebar-fighter ${sel?.id===f.id?'active':''}`} onClick={()=>pick(f)}>
               <div className="sf-name">{f.name}</div>

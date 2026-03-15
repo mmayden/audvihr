@@ -1,4 +1,4 @@
-import { useMemo, Fragment } from 'react';
+import { useMemo, useCallback, Fragment } from 'react';
 import { CHECKLIST } from '../constants/checklist';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
@@ -9,11 +9,11 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
  */
 export function ChecklistPanel({storageKey}) {
   const init = useMemo(()=>Object.fromEntries(CHECKLIST.map(i=>[i.id,false])),[]);
-  const [checked,setChecked] = useLocalStorage('cl_'+storageKey, init);
-  const done = Object.values(checked).filter(Boolean).length;
-  const toggle = id => setChecked(p=>({...p,[id]:!p[id]}));
-  const reset = () => setChecked(Object.fromEntries(CHECKLIST.map(i=>[i.id,false])));
-  const cats = [...new Set(CHECKLIST.map(i=>i.cat))];
+  const [checked, setChecked] = useLocalStorage('cl_' + storageKey, init);
+  const done = useMemo(() => Object.values(checked).filter(Boolean).length, [checked]);
+  const toggle = useCallback(id => setChecked(p => ({...p, [id]: !p[id]})), [setChecked]);
+  const reset = useCallback(() => setChecked(Object.fromEntries(CHECKLIST.map(i => [i.id, false]))), [setChecked]);
+  const cats = useMemo(() => [...new Set(CHECKLIST.map(i => i.cat))], []);
   return (
     <>
       <div className="cl-header"><span>TRADE CHECKLIST</span><button className="cl-reset" onClick={reset}>RESET</button></div>
