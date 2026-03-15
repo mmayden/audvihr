@@ -3,6 +3,57 @@ import { MARKETS } from '../data/markets';
 import { useWatchlist } from '../hooks/useWatchlist';
 import { mlToImplied } from '../utils/odds';
 
+const SORT_LABELS = ['CLOSING', 'VOLUME', 'EVENT'];
+const PLATFORMS = ['ALL', 'Polymarket', 'Kalshi', 'Novig'];
+
+/** Format a USD volume number as a compact string (e.g. $1.2M, $340K). */
+function fmtVolume(n) {
+  if (n >= 1000000) return `$${(n / 1000000).toFixed(1)}M`;
+  return `$${Math.round(n / 1000)}K`;
+}
+
+/** Sum all platform volumes for a market. */
+function totalVolume(market) {
+  return market.platforms.reduce((acc, p) => acc + p.volume, 0);
+}
+
+/**
+ * Compute cross-platform arbitrage data for a market.
+ * Arb exists when bestF1Implied + bestF2Implied < 100.
+ * "Best" = lowest implied probability = best available price for bettors.
+ */
+function computeArb(market) {
+  const f1Implieds = market.platforms.map((p) => parseFloat(mlToImplied(p.f1_ml)) || 100);
+  const f2Implieds = market.platforms.map((p) => parseFloat(mlToImplied(p.f2_ml)) || 100);
+  const bestF1 = Math.min(...f1Implieds);
+  const bestF2 = Math.min(...f2Implieds);
+  const sum = bestF1 + bestF2;
+  const edge = parseFloat((100 - sum).toFixed(1));
+  return { bestF1: bestF1.toFixed(1), bestF2: bestF2.toFixed(1), sum: sum.toFixed(1), edge, hasArb: edge > 0 };
+}
+
+/** Returns days until a date string from the given today reference. */
+function daysUntil(dateStr, today) {
+  return Math.round((new Date(dateStr) - today) / (1000 * 60 * 60 * 24));
+}
+
+/** Returns a compact countdown label for a closing date. */
+function countdown(dateStr, today) {
+  const d = daysUntil(dateStr, today);
+  if (d < 0) return 'CLOSED';
+  if (d === 0) return 'TODAY';
+  if (d === 1) return '1D';
+  return `${d}D`;
+}
+
+/** Returns a CSS color variable for a closing date urgency. */
+function countdownColor(dateStr, today) {
+  const d = daysUntil(dateStr, today);
+  if (d < 0) return 'var(--text-dim)';
+  if (d <= 7) return 'var(--accent)';
+  return 'var(--green)';
+}
+
 /**
  * MarketsScreen — prediction market dashboard.
  * Displays active UFC markets across Polymarket, Kalshi, and Novig with:
@@ -21,51 +72,12 @@ export function MarketsScreen({ onBack }) {
   const [watchedOnly, setWatchedOnly]       = useState(false);
   const [sortKey, setSortKey]               = useState('CLOSING');
 
-  const SORT_LABELS = ['CLOSING', 'VOLUME', 'EVENT'];
   const cycleSort = () => setSortKey((k) => {
     const i = SORT_LABELS.indexOf(k);
     return SORT_LABELS[(i + 1) % SORT_LABELS.length];
   });
 
   const today = useMemo(() => { const d = new Date(); d.setHours(0,0,0,0); return d; }, []);
-
-  function daysUntil(dateStr) {
-    return Math.round((new Date(dateStr) - today) / (1000 * 60 * 60 * 24));
-  }
-  function countdown(dateStr) {
-    const d = daysUntil(dateStr);
-    if (d < 0) return 'CLOSED';
-    if (d === 0) return 'TODAY';
-    if (d === 1) return '1D';
-    return `${d}D`;
-  }
-  function countdownColor(dateStr) {
-    const d = daysUntil(dateStr);
-    if (d < 0) return 'var(--text-dim)';
-    if (d <= 7) return 'var(--accent)';
-    return 'var(--green)';
-  }
-  function fmtVolume(n) {
-    if (n >= 1000000) return `$${(n / 1000000).toFixed(1)}M`;
-    return `$${Math.round(n / 1000)}K`;
-  }
-
-  // Compute arbitrage data for a market.
-  // Arb exists when bestF1Implied + bestF2Implied < 100.
-  // "Best" = lowest implied probability = best available price for bettors.
-  function computeArb(market) {
-    const f1Implieds = market.platforms.map((p) => parseFloat(mlToImplied(p.f1_ml)) || 100);
-    const f2Implieds = market.platforms.map((p) => parseFloat(mlToImplied(p.f2_ml)) || 100);
-    const bestF1 = Math.min(...f1Implieds);
-    const bestF2 = Math.min(...f2Implieds);
-    const sum = bestF1 + bestF2;
-    const edge = parseFloat((100 - sum).toFixed(1));
-    return { bestF1: bestF1.toFixed(1), bestF2: bestF2.toFixed(1), sum: sum.toFixed(1), edge, hasArb: edge > 0 };
-  }
-
-  function totalVolume(market) {
-    return market.platforms.reduce((acc, p) => acc + p.volume, 0);
-  }
 
   const filtered = useMemo(() => {
     let list = MARKETS.filter((m) => {
@@ -79,8 +91,6 @@ export function MarketsScreen({ onBack }) {
     if (sortKey === 'EVENT')   list = [...list].sort((a, b) => new Date(a.eventDate) - new Date(b.eventDate));
     return list;
   }, [platformFilter, titleOnly, watchedOnly, sortKey, isWatched]);
-
-  const platforms = ['ALL', 'Polymarket', 'Kalshi', 'Novig'];
 
   return (
     <div className="app">
@@ -96,7 +106,7 @@ export function MarketsScreen({ onBack }) {
       <div className="compare-layout">
         {/* Filter + sort bar */}
         <div className="markets-filterbar">
-          {platforms.map((p) => (
+          {PLATFORMS.map((p) => (
             <button
               key={p}
               className={`filter-chip ${platformFilter === p ? 'on' : ''}`}
@@ -155,8 +165,8 @@ export function MarketsScreen({ onBack }) {
                     </div>
                   </div>
                   <div className="mkt-header-right">
-                    <span className="mkt-countdown" style={{ color: countdownColor(market.closing) }}>
-                      {countdown(market.closing)}
+                    <span className="mkt-countdown" style={{ color: countdownColor(market.closing, today) }}>
+                      {countdown(market.closing, today)}
                     </span>
                     <span className="mkt-vol-total">{fmtVolume(vol)} VOL</span>
                   </div>

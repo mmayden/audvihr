@@ -7,8 +7,8 @@ import { MenuScreen } from './screens/MenuScreen';
 import { FighterScreen } from './screens/FighterScreen';
 import { CompareScreen } from './screens/CompareScreen';
 import { CalendarScreen } from './screens/CalendarScreen';
-import { ComingSoon } from './screens/ComingSoon';
 import { MarketsScreen } from './screens/MarketsScreen';
+import { NewsScreen } from './screens/NewsScreen';
 
 export const App = () => {
   const [screen, setScreen] = useState('menu');
@@ -21,6 +21,6 @@ export const App = () => {
   if (screen === 'compare')  return <CompareScreen onBack={backToMenu} />;
   if (screen === 'calendar') return <CalendarScreen onBack={backToMenu} onGoFighter={goFighter} />;
   if (screen === 'markets')  return <MarketsScreen onBack={backToMenu} />;
-  if (screen === 'news')     return <ComingSoon label="FIGHTER NEWS" onBack={backToMenu} />;
+  if (screen === 'news')     return <NewsScreen onBack={backToMenu} onGoFighter={goFighter} />;
   return <MenuScreen onSelect={setScreen} />;
 };

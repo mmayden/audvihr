@@ -15,7 +15,6 @@ export function CompareScreen({onBack}) {
   const f1=FIGHTERS.find(f=>f.id===parseInt(f1id));
   const f2=FIGHTERS.find(f=>f.id===parseInt(f2id));
   const clKey=f1&&f2?`${Math.min(f1.id,f2.id)}_${Math.max(f1.id,f2.id)}`:'default';
-  let lastCat=null;
   const rows=f1&&f2?[
     {cat:'RECORD',  l:'Overall Record',       v1:`${f1.wins}-${f1.losses}`,v2:`${f2.wins}-${f2.losses}`,n1:f1.wins,n2:f2.wins,hi:true},
     {cat:'RECORD',  l:'Win Streak',            v1:f1.streak,    v2:f2.streak,    n1:f1.streak,   n2:f2.streak,    hi:true},
@@ -72,7 +71,7 @@ export function CompareScreen({onBack}) {
                 <table className="ctable">
                   <thead><tr><th style={{textAlign:'left',width:'38%'}}>F1</th><th className="center" style={{width:'24%'}}>STAT</th><th style={{textAlign:'right',width:'38%'}}>F2</th></tr></thead>
                   <tbody>{rows.map((r,i)=>{
-                    const sc=r.cat!==lastCat; lastCat=r.cat;
+                    const sc=i===0||rows[i-1].cat!==r.cat;
                     const tie=r.n1===r.n2, f1w=r.hi?r.n1>r.n2:r.n1<r.n2;
                     return <Fragment key={i}>
                       {sc&&<tr className="cat-row"><td colSpan={3}>{r.cat}</td></tr>}

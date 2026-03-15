@@ -3,6 +3,30 @@ import { EVENTS } from '../data/events';
 import { ORG_COLOR } from '../constants/qualifiers';
 import { FighterName } from '../components/FighterName';
 
+/** Format an ISO date string as a human-readable event date (e.g. 'Sat, Apr 12, 2026'). */
+function fmtDate(dateStr) {
+  return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', {
+    weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
+  });
+}
+
+/** Returns true if the event date is in the past relative to today. */
+function isPast(dateStr, today) { return new Date(dateStr) < today; }
+
+/** Returns days until an event date from the given today reference. */
+function daysUntil(dateStr, today) {
+  return Math.round((new Date(dateStr) - today) / (1000 * 60 * 60 * 24));
+}
+
+/** Returns a compact countdown label for an event date. */
+function countdown(dateStr, today) {
+  const d = daysUntil(dateStr, today);
+  if (d < 0) return 'PAST';
+  if (d === 0) return 'TODAY';
+  if (d === 1) return '1D';
+  return d + 'D';
+}
+
 /**
  * CalendarScreen — fight calendar screen with sidebar event list and detail view.
  * Automatically selects the first upcoming event on mount. Supports org filtering.
@@ -20,17 +44,6 @@ export function CalendarScreen({onBack, onGoFighter}) {
   const orgs = ['ALL',...new Set(EVENTS.map(e=>e.org))];
   const filtered = sorted.filter(e=>orgFilter==='ALL'||e.org===orgFilter);
 
-  function isPast(dateStr){ return new Date(dateStr)<today; }
-  function daysUntil(dateStr){ return Math.round((new Date(dateStr)-today)/(1000*60*60*24)); }
-  function countdown(dateStr){
-    const d=daysUntil(dateStr);
-    if(d<0) return 'PAST'; if(d===0) return 'TODAY'; if(d===1) return '1D';
-    return d+'D';
-  }
-  function fmtDate(dateStr){
-    return new Date(dateStr+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
-  }
-
   return (
     <div className="app">
       <div className="topbar">
@@ -46,14 +59,14 @@ export function CalendarScreen({onBack, onGoFighter}) {
           </div>
           <div className="sidebar-list">
             {filtered.map(e=>{
-              const past=isPast(e.date);
-              const d=daysUntil(e.date);
+              const past=isPast(e.date, today);
+              const d=daysUntil(e.date, today);
               const cdColor=past?'var(--text-dim)':d<=7?'var(--accent)':'var(--green)';
               return (
                 <div key={e.id} className={`sidebar-fighter${sel?.id===e.id?' active':''}${past?' past-event':''}`} onClick={()=>setSelId(e.id)}>
                   <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:3}}>
                     <span className="sf-name">{e.name}</span>
-                    <span className="cal-countdown" style={{color:cdColor}}>{countdown(e.date)}</span>
+                    <span className="cal-countdown" style={{color:cdColor}}>{countdown(e.date, today)}</span>
                   </div>
                   <div className="sf-meta">
                     <span className="org-badge" style={{background:ORG_COLOR[e.org]||'#444'}}>{e.org}</span>
@@ -78,8 +91,8 @@ export function CalendarScreen({onBack, onGoFighter}) {
                   <div className="cal-event-meta">{fmtDate(sel.date)} · {sel.venue} · {sel.city}</div>
                 </div>
                 <div>
-                  <div className="cal-countdown-big" style={{color:isPast(sel.date)?'var(--text-dim)':daysUntil(sel.date)<=7?'var(--accent)':'var(--green)'}}>{countdown(sel.date)}</div>
-                  <div className="cal-countdown-label">{isPast(sel.date)?'COMPLETED':'DAYS UNTIL EVENT'}</div>
+                  <div className="cal-countdown-big" style={{color:isPast(sel.date,today)?'var(--text-dim)':daysUntil(sel.date,today)<=7?'var(--accent)':'var(--green)'}}>{countdown(sel.date,today)}</div>
+                  <div className="cal-countdown-label">{isPast(sel.date,today)?'COMPLETED':'DAYS UNTIL EVENT'}</div>
                 </div>
               </div>
 
