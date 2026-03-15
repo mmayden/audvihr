@@ -4,7 +4,7 @@ All notable changes to this project. Format: [version] — date — description.
 
 ---
 
-## [Unreleased] — Phase 4 Markets Dashboard
+## [0.4.0] — 2026-03-15
 
 ### Added
 - `MarketsScreen` — full prediction market dashboard with filter bar and sorted market list
@@ -17,6 +17,13 @@ All notable changes to this project. Format: [version] — date — description.
 - Sort by closing date, total volume, or event date (cycling toggle)
 - Platform color badges: Polymarket (blue), Kalshi (green), Novig (purple)
 - Markets menu item activated (badge: ACTIVE), version bumped to v0.4.0 in menu
+
+### Testing & Tooling
+- Vitest 4.1.0 test suite: 32 tests across 5 files, all passing
+- ESLint 9 flat config (`eslint.config.js`) — 0 errors on `npm run lint`
+- `src/test/setup.js` — in-memory localStorage mock fixes jsdom environment issue
+- Test coverage: odds utils (7), StatBar (5), FighterName (4), useLocalStorage (6), useWatchlist (5)
+- Testing standards documented in CLAUDE.md
 
 ---
 

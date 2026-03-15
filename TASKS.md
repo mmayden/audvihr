@@ -10,27 +10,22 @@
 
 ## Current Sprint
 
-**Branch:** `feature/phase-4-markets`
-**Goal:** Markets Dashboard — cross-platform odds tracking, arb detection, watchlist
+**Branch:** `feature/phase-5-news`
+**Goal:** Fighter News Feed — manual curated news items linked to fighter profiles
 
-### Phase 4 — Markets Dashboard
-- [x] Design MARKETS data model (8 markets, multi-platform prices, method props)
-- [x] `src/data/markets.js` with full schema comment
-- [x] `src/hooks/useWatchlist.js` — localStorage watchlist by market ID
-- [x] `src/screens/MarketsScreen.jsx` — filter bar, sorted market list, arb detection
-- [x] Platform price display: moneyline + implied % per platform per fighter
-- [x] Cross-platform arbitrage detection and alert (best-of sum < 100%)
-- [x] Method props display (KO/TKO, Submission, Decision odds)
-- [x] Filters: platform, title fights only, watchlist only
-- [x] Sort: closing date, total volume, event date (cycling)
-- [x] Watchlist toggle per market with localStorage persistence
-- [x] Markets CSS added to `app.css`
-- [x] Menu badge updated to ACTIVE, version bumped to v0.4.0
-- [x] `npm run build` passes — 213 kB JS / 63 kB gzipped
-- [ ] Smoke test: all filters/sort work, arb alert appears on Oliveira vs Dariush market
-- [ ] Smoke test: watchlist persists on page reload
-- [ ] Commit and merge to `main`, tag v0.4.0
-- [ ] Cut branch `feature/phase-5-news`
+### Phase 5 — Fighter News Feed
+- [ ] Design NEWS data model (id, date, fighter_id, category, headline, body, source)
+- [ ] `src/data/news.js` with full schema comment and 10+ mock items
+- [ ] `src/screens/NewsScreen.jsx` — sorted news list with fighter links
+- [ ] Filter by category (fight / injury / camp / weigh-in / result)
+- [ ] Filter by fighter (select from roster)
+- [ ] `FighterName` links from news items → fighter profile
+- [ ] News CSS added to `app.css`
+- [ ] Menu badge updated to ACTIVE, version bumped to v0.5.0
+- [ ] Tests for any new utils/hooks
+- [ ] `npm run build` passes
+- [ ] Smoke test: filters work, fighter link navigates correctly
+- [ ] Commit and merge to `main`, tag v0.5.0
 
 ---
 
@@ -71,26 +66,13 @@
 - Manual odds entry with auto implied probability + line movement detection
 - Public bet % inflation warning
 
-### 🔲 Phase 3 — Fight Calendar
-**Branch:** `feature/phase-3-calendar`
+### ✅ Phase 3 — Fight Calendar (v0.4.0)
+- Fight calendar screen, EVENTS data, countdown, promotion filter, fighter links
 
-- Upcoming events list (manual data entry to start)
-- Event detail: card breakdown, main event / co-main / prelims
-- Fighter links from calendar → fighter profile
-- Basic date/countdown display
-- Filter by promotion (UFC / Bellator / PFL)
+### ✅ Phase 3a — Vite Migration (v0.4.0)
+- Full Vite + React project, 14 modular components, 0 CVEs, deployable to Netlify/Vercel
 
-### 🔲 Phase 3a — Vite Migration ⚠️ REQUIRED before web deployment
-**Branch:** `feature/phase-3a-vite`
-**Trigger:** Web hosting target (active) — `babel-standalone` is a production blocker
-
-- `npm create vite@latest audwihr -- --template react`
-- Split `mma-trader.html` into component files matching current structure
-- All functionality must pass smoke test before merge
-- No new features in this phase — migration only
-- Deploy output: static site (`dist/`) → GitHub Pages / Netlify / Vercel
-
-### ✅ Phase 4 — Markets Dashboard
+### ✅ Phase 4 — Markets Dashboard (v0.4.0)
 **Branch:** `feature/phase-4-markets`
 
 - 8 active UFC markets across Polymarket, Kalshi, Novig
@@ -100,7 +82,7 @@
 - Filter by platform, title fights, watchlist; sort by closing/volume/event
 - Watchlist persisted to localStorage
 
-### 🔲 Phase 5 — Fighter News Feed
+### 🔲 Phase 5 — Fighter News Feed (active)
 **Branch:** `feature/phase-5-news`
 
 - Aggregated fighter news (camp switches, injury reports, fight announcements)
