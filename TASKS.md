@@ -26,14 +26,14 @@
 - [ ] Roster expansion — top 10 per active weight class (~60 fighters total)
   - [x] Editorial seed data written for 55 new fighters (IDs 15–69), all 8 weight classes
   - [x] `fetch-data.js` — `"pending": true` flag support to skip URL-less entries cleanly
-  - [ ] Source UFCStats URLs for all 55 pending fighters and remove `"pending"` flags
-  - [ ] Run `npm run fetch-data:fresh` to populate all new fighters with live stats
+  - [x] Source UFCStats URLs for all 55 pending fighters and remove `"pending"` flags — scraped via UFCStats letter pages (with pagination) + event page for Moicano (listed as Carneiro; found via UFC 311 event page)
+  - [x] Run `npm run fetch-data:fresh` to populate all new fighters with live stats — 69/69 OK, 0 warnings
   - [ ] Verify archetype/mod assignments and qualitative flags after scrape
-- [ ] Tapology community % column in MarketsScreen — build-time scrape (CORS rules out runtime; decision logged in PLANNING.md)
-  - [ ] Add `scrapeEventTapologyPct()` to `fetch-data.js` — scrapes Tapology event page for community pick % per fight
-  - [ ] Embed `tapology_pct: { f1: number, f2: number }` per fight in generated `events.js`
-  - [ ] MarketsScreen fight row shows "PUBLIC 68%" in dim text next to sportsbook implied %
-  - [ ] Fade-signal logic: if |public_pct - sportsbook_implied| ≥ 15pt, render in amber as a fade flag
+- [x] Tapology community % column in MarketsScreen — build-time scrape (CORS rules out runtime; decision logged in PLANNING.md)
+  - [x] Add `scrapeTapologyEventPct()` to `fetch-data.js` — scrapes Tapology #sectionPicks via browser UA; `.chartRow` pairs give last name + pick%; `matchTapologyPct()` fuzzes UFCStats name to label
+  - [x] Embed `tapology_pct: { f1: number, f2: number }` per fight in generated `events.js` (via `serializeFight()`)
+  - [x] MarketsScreen shows "PUBLIC Fighter 68% / Opponent 32%" row per fight card when `tapology_pct` is present
+  - [x] Fade-signal logic: if |public_pct - sportsbook_implied| ≥ 15pt, render row in `var(--accent)` amber + FADE badge
 - [ ] Tests + docs: all new utils covered; JSDoc on any new components; CHANGELOG updated
 - [ ] `npm audit` clean, `npm run lint` 0 errors before merge
 

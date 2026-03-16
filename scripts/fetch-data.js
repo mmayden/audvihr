@@ -76,14 +76,23 @@ const SEL = {
   boutFighter:  'p.b-fight-details__table-text a.b-link_style_black',
 };
 
-const BASE_URL = 'http://www.ufcstats.com';
-const UA       = 'Audwihr/0.6.0 (personal MMA trading tool; build-time scraper)';
+const BASE_URL    = 'http://www.ufcstats.com';
+const TAP_BASE    = 'https://www.tapology.com';
+const UA          = 'Audwihr/0.6.0 (personal MMA trading tool; build-time scraper)';
+const UA_BROWSER  = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36';
 
 // ── HTTP helpers ──────────────────────────────────────────────────────────────
 
 /** Fetch a URL and return the HTML body as a string. */
 async function fetchHtml(url) {
   const res = await fetch(url, { headers: { 'User-Agent': UA } });
+  if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`);
+  return res.text();
+}
+
+/** Fetch with a browser User-Agent (required for Tapology). */
+async function fetchHtmlBrowser(url) {
+  const res = await fetch(url, { headers: { 'User-Agent': UA_BROWSER } });
   if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`);
   return res.text();
 }
@@ -472,6 +481,25 @@ async function scrapeUpcomingEvents() {
     await sleep(DELAY_MS);
     try {
       const eventData = await scrapeEventPage(meta.url, meta.name, meta.date, meta.venue, meta.city);
+
+      // Enrich with Tapology community pick % (silent degradation on failure)
+      await sleep(DELAY_MS);
+      const tapMap = await scrapeTapologyEventPct(meta.name);
+      if (tapMap.size > 0) {
+        const allBouts = [eventData.card.main, eventData.card.comain,
+          ...(eventData.card.prelims || []), ...(eventData.card.early_prelims || [])].filter(Boolean);
+        for (const bout of allBouts) {
+          const match = matchTapologyPct(bout.f1, tapMap) || matchTapologyPct(bout.f2, tapMap);
+          if (match) {
+            // Orient so f1_pct always corresponds to bout.f1
+            const f1IsF1 = matchTapologyPct(bout.f1, tapMap) !== null;
+            bout.tapology_pct = f1IsF1
+              ? { f1: match.f1_pct, f2: match.f2_pct }
+              : { f1: match.f2_pct, f2: match.f1_pct };
+          }
+        }
+      }
+
       events.push({ ...eventData, id: i + 1 });
     } catch (err) {
       console.warn(`  ⚠ Skipping event "${meta.name}": ${err.message}`);
@@ -547,6 +575,99 @@ async function scrapeEventPage(url, name, date, venue, city) {
       early_prelims: bouts.slice(Math.max(2, bouts.length - 2)).map(({ f1, f2, weight }) => ({ f1, f2, weight })),
     },
   };
+}
+
+/**
+ * Scrape Tapology community pick percentages for a given event.
+ *
+ * Searches tapology.com/fightcenter?group=ufc for an event whose name matches
+ * the provided string (case-insensitive, partial), then fetches the event page
+ * and extracts community pick % from #sectionPicks.
+ *
+ * Returns a Map<string, {f1_pct: number, f2_pct: number}> where the key is the
+ * Tapology-style last-name label (e.g. "Procházka") normalized to ASCII lowercase.
+ * Callers must fuzzy-match UFCStats fighter names against these keys.
+ *
+ * Degrades silently — returns an empty Map on any error (network, 403, parse).
+ *
+ * @param {string} eventName - e.g. "UFC 327"
+ * @returns {Promise<Map<string, {f1_pct:number, f2_pct:number}>>}
+ *   fight-level picks keyed by normalized f1 last-name (e.g. "prochazka")
+ */
+async function scrapeTapologyEventPct(eventName) {
+  try {
+    // Step 1: find the Tapology event URL from the fightcenter listing
+    const listHtml = await fetchHtmlBrowser(`${TAP_BASE}/fightcenter?group=ufc`);
+    const $list    = cheerio.load(listHtml);
+    const needle   = eventName.replace(/\s+/g, ' ').toLowerCase();
+
+    let eventPath  = null;
+    $list('a[href*="/fightcenter/events/"]').each((_, el) => {
+      const href = $list(el).attr('href') || '';
+      if (href.toLowerCase().replace(/-/g, ' ').includes(needle.replace(/\s+/g, ' '))) {
+        eventPath = href;
+        return false; // stop
+      }
+    });
+
+    if (!eventPath) {
+      console.log(`  ⚠ Tapology: no event match for "${eventName}"`);
+      return new Map();
+    }
+
+    // Step 2: fetch the event detail page
+    await sleep(DELAY_MS);
+    const eventUrl  = eventPath.startsWith('http') ? eventPath : `${TAP_BASE}${eventPath}`;
+    const eventHtml = await fetchHtmlBrowser(eventUrl);
+    const $evt      = cheerio.load(eventHtml);
+    const section   = $evt('#sectionPicks');
+
+    if (!section.length) {
+      console.log(`  ⚠ Tapology: no #sectionPicks on "${eventName}" page`);
+      return new Map();
+    }
+
+    // Step 3: parse fight containers — each has exactly 2 .chartRow children
+    const result = new Map();
+    section.find('.chartRow').parent().each((_, container) => {
+      const rows = $evt(container).find('.chartRow');
+      if (rows.length < 2) return;
+      const f1Label = $evt(rows[0]).find('.chartLabel').text().trim();
+      const f1Pct   = parseInt($evt(rows[0]).find('.number').first().text());
+      const f2Label = $evt(rows[1]).find('.chartLabel').text().trim();
+      const f2Pct   = parseInt($evt(rows[1]).find('.number').first().text());
+      if (!f1Label || !f2Label || isNaN(f1Pct) || isNaN(f2Pct)) return;
+      // Normalize label to ASCII lowercase for fuzzy matching
+      const key = f1Label.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
+      result.set(key, { f1: f1Label, f1_pct: f1Pct, f2: f2Label, f2_pct: f2Pct });
+    });
+
+    console.log(`  ✓ Tapology: ${result.size} fight picks for "${eventName}"`);
+    return result;
+  } catch (err) {
+    console.warn(`  ⚠ Tapology scrape failed for "${eventName}": ${err.message}`);
+    return new Map();
+  }
+}
+
+/**
+ * Match a UFCStats fighter name against a Tapology picks Map.
+ * Returns the picks entry whose normalized f1 or f2 label matches the
+ * last name of the given UFCStats name string.
+ *
+ * @param {string} ufcName - e.g. "Alexandre Pantoja"
+ * @param {Map}    tapMap  - from scrapeTapologyEventPct()
+ * @returns {{ f1_pct: number, f2_pct: number }|null}
+ */
+function matchTapologyPct(ufcName, tapMap) {
+  const last = ufcName.split(' ').pop().toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
+  for (const [key, val] of tapMap) {
+    // key = normalized f1 last name; also check f2 last name
+    const f2norm = val.f2.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
+    if (key === last) return { f1_pct: val.f1_pct, f2_pct: val.f2_pct };
+    if (f2norm === last) return { f1_pct: val.f2_pct, f2_pct: val.f1_pct };
+  }
+  return null;
 }
 
 /**

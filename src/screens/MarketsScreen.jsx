@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { MARKETS } from '../data/markets';
+import { EVENTS } from '../data/events';
 import { useWatchlist } from '../hooks/useWatchlist';
 import { useOdds } from '../hooks/useOdds';
 import { usePolymarket } from '../hooks/usePolymarket';
@@ -9,6 +10,19 @@ import { fightKey } from '../utils/normalizeOdds';
 import { daysUntil } from '../utils/date';
 import { readCLVLog, readOpeningLines } from '../utils/clv';
 import { PriceChart } from '../components/PriceChart';
+
+// Build a static fightKey → tapology_pct lookup from generated events data.
+// tapology_pct is optional per fight; present only after build-time scrape runs.
+const tapologyByKey = (() => {
+  const map = {};
+  EVENTS.forEach((ev) => {
+    const bouts = [ev.card.main, ev.card.comain, ...(ev.card.prelims || []), ...(ev.card.early_prelims || [])].filter(Boolean);
+    bouts.forEach((bout) => {
+      if (bout.tapology_pct) map[fightKey(bout.f1, bout.f2)] = bout.tapology_pct;
+    });
+  });
+  return map;
+})();
 
 const SORT_LABELS = ['CLOSING', 'VOLUME', 'EVENT'];
 const PLATFORMS   = ['ALL', 'Polymarket', 'Kalshi', 'Novig'];
@@ -72,6 +86,8 @@ function countdownColor(dateStr, today) {
  *   - Cross-platform arbitrage detection across all three live sources
  *   - Opening line display in sportsbook column ("OPEN -130 / +110") from localStorage
  *   - "NOT IN ROSTER" badge on live-only stub fight rows (fighters not in 69-fighter seed)
+ *   - Tapology public pick % row ("PUBLIC Fighter 68% / Opponent 32%") when build-time scrape data
+ *     is present; amber FADE badge when public diverges ≥15pt from sportsbook implied probability
  *   - Probability movement line chart (lazy-loaded per market)
  *   - Personal CLV log view (localStorage-persisted snapshots)
  *   - Watchlist (localStorage-persisted)
@@ -319,6 +335,7 @@ export const MarketsScreen = ({ onBack }) => {
             const hist        = chartHistory[histKey];
             const isStub      = market.id.startsWith('live_');
             const opening     = openingLines[market._fightKey] || null;
+            const tapologyPct = tapologyByKey[market._fightKey] || null;
 
             // Build arb sources from live data if available, else from mock platforms.
             const arbSources = [];
@@ -460,6 +477,24 @@ export const MarketsScreen = ({ onBack }) => {
                     )}
                   </>
                 )}
+
+                {/* Tapology community picks — fade signal when public diverges ≥15pt from sportsbook implied */}
+                {tapologyPct && (() => {
+                  const sbF1Impl = live?.sportsbook ? impliedNum(live.sportsbook.f1_ml) : null;
+                  const gap      = sbF1Impl !== null ? Math.abs(tapologyPct.f1 - sbF1Impl) : null;
+                  const isFade   = gap !== null && gap >= 15;
+                  return (
+                    <div className={`mkt-public-row${isFade ? ' mkt-public-row--fade' : ''}`}>
+                      <span className="mkt-public-label">PUBLIC</span>
+                      <span className="mkt-public-pct">
+                        {market.fighter1.split(' ').pop()} {tapologyPct.f1}%
+                        <span className="mkt-public-sep">/</span>
+                        {market.fighter2.split(' ').pop()} {tapologyPct.f2}%
+                      </span>
+                      {isFade && <span className="mkt-public-fade-badge">FADE</span>}
+                    </div>
+                  );
+                })()}
 
                 {/* Method props */}
                 {market.method_props.length > 0 && (
