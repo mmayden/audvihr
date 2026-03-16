@@ -70,6 +70,8 @@ function countdownColor(dateStr, today) {
  * Features:
  *   - Unified market row: Sportsbook (best available) | Polymarket | Kalshi | Arb alert
  *   - Cross-platform arbitrage detection across all three live sources
+ *   - Opening line display in sportsbook column ("OPEN -130 / +110") from localStorage
+ *   - "NOT IN ROSTER" badge on live-only stub fight rows (fighters not in 69-fighter seed)
  *   - Probability movement line chart (lazy-loaded per market)
  *   - Personal CLV log view (localStorage-persisted snapshots)
  *   - Watchlist (localStorage-persisted)

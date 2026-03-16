@@ -654,12 +654,15 @@ const EVENTS_SCHEMA_COMMENT = `/**
  *   venue: String,
  *   city: String,
  *   card: {
- *     main:         { f1: String, f2: String, weight: String, title: Boolean, weigh_in?: String|null, judges?: String[] },
- *     comain:       { f1: String, f2: String, weight: String, title: Boolean, weigh_in?: String|null, judges?: String[] },
- *     prelims:      [{ f1: String, f2: String, weight: String, weigh_in?: String|null, judges?: String[] }],
- *     early_prelims:[{ f1: String, f2: String, weight: String, weigh_in?: String|null, judges?: String[] }],
+ *     main:         { f1: String, f2: String, weight: String, title: Boolean, weigh_in?: String|null, judges?: String[], tapology_pct?: { f1: Number, f2: Number } },
+ *     comain:       { f1: String, f2: String, weight: String, title: Boolean, weigh_in?: String|null, judges?: String[], tapology_pct?: { f1: Number, f2: Number } },
+ *     prelims:      [{ f1: String, f2: String, weight: String, weigh_in?: String|null, judges?: String[], tapology_pct?: { f1: Number, f2: Number } }],
+ *     early_prelims:[{ f1: String, f2: String, weight: String, weigh_in?: String|null, judges?: String[], tapology_pct?: { f1: Number, f2: Number } }],
  *   }
  * }
+ * tapology_pct — community pick % scraped from Tapology at build time (Phase 9).
+ *   f1/f2 are integers 0–100 representing % of community picks.
+ *   Absent on fights where Tapology matching fails or event not yet listed.
  */`;
 
 /**
@@ -694,10 +697,14 @@ function generateFightersFile(fighters, timestamp) {
 function serializeFight(fight, includeTitle = false) {
   if (!fight) return 'null';
   const base = `{f1:${JSON.stringify(fight.f1)},f2:${JSON.stringify(fight.f2)},weight:${JSON.stringify(fight.weight)}`;
-  const titlePart   = includeTitle ? `,title:${fight.title || false}` : '';
-  const weighInPart = fight.weigh_in != null ? `,weigh_in:${JSON.stringify(fight.weigh_in)}` : '';
-  const judgesPart  = fight.judges && fight.judges.length > 0 ? `,judges:${JSON.stringify(fight.judges)}` : '';
-  return `${base}${titlePart}${weighInPart}${judgesPart}}`;
+  const titlePart    = includeTitle ? `,title:${fight.title || false}` : '';
+  const weighInPart  = fight.weigh_in != null ? `,weigh_in:${JSON.stringify(fight.weigh_in)}` : '';
+  const judgesPart   = fight.judges && fight.judges.length > 0 ? `,judges:${JSON.stringify(fight.judges)}` : '';
+  // Phase 9: tapology_pct added by scrapeTapologyEventPct() when available.
+  const tapologyPart = fight.tapology_pct
+    ? `,tapology_pct:{f1:${fight.tapology_pct.f1},f2:${fight.tapology_pct.f2}}`
+    : '';
+  return `${base}${titlePart}${weighInPart}${judgesPart}${tapologyPart}}`;
 }
 
 function applyEventOverrides(events, overrides) {
