@@ -16,6 +16,8 @@ const WEIGHT_FILTERS = ['ALL', ...new Set(FIGHTERS.map(f => f.weight))];
  * FighterScreen — full fighter profile screen with sidebar roster list,
  * hero card, and tabbed detail view (Overview, Striking, Grappling,
  * Physical, History, Market).
+ * On mobile (< 768 px) the sidebar is hidden by default and can be revealed
+ * via the ROSTER button in the topbar; selecting a fighter closes it.
  * @param {function} onBack - callback invoked when the back button is clicked
  * @param {object|null} initialFighter - fighter object to pre-select on mount
  */
@@ -24,6 +26,7 @@ export const FighterScreen = ({onBack, initialFighter}) => {
   const [weightFilter, setWeightFilter] = useState('ALL');
   const [sel, setSel] = useState(initialFighter || FIGHTERS[0]);
   const [tab, setTab] = useState('OVERVIEW');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return FIGHTERS.filter(f =>
@@ -31,17 +34,23 @@ export const FighterScreen = ({onBack, initialFighter}) => {
       (weightFilter === 'ALL' || f.weight === weightFilter)
     );
   }, [search, weightFilter]);
-  const pick = (f) => { setSel(f); setTab('OVERVIEW'); };
+  const pick = (f) => { setSel(f); setTab('OVERVIEW'); setSidebarOpen(false); };
   const ac = sel ? ARCH_COLORS[sel.archetype] : null;
+  /** Derive two-letter initials from a fighter name for the portrait fallback. */
+  const initials = sel ? sel.name.split(' ').map(w => w[0]).slice(0, 2).join('') : '';
   return (
     <div className="app">
       <div className="topbar">
         <span className="topbar-logo">AUDWIHR</span><span className="topbar-sep">/</span>
         <span className="topbar-section">FIGHTERS</span>
-        <div className="topbar-right"><button className="topbar-back" onClick={onBack}>← MENU</button></div>
+        <div className="topbar-right">
+          <button className="topbar-roster-btn" onClick={() => setSidebarOpen(o => !o)}>ROSTER</button>
+          <button className="topbar-back" onClick={onBack}>← MENU</button>
+        </div>
       </div>
       <div className="main-layout">
-        <div className="sidebar">
+        {sidebarOpen && <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />}
+        <div className={`sidebar${sidebarOpen ? ' sidebar--open' : ''}`}>
           <div className="sidebar-header">ROSTER — {filtered.length}</div>
           <div className="sidebar-search"><input className="sidebar-input" placeholder="Search..." value={search} onChange={e=>setSearch(e.target.value)}/></div>
           <div className="sidebar-filters">{WEIGHT_FILTERS.map(w=><button key={w} className={`filter-chip ${weightFilter===w?'on':''}`} onClick={()=>setWeightFilter(w)}>{w==='ALL'?'ALL':w.split(' ')[0].toUpperCase()}</button>)}</div>
@@ -55,7 +64,12 @@ export const FighterScreen = ({onBack, initialFighter}) => {
         {sel ? (
           <div className="fighter-area">
             <div className="card-hero">
-              <div className="card-portrait"><span className="portrait-placeholder">🥊</span></div>
+              <div className="card-portrait">
+                {sel.portrait
+                  ? <img src={`/assets/portraits/${sel.portrait}`} alt={sel.name} className="portrait-img" />
+                  : <span className="portrait-initials">{initials}</span>
+                }
+              </div>
               <div className="card-identity">
                 <div className="fighter-name-big">{sel.name}</div>
                 <div className="fighter-nickname">&ldquo;{sel.nickname}&rdquo;</div>

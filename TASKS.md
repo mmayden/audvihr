@@ -11,33 +11,41 @@
 ## Current Sprint
 
 **Branch:** `master`
-**Phase:** 9 — Roster Expansion + Public Signal
-**Status:** Active. v0.8.1 docs/standards cleanup committed. Phase 9 kick-off 2026-03-16.
+**Phase:** 10 — Mobile + UX Polish
+**Status:** Complete. v0.10.0. 2026-03-16.
 
-### Phase 9 Active Tasks
+### ✅ Phase 10 Active Tasks
 
-- [x] Opening line preservation in CLV log
-  - [x] `appendOpeningLine(fightKey, f1ml, f2ml, timestamp)` + `readOpeningLines()` in `src/utils/clv.js`
-  - [x] `useOdds.js` writes opening snapshot on first fetch (no-op if already stored)
-  - [x] MarketsScreen SPORTSBOOK column shows "OPEN -130 / +110" when opening line stored
-  - [ ] TabMarket shows opening line delta alongside current line (deferred — TabMarket reads from localStorage separately)
-- [x] "NOT IN ROSTER" stub fighter shape for non-roster fighters from The Odds API
-  - [x] MarketsScreen renders "NOT IN ROSTER" badge on live-only stub fight rows
-- [ ] Roster expansion — top 10 per active weight class (~60 fighters total)
-  - [x] Editorial seed data written for 55 new fighters (IDs 15–69), all 8 weight classes
-  - [x] `fetch-data.js` — `"pending": true` flag support to skip URL-less entries cleanly
-  - [x] Source UFCStats URLs for all 55 pending fighters and remove `"pending"` flags — scraped via UFCStats letter pages (with pagination) + event page for Moicano (listed as Carneiro; found via UFC 311 event page)
-  - [x] Run `npm run fetch-data:fresh` to populate all new fighters with live stats — 69/69 OK, 0 warnings
-  - [ ] Verify archetype/mod assignments and qualitative flags after scrape
-- [x] Tapology community % column in MarketsScreen — build-time scrape (CORS rules out runtime; decision logged in PLANNING.md)
-  - [x] Add `scrapeTapologyEventPct()` to `fetch-data.js` — scrapes Tapology #sectionPicks via browser UA; `.chartRow` pairs give last name + pick%; `matchTapologyPct()` fuzzes UFCStats name to label
-  - [x] Embed `tapology_pct: { f1: number, f2: number }` per fight in generated `events.js` (via `serializeFight()`)
-  - [x] MarketsScreen shows "PUBLIC Fighter 68% / Opponent 32%" row per fight card when `tapology_pct` is present
-  - [x] Fade-signal logic: if |public_pct - sportsbook_implied| ≥ 15pt, render row in `var(--accent)` amber + FADE badge
-- [ ] Tests + docs: all new utils covered; JSDoc on any new components; CHANGELOG updated
-- [ ] `npm audit` clean, `npm run lint` 0 errors before merge
+- [x] Responsive layout — sidebar collapses to bottom navigation bar on viewports < 768px
+  - CSS media queries only (no JS resize listeners) — all layout in `app.css`
+  - Bottom nav: Fighters | Compare | Calendar | Markets | News
+  - FighterScreen + CalendarScreen sidebar becomes a slide-in drawer overlay on mobile (ROSTER / EVENTS topbar toggle)
+- [x] Fighter portrait images
+  - Decision: `public/assets/` self-hosted (no CSP change required; Cloudinary deferred)
+  - `portrait` field added to `fighter-seed.json` schema (nullable); all 69 fighters default to null
+  - FighterScreen shows `portrait-img` when portrait path set, `portrait-initials` (2-letter mono fallback) when null
+- [x] Visual hierarchy audit
+  - `fighter-link` changed from `var(--accent)` to `var(--blue)` — amber now has 2 semantic meanings: brand/active state + data emphasis
+  - `.flag-value` and `.stat-cell-attr-val` — added `font-family: var(--mono)` for typography consistency
+  - CompareScreen checklist stacks below table on mobile (density improvement)
+- [x] Dark/light theme toggle
+  - `src/hooks/useTheme.js` — `useTheme()` with localStorage persistence and `data-theme` attribute on `<html>`
+  - System preference default (`prefers-color-scheme: light` fallback in CSS); manual toggle overrides
+  - Floating toggle button (desktop top-right) + inline button in bottom nav (mobile)
+- [x] Tests + docs: 186 tests all passing (up from 165); JSDoc updated for CalendarScreen + FighterScreen; CHANGELOG updated
+- [x] `npm audit` clean, `npm run lint` 0 errors before merge
 
 ---
+
+## ✅ Completed Sprints
+
+### ✅ Phase 9 — Roster Expansion + Public Signal (v0.9.0) — merged to master
+
+- [x] Opening line preservation (`appendOpeningLine` + `readOpeningLines` in `clv.js`; `useOdds` writes on first fetch; MarketsScreen SPORTSBOOK column shows "OPEN f1ml / f2ml")
+- [x] "NOT IN ROSTER" badge on live-only stub fight rows in MarketsScreen
+- [x] Roster expansion — 55 new fighters (IDs 15–69), all 8 weight classes, 69/69 scraped OK; archetype/mod/qualitative flags verified
+- [x] Tapology community % — build-time scrape; `scrapeTapologyEventPct()` + `matchTapologyPct()`; `tapology_pct` embedded in `events.js`; MarketsScreen PUBLIC row + FADE badge (≥15pt divergence)
+- [x] 165 tests (all passing), 0 lint errors, 0 audit vulnerabilities; CHANGELOG and TASKS updated
 
 ### ✅ Phase 8 — CSS Extraction + Phase 7 Should-Haves (v0.8.0) — merged to master
 
@@ -48,12 +56,8 @@
 - [x] Edge signal panel in CompareScreen — `computeEdgeSignals()` (archetype mismatch, modifier flags, market discrepancy); labeled "RESEARCH PROMPT — NOT A PICK"
 - [x] CHANGELOG promoted to v0.8.0, TASKS updated, memory updated
 
----
-
 ### ✅ Phase 7 — Live Odds + Market Intelligence (v0.7.0) — merged to master
 
-**Must Have — done:**
-- [x] Cut branch `feature/phase-7-live-odds`
 - [x] `src/utils/normalizeOdds.js` — 6 transform/validate functions; 31 tests
 - [x] `src/utils/cache.js` — shared sessionStorage helpers; 100% coverage
 - [x] `src/utils/clv.js` — shared CLV log helpers; 100% coverage
@@ -61,28 +65,12 @@
 - [x] `src/hooks/usePolymarket.js` — Polymarket CLOB; CLV snapshot; lazy history
 - [x] `src/hooks/useKalshi.js` — Kalshi REST; CLV snapshot; lazy history; silent degradation
 - [x] `src/components/PriceChart.jsx` — SVG sparkline; 9 tests
-- [x] Unified market row in MarketsScreen (SPORTSBOOK | POLYMARKET | KALSHI + arb)
-- [x] Arb detection across all three live sources
-- [x] Lazy price history charts in MarketsScreen (expand/collapse per card)
-- [x] Price history charts in fighter Market tab (matched by name)
-- [x] Personal CLV log panel in MarketsScreen
-- [x] All hooks degrade silently; live-only fights shown as price-only stubs
+- [x] Unified market row in MarketsScreen (SPORTSBOOK | POLYMARKET | KALSHI + arb); arb detection; lazy charts; CLV log panel
+- [x] TabMarket live prices + auto-loaded history for matched roster fighters
 - [x] `VITE_KALSHI_API_KEY` in `.env.example`; CSP updated in `netlify.toml` + `vercel.json`
-- [x] 142 tests, 0 lint errors, `npm run build` passes (71 kB gzipped)
-- [x] `MenuScreen` version badge → `v0.7.0 — LIVE ODDS`
-- [x] Merge to `master`, tag v0.7.0
-
-### ✅ Phase 7 — Should Have — complete
-
-- [x] Move compare stat rows to `src/constants/compareRows.js` (config-driven, zero behavior change)
-- [x] Add `opp_quality` field to fight history entries in `scripts/fighter-seed.json` (elite / contender / gatekeeper / unknown)
-- [x] Add `weigh_in` result field to event fight card entries in `scripts/fighter-seed.json` (missed / made / under)
-- [x] Add `judges: []` field to event card data in seed (manual — enables decision prop research)
-- [x] Simple client-side edge score in CompareScreen — stat rows + archetype + flags + market discrepancy → research prompt panel, not a pick
-
----
-
-## ✅ Completed Sprints
+- [x] 142 tests, 0 lint errors, `npm run build` passes (71 kB gzipped); Merge to `master`, tag v0.7.0
+- [x] `src/constants/compareRows.js` — 15 stat-row definitions from CompareScreen (Should Have)
+- [x] Edge signal panel in CompareScreen — `computeEdgeSignals()` (Should Have)
 
 ### ✅ Phase 5 — Fighter News Feed (v0.5.0) — complete
 - [x] Design NEWS data model (id, date, fighter_id, category, headline, body, source, relevance)
@@ -105,7 +93,7 @@
 - [x] Add fighters — Welterweight division (Muhammad, Edwards, Della Maddalena)
 - [x] Add fighters — Heavyweight (Jones, Aspinall)
 - [x] Verify all fighter data internally consistent
-- [x] Merged to `main`, tagged v0.3.0
+- [x] Merged to `master`, tagged v0.3.0
 
 ---
 
@@ -177,62 +165,24 @@
 - CSP updated: 3 API domains in `netlify.toml` + `vercel.json`
 - 142 tests, 0 lint errors, `npm run build` passes
 
-### Nice to Have (from Phase 7) — Absorbed into Phase 9
+### ✅ Phase 8 — CSS Extraction + Phase 7 Should-Haves (v0.8.0) — merged to master
 
-- [ ] Tapology community % column in MarketsScreen as "public money" fade signal → Phase 9
-- [ ] Export checklist + notes + CLV log as markdown (download link) → Phase 13
-- [ ] "Archetype unknown" stub fighter shape for non-roster fighters from The Odds API → Phase 9
+- ~33 inline `style={{}}` blocks → 35 named CSS classes in `app.css`
+- `src/constants/compareRows.js` — 15 stat-row definitions extracted from CompareScreen
+- `opp_quality`, `weigh_in`, `judges` editorial fields added to seed + scraper
+- Edge signal panel in CompareScreen (`computeEdgeSignals()`) — "RESEARCH PROMPT — NOT A PICK"
 
----
+### ✅ Phase 9 — Roster Expansion + Public Signal (v0.9.0) — merged to master
 
-## Roadmap
-
-### Phase 9 — Roster Expansion + Public Signal (next)
-
-**Theme:** Make Audwihr useful on any given UFC card, not just the 14 seeded fighters.
-
-- [ ] Expand fighter roster to top 10 per active weight class (target: ~60 fighters total)
-  - Divisions: Flyweight, Bantamweight, Featherweight, Lightweight, Welterweight, Middleweight, LHW, Heavyweight (men's)
-  - Add editorial seed entries to `scripts/fighter-seed.json` for each fighter
-  - Run `npm run fetch-data:fresh` to populate stats from UFCStats
-  - Verify all archetype/mod assignments and qualitative flags (chin, cardio, weight_cut)
-- [ ] Tapology community % column in MarketsScreen
-  - Evaluate: build-time scrape (same pattern as UFCStats) vs. runtime fetch
-  - If runtime: add `https://www.tapology.com` to `connect-src` in `netlify.toml` + `vercel.json`
-  - If build-time: add scraper helper to `fetch-data.js`; co-locate with event data generation
-  - Column renders next to sportsbook implied %: "PUBLIC 68%" in dim text with fade-signal logic
-- [ ] Opening line preservation in CLV log
-  - When a fight's opening line is first fetched by `useOdds`, write the opening snapshot to localStorage alongside the session snapshots
-  - Extend `clv.js` helpers: `appendOpeningLine(fightKey, f1ml, f2ml, timestamp)`
-  - Display opening line in MarketsScreen fight row and TabMarket: "OPEN -130 → CURRENT -155"
-- [ ] "Archetype unknown" stub fighter shape for non-roster fighters from The Odds API
-  - MarketsScreen renders a minimal stub row for live fights with no roster match: name, moneylines, implied %
-  - No archetype, no stats, no checklist — clearly labeled "NOT IN ROSTER"
-- [ ] Tests + docs: all new utils covered; JSDoc on any new components; CHANGELOG updated
-- [ ] `npm audit` clean, `npm run lint` 0 errors before merge
+- 69 fighters live — top 8–10 per division, all 8 active weight classes
+- Tapology community % in MarketsScreen with FADE badge (≥15pt public/sportsbook divergence)
+- Opening line preservation (`opening_lines` localStorage key, never evicted)
+- NOT IN ROSTER badge on live-only stub fight rows
+- 165 tests, 0 lint errors, 0 audit vulnerabilities
 
 ---
 
-### Phase 10 — Mobile + UX Polish
-
-**Theme:** Make Audwihr usable during fight week on a phone. The research happens on mobile.
-
-- [ ] Responsive layout — sidebar collapses to bottom navigation bar on viewports < 768px
-  - CSS media queries only (no JS resize listeners) — all layout in `app.css`
-  - Bottom nav: Fighters | Compare | Calendar | Markets | News
-  - FighterScreen sidebar becomes a scrollable top sheet or filtered list on mobile
-- [ ] Fighter portrait images
-  - Evaluate hosting: Cloudinary (add `img-src https://res.cloudinary.com` to CSP) vs. `public/assets/` self-hosted (no CSP change)
-  - Add `portrait` field to fighter-seed.json schema; keep nullable (no portrait = initials fallback)
-  - Portrait displays in FighterScreen hero card and sidebar roster item
-- [ ] Visual hierarchy audit
-  - Typography consistency pass: mono vs sans across all stat labels and values
-  - Accent usage audit: amber should not be used for more than 2 distinct semantic meanings
-  - Spacing and density pass on TabOverview and CompareScreen (densest screens)
-- [ ] Dark/light theme toggle
-  - CSS variable swap only — all colors already tokenized, zero JS required
-  - System preference default (`prefers-color-scheme`); manual toggle persisted to localStorage
-- [ ] Tests + docs: smoke tests for all screens at mobile viewport; CHANGELOG updated
+### ✅ Phase 10 — Mobile + UX Polish (v0.10.0) — merged to master
 
 ---
 
@@ -332,6 +282,6 @@
 2. Manual smoke test passes (all screens render, no console errors)
 3. localStorage functions correctly (odds/notes/checklist persist on reload)
 4. Changes committed to feature branch
-5. Merged to `master` with `--no-ff`, tagged vN.N.N
+5. Merged to `master`, tagged vN.N.N
 6. CHANGELOG.md updated
 7. New feature branch cut for next phase

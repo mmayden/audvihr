@@ -17,6 +17,7 @@
     "trader_notes": "String — qualitative analysis, free text",
     "striking_extended": "Object — fields UFCStats summary page does not provide; keep in sync with real data",
     "grappling_extended": "Object — fields UFCStats summary page does not provide; keep in sync with real data",
+    "portrait": "String | null — path relative to /public/assets/portraits/ (e.g. 'makhachev.jpg'). Null = initials fallback in UI. Self-hosted; no CDN or CSP change needed.",
     "history_overrides": "Object — opponent name → { opp_quality: 'elite'|'contender'|'gatekeeper'|'unknown' }",
     "event_overrides": "Array at root level — editorial weigh_in + judges per fight per event"
   },

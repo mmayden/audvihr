@@ -6,20 +6,47 @@ All notable changes to this project. Format: [version] — date — description.
 
 ## [Unreleased]
 
-### Phase 9 — Roster Expansion + Public Signal (in progress)
+---
+
+## [0.10.0] — 2026-03-16
+
+### Phase 10 — Mobile + UX Polish
+
+#### Added
+- `src/hooks/useTheme.js` — `useTheme()` hook: persists user colour-scheme preference (`'light'|'dark'|'system'`) to localStorage via `useLocalStorage`; applies `data-theme` attribute on `<html>` on change; `'system'` removes the attribute so the CSS `prefers-color-scheme` media query takes over; exports `{ theme, toggle, label }`
+- `src/App.jsx` — bottom navigation bar (`.bottom-nav`) with 5 screen buttons, hidden on desktop, shown on mobile (< 768 px) as a fixed 56 px bar; floating theme toggle (`.theme-toggle-floating`) fixed top-right on desktop; inline theme toggle (`.bottom-nav-theme`) in bottom nav on mobile; `navTo()` helper clears deep-fighter state on nav-item tap
+- `src/screens/FighterScreen.jsx` — `sidebarOpen` state; ROSTER toggle button in topbar (desktop-hidden, mobile-shown); `.sidebar-backdrop` rendered when open; `.sidebar--open` class; `portrait` field support: `portrait-img` when present, `portrait-initials` (first 2 name initials, JetBrains Mono) when null
+- `src/screens/CalendarScreen.jsx` — same `sidebarOpen` pattern with EVENTS topbar button
+- `src/styles/app.css` — light-theme CSS variable set (`[data-theme="light"]`, 12 token overrides) + `@media (prefers-color-scheme: light)` fallback; `@media (max-width: 767px)` responsive block: bottom nav, mobile `.app` height (`100dvh - 56px`), sidebar overlay, compact hero card, fight log column reduction, compare stacking, padding reduction; `fighter-link` changed to `var(--blue)` (amber down to 2 semantic meanings); `.flag-value` + `.stat-cell-attr-val` get `font-family: var(--mono)` (typography consistency)
+- `scripts/fighter-seed.json` schema — `portrait` field documented (nullable, self-hosted in `/public/assets/portraits/`, no CSP change)
+
+#### Testing
+- `src/hooks/useTheme.test.js` — 9 tests: system default, localStorage restore, toggle directions, label values, persistence
+- `src/App.test.jsx` — 5 tests: bottom nav labels, navigation on tap, active class, toggle buttons present, `data-theme` set on toggle
+- `src/screens/FighterScreen.test.jsx` — 7 tests: initials fallback, portrait img, max-2 initials, ROSTER button, backdrop opens/closes, `sidebar--open` class
+- 186 total tests, all passing; 0 lint errors
+
+
+---
+
+## [0.9.0] — 2026-03-16
+
+### Phase 9 — Roster Expansion + Public Signal
 
 #### Added
 - `src/utils/clv.js` — `appendOpeningLine(fightKeyStr, f1ml, f2ml, ts)`: writes a one-time opening-line snapshot to `opening_lines` localStorage key; no-op if fightKey already present (never overwrites the true opening). `readOpeningLines()`: reads all stored opening lines; returns `{}` on missing/invalid. `CLV_OPENING_KEY` constant exported.
 - `src/hooks/useOdds.js` — after every fresh API fetch, calls `appendOpeningLine` for each fight with sportsbook prices; cache hits do not re-write (first-fetch-only semantic preserved)
-- `src/screens/MarketsScreen.jsx` — opening line displayed in SPORTSBOOK column ("OPEN -130 / +110") when stored; "NOT IN ROSTER" badge on live-only stub fight rows
-- `src/styles/app.css` — `.mkt-opening-line`, `.mkt-not-in-roster` CSS classes
+- `src/screens/MarketsScreen.jsx` — opening line displayed in SPORTSBOOK column ("OPEN -130 / +110") when stored; "NOT IN ROSTER" badge on live-only stub fight rows; Tapology public picks row: "PUBLIC Fighter 68% / Opponent 32%" below arb row when `tapology_pct` present; amber `var(--accent)` + FADE badge when |public_pct − sportsbook_implied| ≥ 15pt; `tapologyByKey` IIFE at module level (static derived map — no useMemo); EVENTS imported
+- `src/styles/app.css` — `.mkt-opening-line`, `.mkt-not-in-roster`, `.mkt-public-row`, `.mkt-public-row--fade`, `.mkt-public-label`, `.mkt-public-sep`, `.mkt-public-fade-badge` CSS classes added
 - `scripts/fighter-seed.json` — 55 new fighter entries (IDs 15–69) covering all 8 active weight classes; editorial data complete (archetype, mods, chin, cardio, weight_cut, trader_notes, history_overrides). UFCStats URLs sourced for all 55 via letter-page pagination + UFC 311 event page for Moicano (listed under Carneiro). All `"pending"` flags removed. 69/69 fighters now have live UFCStats stats. Divisions: FLW (7), BW (7), FW (7), LW (4), WW (7), MW (9), LHW (7), HW (8).
-- `scripts/fetch-data.js` — `"pending": true` flag support: fighters with this flag are skipped cleanly (log message only, no error pushed, no CI abort); `scrapeTapologyEventPct(eventName)` — fetches Tapology `#sectionPicks` with a browser UA, parses `.chartRow` pairs for last-name labels + pick%, returns a Map keyed by normalized last name; `matchTapologyPct(ufcName, tapMap)` — fuzzy matches UFCStats full names to Tapology labels via normalized last name; integrated into `scrapeUpcomingEvents()` after each event scrape, degrades silently on failure; `fetchHtmlBrowser()` helper added for Tapology-compatible requests
-- `src/screens/MarketsScreen.jsx` — Tapology public picks row: "PUBLIC Fighter 68% / Opponent 32%" rendered below arb row when `tapology_pct` is present in EVENTS data; amber `var(--accent)` color + FADE badge when |public_pct − sportsbook_implied| ≥ 15pt; `tapologyByKey` built at module level from EVENTS (static derived map, no hook); EVENTS imported
-- `src/styles/app.css` — `.mkt-public-row`, `.mkt-public-row--fade`, `.mkt-public-label`, `.mkt-public-sep`, `.mkt-public-fade-badge` classes added
+- `scripts/fetch-data.js` — `"pending": true` flag support: fighters with this flag are skipped cleanly (log message only, no error pushed, no CI abort); `scrapeTapologyEventPct(eventName)` — fetches Tapology `#sectionPicks` with browser Chrome UA (default UA returns 403), parses `.chartRow` pairs for last-name labels + pick% (SVG heights decorative — use `.number` text); `matchTapologyPct(ufcName, tapMap)` — fuzzy matches UFCStats full names to Tapology labels via NFD-normalized last name; integrated into `scrapeUpcomingEvents()` after each event scrape, degrades silently on failure; `fetchHtmlBrowser()` helper added
 
 #### Testing
 - `src/utils/clv.test.js` — 11 new tests for `appendOpeningLine` and `readOpeningLines`: first-write, no-overwrite, multi-fight, default-ts, missing-args, invalid-JSON, round-trip read; 161 total tests (up from 142), all passing
+- `src/screens/MarketsScreen.test.jsx` — 4 new Phase 9 targeted tests: NOT IN ROSTER badge (live-only stub fight), opening line display (localStorage-seeded, matched live fight), Tapology PUBLIC row (mocked EVENTS with tapology_pct), FADE badge (public/sportsbook ≥15pt divergence). Hook mocks refactored to vi.fn() for per-test override via vi.mocked(); EVENTS mocked at module level to inject tapology_pct. 165 total tests, all passing.
+
+#### Verification
+- Editorial data for all 55 new fighters (IDs 15–69) reviewed: archetypes, modifier flags, chin/cardio/weight_cut qualitative ratings confirmed accurate against fighter profiles.
 
 ---
 

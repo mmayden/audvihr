@@ -20,6 +20,39 @@
   --font:       'Inter', sans-serif;
   --mono:       'JetBrains Mono', monospace;
 }
+
+/* ---- Light theme — applied via [data-theme="light"] on <html> ---- */
+[data-theme="light"] {
+  --bg:         #f0f2f7;
+  --surface:    #ffffff;
+  --surface2:   #f5f7fc;
+  --surface3:   #eaecf3;
+  --border:     #d0d4e0;
+  --border2:    #b8bdd0;
+  --text:       #2c3248;
+  --text-dim:   #8090b0;
+  --text-bright:#1a2035;
+  --accent:     #b8861e;
+  --accent-dim: #8a6010;
+}
+
+/* ---- System-preference light theme (no manual override) ---- */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg:         #f0f2f7;
+    --surface:    #ffffff;
+    --surface2:   #f5f7fc;
+    --surface3:   #eaecf3;
+    --border:     #d0d4e0;
+    --border2:    #b8bdd0;
+    --text:       #2c3248;
+    --text-dim:   #8090b0;
+    --text-bright:#1a2035;
+    --accent:     #b8861e;
+    --accent-dim: #8a6010;
+  }
+}
+
 html, body, #root { height: 100%; }
 body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.5; }
 ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -70,6 +103,8 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
 .card-hero { display: flex; border-bottom: 1px solid var(--border); background: var(--surface); flex-shrink: 0; }
 .card-portrait { width: 160px; min-width: 160px; height: 160px; background: var(--surface2); display: flex; align-items: center; justify-content: center; border-right: 1px solid var(--border); overflow: hidden; flex-shrink: 0; }
 .portrait-placeholder { font-size: 52px; opacity: .15; user-select: none; }
+.portrait-initials { font-family: var(--mono); font-size: 40px; font-weight: 700; color: var(--border2); user-select: none; letter-spacing: -.02em; }
+.portrait-img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
 .card-identity { flex: 1; padding: 16px 20px; display: flex; flex-direction: column; justify-content: center; gap: 6px; }
 .fighter-name-big { font-size: clamp(18px,2.5vw,28px); font-weight: 700; color: var(--text-bright); letter-spacing: .03em; line-height: 1.1; }
 .fighter-nickname { font-size: 12px; color: var(--accent); font-style: italic; font-family: var(--mono); }
@@ -194,7 +229,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
 .cmb-fighter-name { font-size: 15px; font-weight: 700; color: var(--text-bright); }
 .cmb-weight-tag { font-size: 9px; font-family: var(--mono); color: var(--text-dim); letter-spacing: .08em; }
 .cmb-vs { background: var(--surface); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--red); }
-.fighter-link { color: var(--accent); cursor: pointer; font-weight: 700; border-bottom: 1px solid var(--accent-dim); transition: color .12s, border-color .12s; }
+.fighter-link { color: var(--blue); cursor: pointer; font-weight: 700; border-bottom: 1px solid rgba(91,141,217,.35); transition: color .12s, border-color .12s; }
 .fighter-link:hover { color: var(--text-bright); border-bottom-color: var(--text-bright); }
 .cal-bout { display: flex; align-items: center; gap: 10px; padding: 9px 14px; background: var(--surface); margin-bottom: 1px; font-size: 12px; }
 .cal-bout:hover { background: var(--surface2); }
@@ -289,8 +324,8 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
 .fin-n--dec { color: var(--text-dim); }
 
 /* TAB SHARED */
-.flag-value { font-size: 13px; font-weight: 600; margin-top: 4px; }
-.stat-cell-attr-val { font-size: 14px; font-weight: 600; color: var(--text-bright); margin-top: 4px; }
+.flag-value { font-size: 13px; font-weight: 600; margin-top: 4px; font-family: var(--mono); }
+.stat-cell-attr-val { font-size: 14px; font-weight: 600; color: var(--text-bright); margin-top: 4px; font-family: var(--mono); }
 .stat-cell-text-val { font-size: 13px; color: var(--text); margin-top: 4px; }
 .stat-cell--standalone { margin-bottom: 20px; }
 .stat-cell-val--win { color: var(--green); }
@@ -354,9 +389,158 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
 /* MENUSCREEN */
 .topbar-version-badge { font-family: var(--mono); font-size: 10px; color: var(--text-dim); letter-spacing: .08em; }
 
+/* ROSTER / EVENTS toggle button — hidden on desktop, shown on mobile */
+.topbar-roster-btn { display: none; font-size: 10px; font-family: var(--mono); color: var(--text-dim); border: 1px solid var(--border2); padding: 3px 8px; cursor: pointer; background: transparent; transition: all .15s; letter-spacing: .06em; }
+.topbar-roster-btn:hover { color: var(--text); border-color: var(--border); }
+
+/* THEME TOGGLE — floating on desktop, inline in bottom-nav on mobile */
+.theme-toggle-floating { display: inline-block; position: fixed; top: 10px; right: 14px; z-index: 200; font-family: var(--mono); font-size: 9px; font-weight: 600; letter-spacing: .08em; color: var(--text-dim); border: 1px solid var(--border2); padding: 3px 8px; cursor: pointer; background: var(--surface); transition: color .15s, border-color .15s; }
+.theme-toggle-floating:hover { color: var(--text); border-color: var(--border2); }
+.bottom-nav-theme { display: none; }
+
 /* ERROR BOUNDARY */
 .error-fallback { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; gap: 12px; background: var(--bg); color: var(--text); font-family: var(--mono); font-size: 13px; }
 .error-fallback-icon { font-size: 28px; opacity: .3; }
 .error-fallback-title { color: var(--red); }
 .error-fallback-message { color: var(--text-dim); font-size: 11px; }
 .error-fallback-btn { margin-top: 8px; padding: 6px 16px; cursor: pointer; background: var(--surface2); border: 1px solid var(--border2); color: var(--text); font-family: var(--mono); font-size: 11px; }
+
+/* BOTTOM NAV — hidden on desktop, shown on mobile */
+.bottom-nav { display: none; }
+
+/* SIDEBAR BACKDROP — mobile only, hidden by default */
+.sidebar-backdrop { display: none; }
+
+/* ============================================================
+   RESPONSIVE — viewports < 768 px
+   CSS media queries only; no JS resize listeners.
+   ============================================================ */
+@media (max-width: 767px) {
+  /* Bottom nav bar */
+  .bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 56px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    z-index: 100;
+  }
+  .bottom-nav-item {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    padding: 8px 2px;
+    transition: color .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .bottom-nav-item:hover { color: var(--text); }
+  .bottom-nav-item.active { color: var(--accent); border-top: 2px solid var(--accent); }
+
+  /* Shrink each screen to leave room for the fixed bottom nav */
+  .app {
+    height: calc(100vh - 56px);
+    height: calc(100dvh - 56px);
+  }
+
+  /* Topbar — hide wordmark on narrow viewports to reduce clutter */
+  .topbar-logo { display: none; }
+
+  /* Show the ROSTER / EVENTS sidebar toggle button on mobile */
+  .topbar-roster-btn { display: inline-block; }
+
+  /* ---- Sidebar: hidden by default; slide-in overlay when open ---- */
+  .sidebar {
+    display: none;
+    position: fixed;
+    top: 48px;   /* below topbar */
+    left: 0;
+    bottom: 56px; /* above bottom nav */
+    width: 280px;
+    z-index: 90;
+    box-shadow: 4px 0 20px rgba(0,0,0,.5);
+  }
+  .sidebar--open { display: flex; }
+
+  /* Semi-transparent backdrop behind the open sidebar */
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 48px 0 56px 0;
+    background: rgba(0,0,0,.5);
+    z-index: 89;
+  }
+
+  /* FighterScreen: hero card becomes more compact */
+  .card-hero { flex-wrap: wrap; }
+  .card-portrait { width: 100px; min-width: 100px; height: 100px; }
+  .card-record { min-width: 0; flex: 1; border-left: none; border-top: 1px solid var(--border); width: 100%; flex-direction: row; align-items: center; gap: 16px; padding: 10px 16px; }
+
+  /* Stat rows — shrink label width on small screens */
+  .srl-label { width: 130px; font-size: 10px; }
+
+  /* Fight log — hide less critical columns */
+  .fight-log-header,
+  .fight-entry { grid-template-columns: 28px 1fr 60px 44px; }
+  .fight-log-header > *:nth-child(5),
+  .fight-log-header > *:nth-child(6),
+  .fight-entry > *:nth-child(5),
+  .fight-entry > *:nth-child(6) { display: none; }
+
+  /* Compare: stack fighter selectors + checklist vertically */
+  .compare-selector { flex-wrap: wrap; }
+  .compare-select { min-width: 0; }
+  .compare-fighter-header { grid-template-columns: 1fr 40px 1fr; }
+  .compare-fighter-name { font-size: 12px; }
+  .compare-body { flex-direction: column; }
+  .checklist-wrap { width: 100%; min-width: 0; border-left: none; border-top: 1px solid var(--border); max-height: 340px; }
+
+  /* Markets filter bar — allow wrapping */
+  .markets-filterbar { gap: 4px; }
+
+  /* CLV table — narrower columns */
+  .clv-row { grid-template-columns: 100px 64px 100px 60px 60px; font-size: 9px; }
+
+  /* Tab bar — allow horizontal scroll */
+  .tabs-bar { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tab-btn { padding: 10px 12px; font-size: 10px; }
+
+  /* Tab content — reduce padding */
+  .tab-content { padding: 14px; }
+
+  /* Markets list — reduce padding */
+  .markets-list { padding: 10px 12px; }
+
+  /* News list — reduce padding */
+  .news-list { padding: 10px 12px; }
+
+  /* Theme toggle — hide floating button, show inline in bottom nav */
+  .theme-toggle-floating { display: none; }
+  .bottom-nav-theme {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 10px;
+    background: transparent;
+    border: none;
+    border-left: 1px solid var(--border);
+    cursor: pointer;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: .05em;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .bottom-nav-theme:hover { color: var(--text); }
+}

@@ -24,6 +24,8 @@ function countdown(dateStr, today) {
  * CalendarScreen — fight calendar screen with sidebar event list and detail view.
  * Automatically selects the first upcoming event on mount. Supports org filtering.
  * Fighter names that exist in the roster are rendered as clickable profile links.
+ * On mobile (< 768 px) the sidebar is hidden by default and revealed via the
+ * EVENTS button in the topbar; selecting an event closes it.
  * @param {function} onBack - callback invoked when the back button is clicked
  * @param {function} onGoFighter - callback invoked with a fighter object to deep-navigate to their profile
  */
@@ -33,19 +35,25 @@ export const CalendarScreen = ({onBack, onGoFighter}) => {
   const firstUpcoming = sorted.find(e=>new Date(e.date)>=today);
   const [selId,setSelId] = useState((firstUpcoming||sorted[0]).id);
   const [orgFilter,setOrgFilter] = useState('ALL');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const sel = EVENTS.find(e=>e.id===selId);
   const orgs = ['ALL',...new Set(EVENTS.map(e=>e.org))];
   const filtered = sorted.filter(e=>orgFilter==='ALL'||e.org===orgFilter);
+  const pickEvent = (id) => { setSelId(id); setSidebarOpen(false); };
 
   return (
     <div className="app">
       <div className="topbar">
         <span className="topbar-logo">AUDWIHR</span><span className="topbar-sep">/</span>
         <span className="topbar-section">CALENDAR</span>
-        <div className="topbar-right"><button className="topbar-back" onClick={onBack}>← MENU</button></div>
+        <div className="topbar-right">
+          <button className="topbar-roster-btn" onClick={() => setSidebarOpen(o => !o)}>EVENTS</button>
+          <button className="topbar-back" onClick={onBack}>← MENU</button>
+        </div>
       </div>
       <div className="main-layout">
-        <div className="sidebar">
+        {sidebarOpen && <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />}
+        <div className={`sidebar${sidebarOpen ? ' sidebar--open' : ''}`}>
           <div className="sidebar-header">EVENTS — {filtered.length}</div>
           <div className="sidebar-filters">
             {orgs.map(o=><button key={o} className={`filter-chip ${orgFilter===o?'on':''}`} onClick={()=>setOrgFilter(o)}>{o}</button>)}
@@ -56,7 +64,7 @@ export const CalendarScreen = ({onBack, onGoFighter}) => {
               const d=daysUntil(e.date, today);
               const cdColor=past?'var(--text-dim)':d<=7?'var(--accent)':'var(--green)';
               return (
-                <div key={e.id} className={`sidebar-fighter${sel?.id===e.id?' active':''}${past?' past-event':''}`} onClick={()=>setSelId(e.id)}>
+                <div key={e.id} className={`sidebar-fighter${sel?.id===e.id?' active':''}${past?' past-event':''}`} onClick={()=>pickEvent(e.id)}>
                   <div className="cal-sidebar-event-row">
                     <span className="sf-name">{e.name}</span>
                     <span className="cal-countdown" style={{color:cdColor}}>{countdown(e.date, today)}</span>
