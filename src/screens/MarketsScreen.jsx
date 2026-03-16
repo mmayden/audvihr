@@ -7,7 +7,7 @@ import { useKalshi } from '../hooks/useKalshi';
 import { mlToImplied } from '../utils/odds';
 import { fightKey } from '../utils/normalizeOdds';
 import { daysUntil } from '../utils/date';
-import { readCLVLog } from '../utils/clv';
+import { readCLVLog, readOpeningLines } from '../utils/clv';
 import { PriceChart } from '../components/PriceChart';
 
 const SORT_LABELS = ['CLOSING', 'VOLUME', 'EVENT'];
@@ -87,6 +87,7 @@ export const MarketsScreen = ({ onBack }) => {
   const [chartHistory, setChartHistory]          = useState({});   // { fightKey: { poly: [], kalshi: [] } }
   const [showCLV, setShowCLV]                    = useState(false);
   const [clvLog, setCLVLog]                      = useState([]);
+  const [openingLines]                           = useState(() => readOpeningLines());
 
   const { data: oddsData }                       = useOdds();
   const { data: polyData, fetchHistory: polyFetchHistory } = usePolymarket();
@@ -309,11 +310,13 @@ export const MarketsScreen = ({ onBack }) => {
             </div>
           )}
           {filtered.map((market) => {
-            const live    = market._live;
-            const watched = isWatched(market.id);
-            const histKey = market._fightKey;
-            const isExpanded = expandedChart === market.id;
-            const hist    = chartHistory[histKey];
+            const live        = market._live;
+            const watched     = isWatched(market.id);
+            const histKey     = market._fightKey;
+            const isExpanded  = expandedChart === market.id;
+            const hist        = chartHistory[histKey];
+            const isStub      = market.id.startsWith('live_');
+            const opening     = openingLines[market._fightKey] || null;
 
             // Build arb sources from live data if available, else from mock platforms.
             const arbSources = [];
@@ -357,6 +360,7 @@ export const MarketsScreen = ({ onBack }) => {
                     </div>
                     <div className="mkt-fight-meta">
                       {market.event} · {market.weight.toUpperCase()}{market.isTitle ? ' · TITLE' : ''}
+                      {isStub && <span className="mkt-not-in-roster">NOT IN ROSTER</span>}
                     </div>
                   </div>
                   <div className="mkt-header-right">
@@ -384,6 +388,7 @@ export const MarketsScreen = ({ onBack }) => {
                       formatF2={(v) => v}
                       sublabel={live.sportsbook?.source || null}
                       isML
+                      openingLine={opening}
                     />
                     {/* Polymarket column */}
                     <LivePriceCell
@@ -528,9 +533,10 @@ export const MarketsScreen = ({ onBack }) => {
  * @param {function} formatF1    - (val) => display string for F1
  * @param {function} formatF2    - (val) => display string for F2
  * @param {string}   [sublabel]  - optional sub-label under the badge (e.g. bookmaker name)
- * @param {boolean}  [isML]      - if true, interpret vals as American ML strings for color coding
+ * @param {boolean}  [isML]         - if true, interpret vals as American ML strings for color coding
+ * @param {{ f1ml: string, f2ml: string, ts: number }|null} [openingLine] - stored opening line for delta display
  */
-const LivePriceCell = ({ label, colorClass, f1Name, f2Name, f1Val, f2Val, formatF1, formatF2, sublabel, isML }) => {
+const LivePriceCell = ({ label, colorClass, f1Name, f2Name, f1Val, f2Val, formatF1, formatF2, sublabel, isML, openingLine }) => {
   const available = f1Val !== null && f2Val !== null;
 
   const f1IsFav = isML
@@ -553,6 +559,11 @@ const LivePriceCell = ({ label, colorClass, f1Name, f2Name, f1Val, f2Val, format
             <span className="mkt-price-name">{f2Name}</span>
             <span className={`mkt-price-ml ${!f1IsFav ? 'fav' : 'dog'}`}>{formatF2(f2Val)}</span>
           </div>
+          {openingLine && (
+            <div className="mkt-opening-line">
+              OPEN {openingLine.f1ml} / {openingLine.f2ml}
+            </div>
+          )}
         </>
       ) : (
         <div className="mkt-live-unavailable">—</div>

@@ -332,6 +332,8 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
 .mkt-live-cell-header { margin-bottom: 4px; }
 .mkt-live-sublabel { font-family: var(--mono); font-size: 9px; color: var(--text-dim); margin-left: 4px; }
 .mkt-live-unavailable { color: var(--text-dim); font-family: var(--mono); font-size: 10px; padding-top: 4px; }
+.mkt-opening-line { font-family: var(--mono); font-size: 9px; color: var(--text-dim); margin-top: 5px; letter-spacing: .04em; }
+.mkt-not-in-roster { font-family: var(--mono); font-size: 8px; color: var(--text-dim); background: var(--surface3); border: 1px solid var(--border2); border-radius: 2px; padding: 1px 5px; margin-left: 8px; letter-spacing: .07em; vertical-align: middle; }
 
 /* TAB MARKET */
 .mc-live-price { margin-top: 6px; font-family: var(--mono); font-size: 22px; color: var(--text-bright); }

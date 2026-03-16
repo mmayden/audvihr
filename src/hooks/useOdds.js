@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { normalizeOddsApiResponse } from '../utils/normalizeOdds';
 import { readCache, writeCache, evictCache } from '../utils/cache';
+import { appendOpeningLine } from '../utils/clv';
 
 /**
  * useOdds — fetches live UFC moneylines from The Odds API.
@@ -55,6 +56,14 @@ export function useOdds() {
       .then((raw) => {
         const normalized = normalizeOddsApiResponse(raw);
         writeCache(CACHE_KEY, normalized);
+        // Write opening-line snapshot for each fight on first-ever fetch.
+        // appendOpeningLine is a no-op if the fightKey already has an opening stored.
+        const ts = Date.now();
+        normalized.forEach((f) => {
+          if (f.sportsbook) {
+            appendOpeningLine(f.fightKey, f.sportsbook.f1_ml, f.sportsbook.f2_ml, ts);
+          }
+        });
         setData(normalized);
       })
       .catch((err) => {

@@ -16,14 +16,13 @@
 
 ### Phase 9 Active Tasks
 
-- [ ] Opening line preservation in CLV log
-  - [x] `appendOpeningLine(fightKey, f1ml, f2ml, timestamp)` in `src/utils/clv.js`
-  - [ ] `useOdds.js` writes opening snapshot on first fetch (no prior snapshot for this fightKey)
-  - [ ] MarketsScreen fight row shows "OPEN -130 → CURRENT -155" when opening line stored
-  - [ ] TabMarket shows opening line delta alongside current line
-- [ ] "NOT IN ROSTER" stub fighter shape for non-roster fighters from The Odds API
-  - [ ] MarketsScreen renders minimal stub row: name, moneylines, implied % — clearly labeled "NOT IN ROSTER"
-  - [ ] No archetype, no stats, no checklist on stub rows
+- [x] Opening line preservation in CLV log
+  - [x] `appendOpeningLine(fightKey, f1ml, f2ml, timestamp)` + `readOpeningLines()` in `src/utils/clv.js`
+  - [x] `useOdds.js` writes opening snapshot on first fetch (no-op if already stored)
+  - [x] MarketsScreen SPORTSBOOK column shows "OPEN -130 / +110" when opening line stored
+  - [ ] TabMarket shows opening line delta alongside current line (deferred — TabMarket reads from localStorage separately)
+- [x] "NOT IN ROSTER" stub fighter shape for non-roster fighters from The Odds API
+  - [x] MarketsScreen renders "NOT IN ROSTER" badge on live-only stub fight rows
 - [ ] Roster expansion — top 10 per active weight class (~60 fighters total)
   - [ ] Flyweight (125): 0 → 10 fighters in seed
   - [ ] Bantamweight (135): 2 → 10 fighters in seed

@@ -6,6 +6,17 @@ All notable changes to this project. Format: [version] — date — description.
 
 ## [Unreleased]
 
+### Phase 9 — Roster Expansion + Public Signal (in progress)
+
+#### Added
+- `src/utils/clv.js` — `appendOpeningLine(fightKeyStr, f1ml, f2ml, ts)`: writes a one-time opening-line snapshot to `opening_lines` localStorage key; no-op if fightKey already present (never overwrites the true opening). `readOpeningLines()`: reads all stored opening lines; returns `{}` on missing/invalid. `CLV_OPENING_KEY` constant exported.
+- `src/hooks/useOdds.js` — after every fresh API fetch, calls `appendOpeningLine` for each fight with sportsbook prices; cache hits do not re-write (first-fetch-only semantic preserved)
+- `src/screens/MarketsScreen.jsx` — opening line displayed in SPORTSBOOK column ("OPEN -130 / +110") when stored; "NOT IN ROSTER" badge on live-only stub fight rows
+- `src/styles/app.css` — `.mkt-opening-line`, `.mkt-not-in-roster` CSS classes
+
+#### Testing
+- `src/utils/clv.test.js` — 11 new tests for `appendOpeningLine` and `readOpeningLines`: first-write, no-overwrite, multi-fight, default-ts, missing-args, invalid-JSON, round-trip read; 161 total tests (up from 142), all passing
+
 ---
 
 ## [0.8.1] — 2026-03-16

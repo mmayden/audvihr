@@ -19,6 +19,7 @@
 
 export const CLV_LOG_KEY     = 'clv_log';
 export const CLV_MAX_ENTRIES = 500;
+export const CLV_OPENING_KEY = 'opening_lines';
 
 /**
  * Append CLV snapshots for a batch of NormalizedFight objects.
@@ -48,6 +49,42 @@ export function appendCLVEntries(fights, source) {
     }
     localStorage.setItem(CLV_LOG_KEY, JSON.stringify(log.slice(-CLV_MAX_ENTRIES)));
   } catch { /* quota exceeded or unparseable — ignore */ }
+}
+
+/**
+ * Write an opening-line snapshot for a fight only if none exists yet.
+ * Opening lines are stored separately from the rolling CLV log so they are
+ * never evicted by the 500-entry cap.
+ *
+ * @param {string} fightKeyStr - fightKey() value for this fight
+ * @param {string} f1ml        - F1 American moneyline string e.g. '-130'
+ * @param {string} f2ml        - F2 American moneyline string
+ * @param {number} [ts]        - timestamp; defaults to Date.now()
+ */
+export function appendOpeningLine(fightKeyStr, f1ml, f2ml, ts) {
+  if (!fightKeyStr || !f1ml || !f2ml) return;
+  try {
+    const raw = localStorage.getItem(CLV_OPENING_KEY);
+    const lines = raw ? JSON.parse(raw) : {};
+    if (lines[fightKeyStr]) return; // already stored — never overwrite the true opening line
+    lines[fightKeyStr] = { f1ml, f2ml, ts: ts ?? Date.now() };
+    localStorage.setItem(CLV_OPENING_KEY, JSON.stringify(lines));
+  } catch { /* quota exceeded or unparseable — ignore */ }
+}
+
+/**
+ * Read all stored opening lines from localStorage.
+ * Returns {} if the key is missing or the value is unparseable.
+ *
+ * @returns {{ [fightKey]: { f1ml: string, f2ml: string, ts: number } }}
+ */
+export function readOpeningLines() {
+  try {
+    const raw = localStorage.getItem(CLV_OPENING_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
 }
 
 /**

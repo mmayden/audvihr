@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { appendCLVEntries, readCLVLog, CLV_LOG_KEY, CLV_MAX_ENTRIES } from './clv';
+import {
+  appendCLVEntries, readCLVLog, CLV_LOG_KEY, CLV_MAX_ENTRIES,
+  appendOpeningLine, readOpeningLines, CLV_OPENING_KEY,
+} from './clv';
 
 const POLY_FIGHT = {
   fightKey: 'makhachev_poirier',
@@ -19,6 +22,7 @@ const KALSHI_FIGHT = {
 
 beforeEach(() => {
   localStorage.removeItem(CLV_LOG_KEY);
+  localStorage.removeItem(CLV_OPENING_KEY);
 });
 
 describe('appendCLVEntries', () => {
@@ -75,6 +79,64 @@ describe('appendCLVEntries', () => {
     appendCLVEntries(fights, 'polymarket');
     const log = readCLVLog();
     expect(log).toHaveLength(CLV_MAX_ENTRIES);
+  });
+});
+
+describe('appendOpeningLine', () => {
+  it('stores the opening line for a new fightKey', () => {
+    appendOpeningLine('jones_aspinall', '-155', '+130', 1000);
+    const lines = readOpeningLines();
+    expect(lines['jones_aspinall']).toEqual({ f1ml: '-155', f2ml: '+130', ts: 1000 });
+  });
+
+  it('does not overwrite an existing opening line', () => {
+    appendOpeningLine('jones_aspinall', '-155', '+130', 1000);
+    appendOpeningLine('jones_aspinall', '-180', '+150', 2000); // later — must be ignored
+    const lines = readOpeningLines();
+    expect(lines['jones_aspinall'].f1ml).toBe('-155');
+    expect(lines['jones_aspinall'].ts).toBe(1000);
+  });
+
+  it('stores multiple fights independently', () => {
+    appendOpeningLine('jones_aspinall', '-155', '+130', 1000);
+    appendOpeningLine('makhachev_poirier', '-300', '+240', 2000);
+    const lines = readOpeningLines();
+    expect(Object.keys(lines)).toHaveLength(2);
+  });
+
+  it('defaults ts to Date.now() when not provided', () => {
+    const before = Date.now();
+    appendOpeningLine('jones_aspinall', '-155', '+130');
+    const after = Date.now();
+    const lines = readOpeningLines();
+    expect(lines['jones_aspinall'].ts).toBeGreaterThanOrEqual(before);
+    expect(lines['jones_aspinall'].ts).toBeLessThanOrEqual(after);
+  });
+
+  it('does not throw on missing args', () => {
+    expect(() => appendOpeningLine(null, '-155', '+130')).not.toThrow();
+    expect(() => appendOpeningLine('key', null, '+130')).not.toThrow();
+    expect(() => appendOpeningLine('key', '-155', null)).not.toThrow();
+    expect(readOpeningLines()).toEqual({});
+  });
+});
+
+describe('readOpeningLines', () => {
+  it('returns {} when the key is absent', () => {
+    expect(readOpeningLines()).toEqual({});
+  });
+
+  it('returns {} when localStorage contains invalid JSON', () => {
+    localStorage.setItem(CLV_OPENING_KEY, 'bad-json{');
+    expect(readOpeningLines()).toEqual({});
+  });
+
+  it('returns all stored opening lines', () => {
+    appendOpeningLine('jones_aspinall', '-155', '+130', 1000);
+    appendOpeningLine('makhachev_poirier', '-300', '+240', 2000);
+    const lines = readOpeningLines();
+    expect(lines['jones_aspinall'].f1ml).toBe('-155');
+    expect(lines['makhachev_poirier'].f2ml).toBe('+240');
   });
 });
 
