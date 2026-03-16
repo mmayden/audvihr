@@ -20,7 +20,8 @@ These are non-negotiable. Do not skip them to save time or complexity.
 - **No hardcoded secrets.** API keys, tokens, credentials go in `.env` (Vite: `VITE_` prefix). `.env` files are gitignored. Never commit secrets.
 - **localStorage input validation.** All reads from localStorage must be wrapped in `try/catch` and validated against an expected shape. If validation fails, fall back to the typed default — never use raw parsed data unsanitized.
 - **User input sanitization at the boundary.** Validate and sanitize all form inputs (odds fields, notes) before using them in calculations. `parseInt()` with `isNaN` guard is the current pattern — maintain it.
-- **CSP required for web deployment.** Post-Vite: configure Content Security Policy via the hosting platform's headers file (`netlify.toml` or `_headers` for Netlify, `vercel.json` for Vercel). Minimum policy: `default-src 'self'; script-src 'self'; style-src 'self' fonts.googleapis.com; font-src fonts.gstatic.com`.
+- **CSP required for web deployment.** Configured in `netlify.toml` and `vercel.json`. Current policy includes: `default-src 'self'`; `script-src 'self'`; `worker-src 'self'` (for Service Worker); `style-src 'self' fonts.googleapis.com`; `font-src fonts.gstatic.com`; `connect-src 'self'` + 3 API domains; `img-src 'self' data:`; `frame-ancestors 'none'`. Do not weaken any directive. Every new external domain must be added to both files and documented in PLANNING.md decisions log.
+- **Alert notifications use plain text only.** The Notification API body must be constructed with string concatenation of validated values only. No HTML template literals, no `innerHTML`, no `dangerouslySetInnerHTML`. Browsers do not render HTML in notification bodies — never attempt to inject markup.
 - **`noindex, nofollow` robots meta tag.** This is a personal trading tool — it must not be indexed by search engines. The tag is already present in `index.html`; do not remove it.
 - **Dependency hygiene.** After Vite migration: run `npm audit` before every merge to `master`. Fix all critical/high severity issues before merging. Document any accepted moderate issues in PLANNING.md.
 
@@ -69,8 +70,10 @@ These are non-negotiable. Do not skip them to save time or complexity.
 File and folder structure must match the following layout. Do not put components in the wrong location:
 
 ```
+public/
+│   └── sw.js                 Service Worker — install/activate only; scope /; no fetch handler
 src/
-├── main.jsx                  Entry point — ReactDOM.createRoot + StrictMode
+├── main.jsx                  Entry point — ReactDOM.createRoot + StrictMode; SW registration
 ├── App.jsx                   Screen router — useState only, no business logic
 ├── styles/
 │   └── app.css               All global styles, CSS variables, component classes
@@ -93,13 +96,15 @@ src/
 │   ├── useOdds.js            useOdds — The Odds API moneylines; sessionStorage cache; silent degradation
 │   ├── usePolymarket.js      usePolymarket — Polymarket CLOB prices + lazy history; CLV snapshot
 │   ├── useKalshi.js          useKalshi — Kalshi REST API prices + lazy history; CLV snapshot; silent degradation
-│   └── useTheme.js           useTheme — colour-scheme toggle; localStorage persistence; data-theme on html
+│   ├── useTheme.js           useTheme — colour-scheme toggle; localStorage persistence; data-theme on html
+│   └── useAlerts.js          useAlerts — alert rules, permission state, Notification API dispatch; owns alerts_enabled + alert_rules keys
 ├── utils/
 │   ├── odds.js               mlToImplied(), lineMovement()
 │   ├── date.js               daysUntil(), isPast() — shared date helpers
 │   ├── normalizeOdds.js      fightKey(), probToML(), normalize*() — API response transforms
 │   ├── cache.js              readCache(), writeCache(), evictCache() — sessionStorage helpers
-│   └── clv.js                appendCLVEntries(), readCLVLog(), appendOpeningLine(), readOpeningLines(), CLV_LOG_KEY, CLV_OPENING_KEY, CLV_MAX_ENTRIES — CLV log + opening line localStorage helpers
+│   ├── clv.js                appendCLVEntries(), readCLVLog(), appendOpeningLine(), readOpeningLines(), CLV_LOG_KEY, CLV_OPENING_KEY, CLV_MAX_ENTRIES — CLV log + opening line localStorage helpers
+│   └── alerts.js             readAlertsEnabled/writeAlertsEnabled, readAlertRules/writeAlertRules, readPrevLines/writePrevLines, detectMovements() — alert pure functions; owns alerts_prev_lines sessionStorage key
 ├── components/
 │   ├── StatBar.jsx           Horizontal proportional fill bar
 │   ├── FighterName.jsx       Name → profile link resolver
@@ -114,11 +119,11 @@ src/
 │   ├── TabHistory.jsx
 │   └── TabMarket.jsx         Manual odds entry + live Polymarket/Kalshi prices when matched
 ├── screens/
-│   ├── MenuScreen.jsx
+│   ├── MenuScreen.jsx        ⚙ ALERTS settings panel (global toggle + permission request)
 │   ├── FighterScreen.jsx
 │   ├── CompareScreen.jsx
 │   ├── CalendarScreen.jsx
-│   ├── MarketsScreen.jsx     Unified live market dashboard (sportsbook + Polymarket + Kalshi + opening line + Tapology public %)
+│   ├── MarketsScreen.jsx     Unified live market dashboard + alert bell per fight
 │   └── NewsScreen.jsx        Fighter news feed with filters
 └── test/
     └── setup.js              Vitest setup — jest-dom + in-memory localStorage mock
@@ -141,6 +146,9 @@ src/
 - **CSS variables are the design system.** Do not use Tailwind, CSS Modules, or styled-components until a deliberate design system decision is made and logged in PLANNING.md.
 - **Theme toggle via `data-theme` on `<html>`.** Light theme is defined under `[data-theme="light"]` and `@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) }` in `app.css`. The `useTheme` hook owns the `theme` localStorage key. Do not write to it from any other path.
 - **Portrait images are self-hosted.** Drop fighter portrait files into `public/assets/portraits/` (e.g. `makhachev.jpg`). Add the filename to `fighter-seed.json` as the `portrait` field. No CDN, no CSP change, no build step required.
+- **Alert storage keys owned exclusively by `alerts.js`.** `alerts_enabled` and `alert_rules` (localStorage) and `alerts_prev_lines` (sessionStorage) may only be read/written by `src/utils/alerts.js` and `src/hooks/useAlerts.js`. No other module touches these keys.
+- **Service Worker is minimal and static.** `public/sw.js` contains only install/activate handlers. It makes no fetch calls. Do not add caching logic or background sync to it without a deliberate architecture decision. SW registration lives in `main.jsx` only.
+- **`worker-src 'self'` in CSP.** The SW is registered from the same origin. Both `netlify.toml` and `vercel.json` include `worker-src 'self'` in the Content-Security-Policy header. Do not remove it.
 
 ---
 

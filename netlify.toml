@@ -10,7 +10,7 @@
   [headers.values]
     # Content Security Policy
     # Vite output is fully compiled static JS — no inline scripts, no unsafe-inline needed.
-    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://api.the-odds-api.com https://clob.polymarket.com https://trading-api.kalshi.com; img-src 'self' data:; frame-ancestors 'none'"
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; worker-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://api.the-odds-api.com https://clob.polymarket.com https://trading-api.kalshi.com; img-src 'self' data:; frame-ancestors 'none'"
 
     # Prevent clickjacking
     X-Frame-Options = "DENY"

@@ -60,8 +60,10 @@ This document is the primary reference for Claude and the developer during long-
 The single-file prototype (`mma-trader.html`) was retired at Phase 3a. The project is now a Vite + React app with the following modular layout:
 
 ```
+public/
+│   └── sw.js                 Service Worker — install/activate only; scope /; no fetch handler (Phase 11)
 src/
-├── main.jsx                  Entry point — ReactDOM.createRoot + StrictMode
+├── main.jsx                  Entry point — ReactDOM.createRoot + StrictMode; SW registration
 ├── App.jsx                   Screen router — useState only, no business logic
 ├── styles/
 │   └── app.css               All global styles and CSS variables (design system)
@@ -84,13 +86,15 @@ src/
 │   ├── useOdds.js            useOdds — The Odds API moneylines; sessionStorage cache; silent degradation (Phase 7)
 │   ├── usePolymarket.js      usePolymarket — Polymarket CLOB prices + lazy history; CLV snapshot (Phase 7)
 │   ├── useKalshi.js          useKalshi — Kalshi REST API prices + lazy history; CLV snapshot (Phase 7)
-│   └── useTheme.js           useTheme — colour-scheme toggle; persists 'light'|'dark'|'system' to localStorage; sets data-theme on <html> (Phase 10)
+│   ├── useTheme.js           useTheme — colour-scheme toggle; persists 'light'|'dark'|'system' to localStorage; sets data-theme on <html> (Phase 10)
+│   └── useAlerts.js          useAlerts — line-movement alert rules, permission state, notification dispatch; owns alerts_enabled + alert_rules localStorage keys (Phase 11)
 ├── utils/
 │   ├── odds.js               mlToImplied(), lineMovement()
 │   ├── date.js               daysUntil(), isPast() — shared date helpers
 │   ├── normalizeOdds.js      fightKey(), probToML(), normalizeOddsApiResponse/PolymarketMarket/KalshiMarket/PriceHistory (Phase 7)
 │   ├── cache.js              readCache(), writeCache(), evictCache() — sessionStorage helpers (Phase 7)
-│   └── clv.js                appendCLVEntries(), readCLVLog(), appendOpeningLine(), readOpeningLines(), CLV_LOG_KEY, CLV_OPENING_KEY, CLV_MAX_ENTRIES — CLV log + opening line localStorage helpers (Phase 7–9)
+│   ├── clv.js                appendCLVEntries(), readCLVLog(), appendOpeningLine(), readOpeningLines(), CLV_LOG_KEY, CLV_OPENING_KEY, CLV_MAX_ENTRIES — CLV log + opening line localStorage helpers (Phase 7–9)
+│   └── alerts.js             readAlertsEnabled(), writeAlertsEnabled(), readAlertRules(), writeAlertRules(), readPrevLines(), writePrevLines(), detectMovements() — alert rule pure functions; owns alerts_prev_lines sessionStorage key (Phase 11)
 ├── components/
 │   ├── StatBar.jsx           Horizontal proportional fill bar
 │   ├── FighterName.jsx       Name → profile link resolver (calendar + news)
@@ -105,11 +109,11 @@ src/
 │   ├── TabHistory.jsx        Fight log table
 │   └── TabMarket.jsx         Moneyline entry, implied %, line movement, notes
 ├── screens/
-│   ├── MenuScreen.jsx        Main navigation (5 ACTIVE items)
+│   ├── MenuScreen.jsx        Main navigation (5 ACTIVE items) + ⚙ ALERTS settings panel
 │   ├── FighterScreen.jsx     Sidebar + hero card + 6-tab profile
 │   ├── CompareScreen.jsx     Two-fighter selector + stat table + checklist
 │   ├── CalendarScreen.jsx    Event sidebar + card detail + fighter deep-links
-│   ├── MarketsScreen.jsx     Unified live market dashboard (sportsbook + Polymarket + Kalshi + opening line + Tapology public %)
+│   ├── MarketsScreen.jsx     Unified live market dashboard (sportsbook + Polymarket + Kalshi + opening line + Tapology public %) + alert bell per fight
 │   └── NewsScreen.jsx        Fighter news feed with filters (Phase 5)
 └── test/
     └── setup.js              Vitest setup — jest-dom + in-memory localStorage mock
@@ -527,7 +531,7 @@ Ordered by value vs. effort. Full sprint tasks in TASKS.md.
 |---|---|---|---|
 | **Phase 9** ✅ | Roster expansion + public signal | 69 fighters (top 8–10 per division, all weight classes). Tapology public % column with FADE badge in MarketsScreen. Opening line preservation (`opening_lines` localStorage key). `NOT IN ROSTER` stub rows for live-only fights. | Tapology build-time scrape, browser Chrome UA (CORS prevents runtime). All new fighter seed data validated at scraper boundary. |
 | **Phase 10** ✅ | Mobile + UX polish | Responsive bottom nav (< 768 px). Sidebar drawer overlay (FighterScreen + CalendarScreen). Dark/light theme toggle (`useTheme`, localStorage, `data-theme` on `<html>`, system preference via `prefers-color-scheme`). Fighter portrait field (nullable, self-hosted `/public/assets/`, initials fallback). Visual hierarchy audit (`fighter-link` → `--blue`; mono font for `.flag-value` + `.stat-cell-attr-val`). | Portrait images: self-hosted `public/assets/portraits/` — no CSP change required. Cloudinary deferred. Theme toggle: CSS variable swap only, no new external resources. |
-| **Phase 11** | Alerts + notifications | Line movement alerts via browser Notification API + Service Worker polling. Fight cancellation detection. New-line-open alerts. | SW fetch uses same CSP `connect-src` as existing hooks. No new API surfaces. Alert content must not render user-controlled strings as HTML. |
+| **Phase 11** ✅ | Alerts + notifications | `public/sw.js` minimal SW (install/activate, no fetch handler). `useAlerts(oddsData?)` hook: alertsEnabled + alertRules (localStorage), prevLines (sessionStorage), `detectMovements()` pure fn, browser `Notification` API dispatch. Bell icon + threshold input per fight in MarketsScreen. ⚙ ALERTS settings panel in MenuScreen (global toggle + permission request). Silent degradation when Notification unavailable, denied, or alertsEnabled=false. 239 tests. | SW scope `/`, no fetch handler, `worker-src 'self'` added to CSP. Alert body constructed with string concatenation (`textContent` semantics) — no HTML interpolation, no `innerHTML`, no template-literal HTML tags. `detectMovements()` is pure — no DOM access. All localStorage reads in `alerts.js` are try/catch-wrapped with typed defaults. |
 | **Phase 12** | Live news layer | Replace mock news with real feed — MMA Fighting/ESPN RSS or HTML scrape. Surfaced in fighter profiles. | **Critical:** RSS/HTML content from external sources must be sanitized before any DOM injection. Use a whitelist text-only extraction. No `dangerouslySetInnerHTML` with external feed content. |
 | **Phase 13** | Sharing + export | React Router for shareable fighter/compare URLs. Export checklist+notes+CLV as markdown/PDF download. | URLs must not encode sensitive data (API keys, localStorage state). Export generation must be client-side only (no data leaves the browser to a third-party service). If PDF generation uses a library, `npm audit` required before merge. |
 
@@ -590,3 +594,8 @@ Ordered by value vs. effort. Full sprint tasks in TASKS.md.
 | 2026-03-16 | Visual hierarchy: `fighter-link` color changed from `--accent` to `--blue` | Amber (`--accent`) was overloaded with 3+ semantic meanings: brand/active state, fighter-positive data highlights, AND navigational links. Moving `fighter-link` to `--blue` (the informational/grappling color) leaves amber with exactly 2 meanings: (1) brand/active/selected state, (2) emphasis on primary data values. |
 | 2026-03-16 | Typography: `.flag-value` + `.stat-cell-attr-val` assigned `font-family: var(--mono)` | These classes displayed qualitative codes (ELITE, EXCELLENT, IRON) in Inter (body font). CLAUDE.md standard: all labels, codes, and numbers use JetBrains Mono. Oversight from Phase 8; corrected in Phase 10 visual hierarchy audit. |
 | 2026-03-16 | Phase 10 complete: 186 tests, 0 lint, 0 CVEs | Bottom nav + sidebar drawer, theme toggle, portrait field, visual hierarchy fixes. FighterScreen.test.jsx and App.test.jsx added (21 new tests). useTheme.test.js added (9 tests). vi.hoisted() pattern documented: fixtures accessed in vi.mock factories must be declared via vi.hoisted() to avoid TDZ errors from automatic hoisting. |
+| 2026-03-16 | Phase 11 alerts: localStorage key ownership formalized | `alerts.js` owns three storage keys: `alerts_enabled` (bool, localStorage), `alert_rules` (object, localStorage), `alerts_prev_lines` (transient prev-ML snapshot, sessionStorage). No other module may read or write these keys. Same isolation pattern as `clv.js` owning `clv_log` and `opening_lines`. |
+| 2026-03-16 | Phase 11 alert defaults: opt-in design | Global alerts default to false (not true). Per-fight alert must be explicitly enabled via bell icon. `requestPermission` only fires on explicit user gesture (settings panel REQUEST button). Rationale: no unsolicited permission prompts, no accidental alert spam on first load. |
+| 2026-03-16 | Phase 11 notification content: string concatenation only | Notification body is assembled with JS string concatenation using pre-validated values from the API response. No template-literal HTML tags. No `innerHTML`. The Notification constructor receives a plain text body string — browsers do not parse HTML in notification bodies. This is documented here to prevent future regression. |
+| 2026-03-16 | Phase 11 CSP: worker-src 'self' added explicitly | `worker-src 'self'` added to `netlify.toml` and `vercel.json` CSP for the `/sw.js` Service Worker. MDN: if `worker-src` is absent, browsers fall back to `child-src` then `default-src`. Adding it explicitly is best practice — makes the intent unambiguous and future-proofs against browser divergence. No new external domains introduced. |
+| 2026-03-16 | Phase 11 complete: 239 tests, 0 lint, 0 CVEs | `public/sw.js`, `src/utils/alerts.js` (31 tests), `src/hooks/useAlerts.js` (21 tests), MarketsScreen bell icon + threshold input, MenuScreen settings panel. `navigator` + `Notification` added to ESLint browser globals. `worker-src 'self'` in both deployment config files. |

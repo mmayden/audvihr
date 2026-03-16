@@ -34,6 +34,8 @@ export default [
         String:          'readonly',
         Boolean:         'readonly',
         Number:          'readonly',
+        navigator:       'readonly',
+        Notification:    'readonly',
       },
       parserOptions: {
         ecmaFeatures: { jsx: true },

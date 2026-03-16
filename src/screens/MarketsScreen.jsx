@@ -5,6 +5,7 @@ import { useWatchlist } from '../hooks/useWatchlist';
 import { useOdds } from '../hooks/useOdds';
 import { usePolymarket } from '../hooks/usePolymarket';
 import { useKalshi } from '../hooks/useKalshi';
+import { useAlerts } from '../hooks/useAlerts';
 import { mlToImplied } from '../utils/odds';
 import { fightKey } from '../utils/normalizeOdds';
 import { daysUntil } from '../utils/date';
@@ -90,6 +91,7 @@ function countdownColor(dateStr, today) {
  *     is present; amber FADE badge when public diverges ≥15pt from sportsbook implied probability
  *   - Probability movement line chart (lazy-loaded per market)
  *   - Personal CLV log view (localStorage-persisted snapshots)
+ *   - Line-movement alerts (bell icon per fight; fires browser Notification when ML moves ≥threshold)
  *   - Watchlist (localStorage-persisted)
  *   - Filters: platform, title fights, watchlist; Sort: closing, volume, event
  *
@@ -110,6 +112,7 @@ export const MarketsScreen = ({ onBack }) => {
   const { data: oddsData }                       = useOdds();
   const { data: polyData, fetchHistory: polyFetchHistory } = usePolymarket();
   const { data: kalshiData, fetchHistory: kalshiFetchHistory } = useKalshi();
+  const { alertRules, toggleFightAlert, setFightThreshold } = useAlerts(oddsData);
 
   const liveAvailable = Boolean(oddsData || polyData || kalshiData);
 
@@ -361,6 +364,11 @@ export const MarketsScreen = ({ onBack }) => {
             const arb = computeArb(arbSources);
             const vol = totalVolume(market);
 
+            const alertKey     = market._fightKey;
+            const alertRule    = alertRules[alertKey] || {};
+            const alertEnabled = alertRule.enabled === true;
+            const alertThresh  = typeof alertRule.threshold === 'number' ? alertRule.threshold : 5;
+
             return (
               <div key={market.id} className={`mkt-card${watched ? ' watched' : ''}`}>
 
@@ -373,6 +381,29 @@ export const MarketsScreen = ({ onBack }) => {
                   >
                     {watched ? '★' : '☆'}
                   </button>
+                  <button
+                    className={`mkt-alert-bell${alertEnabled ? ' on' : ''}`}
+                    onClick={() => toggleFightAlert(alertKey)}
+                    title={alertEnabled ? 'Disable line-movement alert' : 'Enable line-movement alert'}
+                    aria-label={alertEnabled ? 'Alert on' : 'Alert off'}
+                  >
+                    {alertEnabled ? '🔔' : '🔕'}
+                  </button>
+                  {alertEnabled && (
+                    <input
+                      className="mkt-alert-threshold"
+                      type="number"
+                      min="1"
+                      max="99"
+                      value={alertThresh}
+                      aria-label="Alert threshold in moneyline points"
+                      title="Alert threshold (ML points)"
+                      onChange={(e) => {
+                        const v = parseInt(e.target.value, 10);
+                        if (!isNaN(v) && v > 0) setFightThreshold(alertKey, v);
+                      }}
+                    />
+                  )}
                   <div className="mkt-card-header-body">
                     <div className="mkt-fight-name">
                       {market.fighter1} <span className="mkt-fight-name-vs">vs</span> {market.fighter2}

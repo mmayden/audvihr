@@ -8,6 +8,26 @@ All notable changes to this project. Format: [version] — date — description.
 
 ---
 
+## [0.11.0] — 2026-03-16
+
+### Phase 11 — Alerts + Notifications
+
+#### Added
+- `public/sw.js` — minimal Service Worker (install + activate only; no fetch handler; scope `/`). Registered in `src/main.jsx` via `navigator.serviceWorker.register` to satisfy browser push-notification infrastructure.
+- `src/utils/alerts.js` — pure alert utility module. Exports: `readAlertsEnabled`, `writeAlertsEnabled` (localStorage `alerts_enabled` key); `readAlertRules`, `writeAlertRules` (localStorage `alert_rules` key, shape `{ [fightKey]: { enabled, threshold } }`); `readPrevLines`, `writePrevLines` (sessionStorage `alerts_prev_lines` key, cleared on tab close); `detectMovements(oddsData, prevLines, rules, defaultThreshold)` — returns array of movement objects for fights whose F1 moneyline moved ≥ threshold. All reads are try/catch-wrapped with typed defaults.
+- `src/hooks/useAlerts.js` — `useAlerts(oddsData?)` React hook. Manages `alertsEnabled` (global on/off), `alertRules` (per-fight enabled + threshold), `permissionState` (Notification API state), `requestPermission`, `toggleAlerts`, `toggleFightAlert(key)`, `setFightThreshold(key, n)`. On each `oddsData` change: calls `detectMovements`, fires `new Notification(title, { body })` for any movements found, advances the sessionStorage prev-lines snapshot. Silent degradation when Notification API is absent, permission is not `'granted'`, alerts are globally disabled, or no per-fight rule is enabled.
+- `src/screens/MenuScreen.jsx` — gear settings panel (`⚙ ALERTS` button in topbar). Shows global on/off toggle (`.alert-settings-toggle`), permission status badge (`.alert-permission-badge`), REQUEST button (shown when permission is `'default'`), and usage hint. Calls `useAlerts()` (settings-only; no oddsData → no monitoring in menu context).
+- `src/screens/MarketsScreen.jsx` — bell icon (`.mkt-alert-bell`) per market card header; calls `toggleFightAlert(fightKey)` on click. When alert is enabled, a threshold number input (`.mkt-alert-threshold`) appears inline (default 5 ML points). Calls `useAlerts(oddsData)` to monitor sportsbook lines.
+- `src/styles/app.css` — `.mkt-alert-bell`, `.mkt-alert-bell.on`, `.mkt-alert-threshold`, `.alert-settings-panel`, `.alert-settings-row`, `.alert-settings-label`, `.alert-settings-toggle`, `.alert-settings-toggle.on`, `.alert-permission-badge`, `.alert-perm--{granted,denied,default,unsupported}`, `.alert-settings-request-btn`, `.alert-settings-hint`
+- `eslint.config.js` — added `navigator` and `Notification` to browser globals.
+
+#### Testing
+- `src/utils/alerts.test.js` — 31 tests covering all branches of `readAlertsEnabled`, `writeAlertsEnabled`, `readAlertRules`, `writeAlertRules`, `readPrevLines`, `writePrevLines`, and `detectMovements` (empty input, no rule, no prev line, below threshold, at threshold, shortening direction, drifting direction, multiple fights, missing sportsbook data).
+- `src/hooks/useAlerts.test.js` — 21 tests: initial state (localStorage restore, permission states, unsupported), `toggleAlerts` (flip + persistence), `toggleFightAlert` (enable/disable/preserve threshold/persistence), `setFightThreshold` (update + create), `requestPermission` (granted result, no-op when unsupported), notification firing (fires when conditions met, not when globally off, not when permission denied, not when oddsData null).
+- 239 total tests, all passing; 0 lint errors; `npm run build` passes (93.83 kB gzipped)
+
+---
+
 ## [0.10.0] — 2026-03-16
 
 ### Phase 10 — Mobile + UX Polish

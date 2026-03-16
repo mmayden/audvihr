@@ -11,29 +11,26 @@
 ## Current Sprint
 
 **Branch:** `master`
-**Phase:** 10 — Mobile + UX Polish
-**Status:** Complete. v0.10.0. 2026-03-16.
+**Phase:** 11 — Alerts + Notifications
+**Status:** Complete. v0.11.0. 2026-03-16.
 
-### ✅ Phase 10 Active Tasks
+### ✅ Phase 11 Active Tasks
 
-- [x] Responsive layout — sidebar collapses to bottom navigation bar on viewports < 768px
-  - CSS media queries only (no JS resize listeners) — all layout in `app.css`
-  - Bottom nav: Fighters | Compare | Calendar | Markets | News
-  - FighterScreen + CalendarScreen sidebar becomes a slide-in drawer overlay on mobile (ROSTER / EVENTS topbar toggle)
-- [x] Fighter portrait images
-  - Decision: `public/assets/` self-hosted (no CSP change required; Cloudinary deferred)
-  - `portrait` field added to `fighter-seed.json` schema (nullable); all 69 fighters default to null
-  - FighterScreen shows `portrait-img` when portrait path set, `portrait-initials` (2-letter mono fallback) when null
-- [x] Visual hierarchy audit
-  - `fighter-link` changed from `var(--accent)` to `var(--blue)` — amber now has 2 semantic meanings: brand/active state + data emphasis
-  - `.flag-value` and `.stat-cell-attr-val` — added `font-family: var(--mono)` for typography consistency
-  - CompareScreen checklist stacks below table on mobile (density improvement)
-- [x] Dark/light theme toggle
-  - `src/hooks/useTheme.js` — `useTheme()` with localStorage persistence and `data-theme` attribute on `<html>`
-  - System preference default (`prefers-color-scheme: light` fallback in CSS); manual toggle overrides
-  - Floating toggle button (desktop top-right) + inline button in bottom nav (mobile)
-- [x] Tests + docs: 186 tests all passing (up from 165); JSDoc updated for CalendarScreen + FighterScreen; CHANGELOG updated
-- [x] `npm audit` clean, `npm run lint` 0 errors before merge
+- [x] Service Worker registration
+  - SW scope limited to `/`; only fetches from existing `connect-src` domains
+  - `npm run build` output includes SW registration in `main.jsx` (not inline script — no CSP `unsafe-inline`)
+- [x] Browser Notification API integration
+  - Request permission on first use; respect denial gracefully (no re-prompt spam)
+  - Alert content: `textContent` only — never `innerHTML` with any variable content
+- [x] Line movement alert rules
+  - User-configurable threshold per fight (default: ±5 moneyline points)
+  - Alert fires when line moves beyond threshold; per-fight must be explicitly enabled
+  - Alerts stored in sessionStorage; dismissed on click; no persistent notification log
+- [x] Alert settings UI
+  - Toggle alerts per fight in MarketsScreen (bell icon on each row) + inline threshold input
+  - Global on/off toggle in settings panel (`⚙ ALERTS` button in MenuScreen topbar)
+  - Settings persisted to localStorage via `useAlerts`
+- [x] Tests + docs: 239 tests all passing (up from 186); 0 lint errors; `npm run build` passes; CHANGELOG updated
 
 ---
 
@@ -186,25 +183,7 @@
 
 ---
 
-### Phase 11 — Alerts + Notifications
-
-**Theme:** Line movement alerts. The #1 most-requested feature in MMA betting communities. BestFightOdds has never built it.
-
-- [ ] Service Worker registration
-  - SW scope limited to `/`; only fetches from existing `connect-src` domains
-  - `npm run build` output includes SW registration in `main.jsx` (not inline script — no CSP `unsafe-inline`)
-- [ ] Browser Notification API integration
-  - Request permission on first use; respect denial gracefully (no re-prompt spam)
-  - Alert content: `textContent` only — never `innerHTML` with any variable content
-- [ ] Line movement alert rules
-  - User-configurable threshold per fight (default: ±5 moneyline points)
-  - Alert fires when: (a) line moves beyond threshold, (b) new fight line opens for watchlisted event, (c) fight is cancelled/removed
-  - Alerts stored in sessionStorage; dismissed on click; no persistent notification log needed
-- [ ] Alert settings UI
-  - Toggle alerts per fight in MarketsScreen (bell icon on each row)
-  - Global on/off toggle in a settings panel (new gear icon in MenuScreen)
-  - Settings persisted to localStorage via `useLocalStorage`
-- [ ] Tests + docs: alert rule logic unit-tested; SW registration tested in jsdom; CHANGELOG updated; CSP review documented
+### ✅ Phase 11 — Alerts + Notifications (v0.11.0) — merged to master
 
 ---
 
