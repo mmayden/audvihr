@@ -777,6 +777,13 @@ async function main() {
     const { id, ufcstats_name, ufcstats_url } = seedFighter;
     console.log(`  [${String(id).padStart(2, '0')}] ${ufcstats_name} ...`);
 
+    // Skip entries explicitly marked as pending (URL not yet sourced).
+    // These do NOT count as errors — they are WIP seed entries.
+    if (seedFighter.pending) {
+      console.log(`       (pending URL — editorial data staged, skipped)`);
+      continue;
+    }
+
     if (!ufcstats_url) {
       errors.push(`${ufcstats_name}: missing ufcstats_url in seed`);
       console.error(`       ✗ No ufcstats_url in seed — skipping`);

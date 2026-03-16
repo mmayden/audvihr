@@ -24,16 +24,11 @@
 - [x] "NOT IN ROSTER" stub fighter shape for non-roster fighters from The Odds API
   - [x] MarketsScreen renders "NOT IN ROSTER" badge on live-only stub fight rows
 - [ ] Roster expansion — top 10 per active weight class (~60 fighters total)
-  - [ ] Flyweight (125): 0 → 10 fighters in seed
-  - [ ] Bantamweight (135): 2 → 10 fighters in seed
-  - [ ] Featherweight (145): 0 → 10 fighters in seed
-  - [ ] Lightweight (155): 6 → 10 fighters in seed
-  - [ ] Welterweight (170): 3 → 10 fighters in seed
-  - [ ] Middleweight (185): 1 → 10 fighters in seed
-  - [ ] Light Heavyweight (205): 0 → 10 fighters in seed
-  - [ ] Heavyweight (265): 2 → 10 fighters in seed
-  - [ ] Run `npm run fetch-data:fresh` to populate all new fighters
-  - [ ] Verify archetype/mod assignments and qualitative flags
+  - [x] Editorial seed data written for 55 new fighters (IDs 15–69), all 8 weight classes
+  - [x] `fetch-data.js` — `"pending": true` flag support to skip URL-less entries cleanly
+  - [ ] Source UFCStats URLs for all 55 pending fighters and remove `"pending"` flags
+  - [ ] Run `npm run fetch-data:fresh` to populate all new fighters with live stats
+  - [ ] Verify archetype/mod assignments and qualitative flags after scrape
 - [ ] Tapology community % column in MarketsScreen — evaluate build-time vs runtime fetch
 - [ ] Tests + docs: all new utils covered; JSDoc on any new components; CHANGELOG updated
 - [ ] `npm audit` clean, `npm run lint` 0 errors before merge

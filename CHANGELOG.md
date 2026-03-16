@@ -13,6 +13,8 @@ All notable changes to this project. Format: [version] — date — description.
 - `src/hooks/useOdds.js` — after every fresh API fetch, calls `appendOpeningLine` for each fight with sportsbook prices; cache hits do not re-write (first-fetch-only semantic preserved)
 - `src/screens/MarketsScreen.jsx` — opening line displayed in SPORTSBOOK column ("OPEN -130 / +110") when stored; "NOT IN ROSTER" badge on live-only stub fight rows
 - `src/styles/app.css` — `.mkt-opening-line`, `.mkt-not-in-roster` CSS classes
+- `scripts/fighter-seed.json` — 55 new fighter entries (IDs 15–69) covering all 8 active weight classes; editorial data complete (archetype, mods, chin, cardio, weight_cut, trader_notes, history_overrides); `"pending": true` flag on all 55 — awaiting UFCStats URL sourcing before scraper can populate live stats. Divisions covered: FLW (7), BW +6, FW (7), LW +4, WW +7, MW +9, LHW (7), HW +8.
+- `scripts/fetch-data.js` — `"pending": true` flag support: fighters with this flag are skipped cleanly (log message only, no error pushed, no CI abort)
 
 #### Testing
 - `src/utils/clv.test.js` — 11 new tests for `appendOpeningLine` and `readOpeningLines`: first-write, no-overwrite, multi-fight, default-ts, missing-args, invalid-JSON, round-trip read; 161 total tests (up from 142), all passing
