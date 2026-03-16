@@ -11,7 +11,33 @@
 ## Current Sprint
 
 **Branch:** `master`
-**Status:** No active sprint. Phase 8 merged. v0.8.0 tagged. Backlog is next.
+**Phase:** 9 — Roster Expansion + Public Signal
+**Status:** Active. v0.8.1 docs/standards cleanup committed. Phase 9 kick-off 2026-03-16.
+
+### Phase 9 Active Tasks
+
+- [ ] Opening line preservation in CLV log
+  - [x] `appendOpeningLine(fightKey, f1ml, f2ml, timestamp)` in `src/utils/clv.js`
+  - [ ] `useOdds.js` writes opening snapshot on first fetch (no prior snapshot for this fightKey)
+  - [ ] MarketsScreen fight row shows "OPEN -130 → CURRENT -155" when opening line stored
+  - [ ] TabMarket shows opening line delta alongside current line
+- [ ] "NOT IN ROSTER" stub fighter shape for non-roster fighters from The Odds API
+  - [ ] MarketsScreen renders minimal stub row: name, moneylines, implied % — clearly labeled "NOT IN ROSTER"
+  - [ ] No archetype, no stats, no checklist on stub rows
+- [ ] Roster expansion — top 10 per active weight class (~60 fighters total)
+  - [ ] Flyweight (125): 0 → 10 fighters in seed
+  - [ ] Bantamweight (135): 2 → 10 fighters in seed
+  - [ ] Featherweight (145): 0 → 10 fighters in seed
+  - [ ] Lightweight (155): 6 → 10 fighters in seed
+  - [ ] Welterweight (170): 3 → 10 fighters in seed
+  - [ ] Middleweight (185): 1 → 10 fighters in seed
+  - [ ] Light Heavyweight (205): 0 → 10 fighters in seed
+  - [ ] Heavyweight (265): 2 → 10 fighters in seed
+  - [ ] Run `npm run fetch-data:fresh` to populate all new fighters
+  - [ ] Verify archetype/mod assignments and qualitative flags
+- [ ] Tapology community % column in MarketsScreen — evaluate build-time vs runtime fetch
+- [ ] Tests + docs: all new utils covered; JSDoc on any new components; CHANGELOG updated
+- [ ] `npm audit` clean, `npm run lint` 0 errors before merge
 
 ---
 
@@ -153,36 +179,152 @@
 - CSP updated: 3 API domains in `netlify.toml` + `vercel.json`
 - 142 tests, 0 lint errors, `npm run build` passes
 
-### Nice to Have (from Phase 7) — Backlogged
+### Nice to Have (from Phase 7) — Absorbed into Phase 9
 
-- [ ] Tapology community % column in MarketsScreen as "public money" fade signal
-- [ ] Export checklist + notes + CLV log as markdown (download link)
-- [ ] "Archetype unknown" stub fighter shape for non-roster fighters from The Odds API
+- [ ] Tapology community % column in MarketsScreen as "public money" fade signal → Phase 9
+- [ ] Export checklist + notes + CLV log as markdown (download link) → Phase 13
+- [ ] "Archetype unknown" stub fighter shape for non-roster fighters from The Odds API → Phase 9
 
 ---
 
-## Backlog (Unscheduled)
+## Roadmap
+
+### Phase 9 — Roster Expansion + Public Signal (next)
+
+**Theme:** Make Audwihr useful on any given UFC card, not just the 14 seeded fighters.
+
+- [ ] Expand fighter roster to top 10 per active weight class (target: ~60 fighters total)
+  - Divisions: Flyweight, Bantamweight, Featherweight, Lightweight, Welterweight, Middleweight, LHW, Heavyweight (men's)
+  - Add editorial seed entries to `scripts/fighter-seed.json` for each fighter
+  - Run `npm run fetch-data:fresh` to populate stats from UFCStats
+  - Verify all archetype/mod assignments and qualitative flags (chin, cardio, weight_cut)
+- [ ] Tapology community % column in MarketsScreen
+  - Evaluate: build-time scrape (same pattern as UFCStats) vs. runtime fetch
+  - If runtime: add `https://www.tapology.com` to `connect-src` in `netlify.toml` + `vercel.json`
+  - If build-time: add scraper helper to `fetch-data.js`; co-locate with event data generation
+  - Column renders next to sportsbook implied %: "PUBLIC 68%" in dim text with fade-signal logic
+- [ ] Opening line preservation in CLV log
+  - When a fight's opening line is first fetched by `useOdds`, write the opening snapshot to localStorage alongside the session snapshots
+  - Extend `clv.js` helpers: `appendOpeningLine(fightKey, f1ml, f2ml, timestamp)`
+  - Display opening line in MarketsScreen fight row and TabMarket: "OPEN -130 → CURRENT -155"
+- [ ] "Archetype unknown" stub fighter shape for non-roster fighters from The Odds API
+  - MarketsScreen renders a minimal stub row for live fights with no roster match: name, moneylines, implied %
+  - No archetype, no stats, no checklist — clearly labeled "NOT IN ROSTER"
+- [ ] Tests + docs: all new utils covered; JSDoc on any new components; CHANGELOG updated
+- [ ] `npm audit` clean, `npm run lint` 0 errors before merge
+
+---
+
+### Phase 10 — Mobile + UX Polish
+
+**Theme:** Make Audwihr usable during fight week on a phone. The research happens on mobile.
+
+- [ ] Responsive layout — sidebar collapses to bottom navigation bar on viewports < 768px
+  - CSS media queries only (no JS resize listeners) — all layout in `app.css`
+  - Bottom nav: Fighters | Compare | Calendar | Markets | News
+  - FighterScreen sidebar becomes a scrollable top sheet or filtered list on mobile
+- [ ] Fighter portrait images
+  - Evaluate hosting: Cloudinary (add `img-src https://res.cloudinary.com` to CSP) vs. `public/assets/` self-hosted (no CSP change)
+  - Add `portrait` field to fighter-seed.json schema; keep nullable (no portrait = initials fallback)
+  - Portrait displays in FighterScreen hero card and sidebar roster item
+- [ ] Visual hierarchy audit
+  - Typography consistency pass: mono vs sans across all stat labels and values
+  - Accent usage audit: amber should not be used for more than 2 distinct semantic meanings
+  - Spacing and density pass on TabOverview and CompareScreen (densest screens)
+- [ ] Dark/light theme toggle
+  - CSS variable swap only — all colors already tokenized, zero JS required
+  - System preference default (`prefers-color-scheme`); manual toggle persisted to localStorage
+- [ ] Tests + docs: smoke tests for all screens at mobile viewport; CHANGELOG updated
+
+---
+
+### Phase 11 — Alerts + Notifications
+
+**Theme:** Line movement alerts. The #1 most-requested feature in MMA betting communities. BestFightOdds has never built it.
+
+- [ ] Service Worker registration
+  - SW scope limited to `/`; only fetches from existing `connect-src` domains
+  - `npm run build` output includes SW registration in `main.jsx` (not inline script — no CSP `unsafe-inline`)
+- [ ] Browser Notification API integration
+  - Request permission on first use; respect denial gracefully (no re-prompt spam)
+  - Alert content: `textContent` only — never `innerHTML` with any variable content
+- [ ] Line movement alert rules
+  - User-configurable threshold per fight (default: ±5 moneyline points)
+  - Alert fires when: (a) line moves beyond threshold, (b) new fight line opens for watchlisted event, (c) fight is cancelled/removed
+  - Alerts stored in sessionStorage; dismissed on click; no persistent notification log needed
+- [ ] Alert settings UI
+  - Toggle alerts per fight in MarketsScreen (bell icon on each row)
+  - Global on/off toggle in a settings panel (new gear icon in MenuScreen)
+  - Settings persisted to localStorage via `useLocalStorage`
+- [ ] Tests + docs: alert rule logic unit-tested; SW registration tested in jsdom; CHANGELOG updated; CSP review documented
+
+---
+
+### Phase 12 — Live News Layer
+
+**Theme:** Replace the 12 mock news items with real camp news, injury reports, and weigh-in results surfaced in context.
+
+**Security note: external feed content is untrusted. All fetched content must be text-extracted only — no HTML pass-through to DOM. `dangerouslySetInnerHTML` is prohibited with feed content.**
+
+- [ ] News source evaluation: MMA Fighting RSS, ESPN MMA RSS, UFC.com news
+  - Select 2–3 sources; document in PLANNING.md with `connect-src` entries required
+  - Add all selected domains to `connect-src` in `netlify.toml` + `vercel.json`
+- [ ] `useNews` hook (`src/hooks/useNews.js`)
+  - Fetches RSS feeds via browser `fetch`; parses XML → JS objects; sessionStorage cache (30-min TTL)
+  - **Sanitization:** extract `title`, `pubDate`, `description` as text only — strip all HTML tags before storing; use `DOMParser` to parse RSS XML (safe for structured XML, not HTML)
+  - Degrade silently when sources unreachable; fall back to `src/data/news.js` mock
+  - Map fetched items to existing NEWS schema: `{ id, date, category, headline, body, source, relevance }`
+- [ ] Fighter name matching in news items
+  - Match fetched news items to roster fighters by name (fuzzy match on last name); populate `fighter_id`
+  - Unmatched items have `fighter_id: null` — visible in ALL filter but not fighter filter
+- [ ] NewsScreen renders live items with "LIVE" badge vs. mock items with "MOCK" badge during transition
+- [ ] Fighter profile integration: TabOverview shows latest 2 news items matched to this fighter
+- [ ] Tests + docs: sanitization function fully tested (including XSS attempt inputs); `useNews` hook tested with mocked fetch; CHANGELOG updated
+
+---
+
+### Phase 13 — Sharing + Export
+
+**Theme:** Make research shareable and exportable. The tool becomes more useful when a breakdown can be sent to someone or archived.
+
+**Security note: URLs must not encode secrets. Export must be client-side only — no data leaves the browser to a third party.**
+
+- [ ] React Router integration (`react-router-dom`)
+  - Routes: `/` (menu), `/fighters/:id`, `/compare/:f1id/:f2id`, `/calendar`, `/markets`, `/news`
+  - URL params: fighter IDs only (numeric slugs) — no sensitive data, no localStorage state in URLs
+  - Preserve existing keyboard/screen navigation; URL changes on screen transition
+  - `noindex` meta tag stays — shareable links are for personal use, not SEO
+- [ ] Shareable compare URL
+  - `/compare/12/7` → opens CompareScreen pre-loaded with those two fighters
+  - Copy-to-clipboard button in CompareScreen header
+- [ ] Export: checklist + notes as markdown
+  - Client-side markdown string generation from checklist state + notes + fighter names
+  - Download via `URL.createObjectURL(new Blob([markdown], { type: 'text/plain' }))` — no external library needed
+  - Output includes: fight date, fighters, checklist items (checked/unchecked), notes, edge signals summary
+- [ ] Export: CLV log as CSV
+  - Client-side CSV string from `readCLVLog()` output
+  - Same Blob download pattern as markdown export
+- [ ] Tests + docs: URL routing smoke tests; export output format tested; CHANGELOG updated; `npm audit` clean before merge
+
+---
+
+## Backlog (Unscheduled — Post Phase 13)
 
 ### High value
 - [ ] Matchup context engine — archetype-aware auto-warnings in compare view ("WRESTLER vs COUNTER STRIKER — takedown threat flagged + judge venue bias noted")
 - [ ] Trend lines in fighter history — stat trajectory over last N fights (requires scraper enhancement to store per-fight stats, not just career averages)
-- [ ] Fighter portrait images — hosting solution TBD (Cloudinary / repo assets); even UFC site headshots would make profiles feel premium
-- [ ] Add more fighters — expand to full top-15 per division
 - [ ] Fighter search by stat range (e.g. "TD def > 80%", "SLpM > 5")
-- [ ] Chart.js for fighter stat visualizations — stat bars are good but trend charts would make profiles feel modern
+- [ ] Opening line database — searchable historical opening lines per fighter across all past fights
 
 ### Medium value
-- [ ] Mobile responsive layout — sidebar collapses to bottom nav on narrow viewports; blocked until inline styles → CSS classes pass is done
-- [ ] Inline styles → named CSS classes systematic extraction — required for mobile and theming; currently JSX carries layout/typography decisions that belong in app.css
-- [ ] React Router / URL state — bookmarkable fighter profiles, shareable compare URLs; defer until personal/shareable decision is made
-- [ ] Export trade notes as PDF or markdown (checklist + notes + CLV log)
-- [ ] Dark/light theme toggle — CSS variable swap, all colors already tokenized; blocked on inline styles pass
+- [ ] Chart.js for fighter stat visualizations — stat bars are good but trend charts would make profiles feel modern
+- [ ] Keyboard navigation — arrow keys in sidebar, tab key across screens
+- [ ] Manual "refresh data" button in app — re-runs scraper locally for same-day stat updates without full rebuild
 
 ### Low / nice-to-have
-- [ ] Keyboard navigation — arrow keys in sidebar, tab key across screens
-- [ ] Visual reskin pass — final art direction, typographic hierarchy audit (mono vs sans consistency across all stat displays)
+- [ ] Women's divisions roster — Strawweight, Flyweight, Bantamweight
+- [ ] Visual reskin pass — final art direction, typographic hierarchy audit
 - [ ] Sound design pass — click feedback, confirmation sounds (user opt-in only)
-- [ ] Manual "refresh data" button in app — re-runs scraper locally for same-day stat updates without full rebuild
 
 ---
 

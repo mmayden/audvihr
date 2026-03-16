@@ -6,20 +6,21 @@ All notable changes to this project. Format: [version] — date — description.
 
 ## [Unreleased]
 
+---
+
+## [0.8.1] — 2026-03-16
+
 ### Code Quality
-- `ChecklistPanel`, `CalendarScreen`, `CompareScreen`, `FighterScreen`, `MarketsScreen` — converted from `export function` to `export const` arrow functions (CLAUDE.md standard; all 5 were missed in prior phases)
+- `ChecklistPanel`, `CalendarScreen`, `CompareScreen`, `FighterScreen`, `MarketsScreen` — converted from `export function` to `export const` arrow functions (CLAUDE.md standard; all 5 were missed in the v0.8.0 commit)
 - `MarketsScreen` — JSDoc block relocated from above module-level constants to directly above the component declaration
 
 ### Testing
-- `src/components/ErrorBoundary.test.jsx` — 5 new tests covering: children pass-through, default fallback UI, custom fallback prop, RETRY button reset cycle, and unknown-error message; component coverage 0% → 100%
-- `src/utils/normalizeOdds.test.js` — 7 new edge-case tests for `extractNamesFromQuestion` and `cleanName` (non-string question input, event-context stripping, dash separator cleanup, `defeat`/`win against` patterns); normalizeOdds branch coverage improved
+- `src/components/ErrorBoundary.test.jsx` — 5 new tests: children pass-through, default fallback UI, custom fallback prop, RETRY button reset cycle, unknown-error message; coverage 0% → 100%
+- `src/utils/normalizeOdds.test.js` — 7 new edge-case tests for `extractNamesFromQuestion` and `cleanName` (non-string question input, event-context stripping, dash separator, `defeat`/`win against` patterns); branch coverage improved
 
-### Docs
-- `CHANGELOG.md` — `[Unreleased]` promoted to `v0.8.0`; entry covers Phase 8 CSS extraction and Phase 7 should-haves
-- `TASKS.md` — current sprint updated to master/no active sprint; Phase 8 marked complete; stale Phase 7 roadmap block replaced with clean `✅` summary; orphaned nice-to-haves moved to backlog
-- `PLANNING.md` — file structure heading bumped to v0.8.0; decisions log extended with 6 Phase 8 entries
-- `package.json` — version bumped to `0.8.0`
-- `MenuScreen.jsx` — version badge updated to `v0.8.0 — LIVE ODDS`
+### Docs & Planning
+- `PLANNING.md` — Vision statement (north star, what Audwihr replaces, what it is not); competitive landscape expanded to full platform breakdown (UFCStats, Tapology, Sherdog, FightMatrix, MMA Decisions, BestFightOdds, Action Network, OddsJam, Unabated, OddsShark, Oddible, Polymarket, Kalshi); Research Findings section (community sentiment, market size, sharp bettor workflow); Phase 9–13 roadmap outline with per-phase security notes; Security Model updated with anticipated Phase 9–13 attack surfaces; 7 new decisions log entries
+- `TASKS.md` — Phase 9–13 added to roadmap with full task lists; backlog reorganized post-Phase-13
 
 ---
 
