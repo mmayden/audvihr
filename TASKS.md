@@ -29,7 +29,11 @@
   - [ ] Source UFCStats URLs for all 55 pending fighters and remove `"pending"` flags
   - [ ] Run `npm run fetch-data:fresh` to populate all new fighters with live stats
   - [ ] Verify archetype/mod assignments and qualitative flags after scrape
-- [ ] Tapology community % column in MarketsScreen — evaluate build-time vs runtime fetch
+- [ ] Tapology community % column in MarketsScreen — build-time scrape (CORS rules out runtime; decision logged in PLANNING.md)
+  - [ ] Add `scrapeEventTapologyPct()` to `fetch-data.js` — scrapes Tapology event page for community pick % per fight
+  - [ ] Embed `tapology_pct: { f1: number, f2: number }` per fight in generated `events.js`
+  - [ ] MarketsScreen fight row shows "PUBLIC 68%" in dim text next to sportsbook implied %
+  - [ ] Fade-signal logic: if |public_pct - sportsbook_implied| ≥ 15pt, render in amber as a fade flag
 - [ ] Tests + docs: all new utils covered; JSDoc on any new components; CHANGELOG updated
 - [ ] `npm audit` clean, `npm run lint` 0 errors before merge
 
