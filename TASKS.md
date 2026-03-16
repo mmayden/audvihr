@@ -11,10 +11,10 @@
 ## Current Sprint
 
 **Branch:** `master`
-**Phase:** 11 — Alerts + Notifications
-**Status:** Complete. v0.11.0. 2026-03-16.
+**Phase:** 12 — Live News Layer
+**Status:** Complete. v0.12.0. 2026-03-16.
 
-### ✅ Phase 11 Active Tasks
+### ✅ Phase 12 Active Tasks
 
 - [x] Service Worker registration
   - SW scope limited to `/`; only fetches from existing `connect-src` domains
@@ -187,26 +187,16 @@
 
 ---
 
-### Phase 12 — Live News Layer
+### ✅ Phase 12 — Live News Layer (v0.12.0) — 2026-03-16
 
-**Theme:** Replace the 12 mock news items with real camp news, injury reports, and weigh-in results surfaced in context.
-
-**Security note: external feed content is untrusted. All fetched content must be text-extracted only — no HTML pass-through to DOM. `dangerouslySetInnerHTML` is prohibited with feed content.**
-
-- [ ] News source evaluation: MMA Fighting RSS, ESPN MMA RSS, UFC.com news
-  - Select 2–3 sources; document in PLANNING.md with `connect-src` entries required
-  - Add all selected domains to `connect-src` in `netlify.toml` + `vercel.json`
-- [ ] `useNews` hook (`src/hooks/useNews.js`)
-  - Fetches RSS feeds via browser `fetch`; parses XML → JS objects; sessionStorage cache (30-min TTL)
-  - **Sanitization:** extract `title`, `pubDate`, `description` as text only — strip all HTML tags before storing; use `DOMParser` to parse RSS XML (safe for structured XML, not HTML)
-  - Degrade silently when sources unreachable; fall back to `src/data/news.js` mock
-  - Map fetched items to existing NEWS schema: `{ id, date, category, headline, body, source, relevance }`
-- [ ] Fighter name matching in news items
-  - Match fetched news items to roster fighters by name (fuzzy match on last name); populate `fighter_id`
-  - Unmatched items have `fighter_id: null` — visible in ALL filter but not fighter filter
-- [ ] NewsScreen renders live items with "LIVE" badge vs. mock items with "MOCK" badge during transition
-- [ ] Fighter profile integration: TabOverview shows latest 2 news items matched to this fighter
-- [ ] Tests + docs: sanitization function fully tested (including XSS attempt inputs); `useNews` hook tested with mocked fetch; CHANGELOG updated
+- [x] News source evaluation: MMA Fighting RSS + MMA Junkie RSS selected; documented in PLANNING.md; `connect-src` updated in `netlify.toml` + `vercel.json`
+- [x] `src/utils/newsParser.js` — `stripHtml`, `parseRssFeed`, `classifyCategory`, `classifyRelevance`, `matchFighterName`, `rssItemToNewsItem`; all text-only, no HTML DOM injection
+- [x] `src/hooks/useNews.js` — fetches 2 RSS sources in parallel; 30-min sessionStorage cache; per-source degradation; falls back to static mock; returns `{ items, loading, isLive }`
+- [x] Fighter name matching — last-name lookup (≥ 3 chars) against FIGHTERS roster; `fighter_id`/`fighter_name` populated on matched items; null on no match
+- [x] NewsScreen — consumes `useNews()`; LIVE/MOCK source badge in topbar; per-item LIVE/MOCK badge
+- [x] TabOverview — `newsItems` prop; RECENT NEWS section (top 2 matched items) below TRADER NOTES
+- [x] FighterScreen — calls `useNews()` once; derives `fighterNews` via `useMemo`; passes to TabOverview
+- [x] Tests + docs: `newsParser.test.js` (44 tests, all XSS vectors covered), `useNews.test.js` (12 tests, mocked fetch); CHANGELOG + PLANNING.md updated
 
 ---
 

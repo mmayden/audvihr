@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react';
-import { NEWS } from '../data/news';
 import { FIGHTERS } from '../data/fighters';
 import { FighterName } from '../components/FighterName';
 import { RELEVANCE_COLOR, CATEGORY_COLOR } from '../constants/qualifiers';
+import { useNews } from '../hooks/useNews';
 
 const CATEGORIES = ['ALL', 'FIGHT', 'INJURY', 'CAMP', 'WEIGH-IN', 'RESULT'];
 
@@ -15,6 +15,8 @@ function fmtDate(iso) {
 
 /**
  * NewsScreen — fighter news feed with category and fighter filters.
+ * Displays live RSS items (LIVE badge) when available; falls back to static
+ * mock items (MOCK badge) when all RSS sources are unreachable.
  * @param {function} onBack - callback invoked when the back button is clicked
  * @param {function} onGoFighter - callback invoked with a fighter object for deep navigation
  */
@@ -22,21 +24,23 @@ export const NewsScreen = ({ onBack, onGoFighter }) => {
   const [catFilter, setCatFilter] = useState('ALL');
   const [fighterFilter, setFighterFilter] = useState('ALL');
 
+  const { items, loading, isLive } = useNews();
+
   const rosterOptions = useMemo(() => {
-    const ids = [...new Set(NEWS.filter(n => n.fighter_id).map(n => n.fighter_id))];
+    const ids = [...new Set(items.filter(n => n.fighter_id).map(n => n.fighter_id))];
     return ids
       .map(id => FIGHTERS.find(f => f.id === id))
       .filter(Boolean)
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, []);
+  }, [items]);
 
   const filtered = useMemo(() => {
-    return NEWS.filter(item => {
-      const catOk = catFilter === 'ALL' || item.category === catFilter.toLowerCase();
+    return items.filter(item => {
+      const catOk     = catFilter === 'ALL' || item.category === catFilter.toLowerCase();
       const fighterOk = fighterFilter === 'ALL' || item.fighter_id === Number(fighterFilter);
       return catOk && fighterOk;
     });
-  }, [catFilter, fighterFilter]);
+  }, [items, catFilter, fighterFilter]);
 
   return (
     <div className="app">
@@ -45,6 +49,9 @@ export const NewsScreen = ({ onBack, onGoFighter }) => {
         <span className="topbar-sep">/</span>
         <span className="topbar-section">FIGHTER NEWS</span>
         <div className="topbar-right">
+          <span className={`news-source-badge ${isLive ? 'news-source-badge--live' : 'news-source-badge--mock'}`}>
+            {loading ? 'LOADING' : isLive ? 'LIVE' : 'MOCK'}
+          </span>
           <button className="topbar-back" onClick={onBack}>← MENU</button>
         </div>
       </div>
@@ -102,6 +109,9 @@ export const NewsScreen = ({ onBack, onGoFighter }) => {
                 title={`Trading relevance: ${item.relevance}`}
               >
                 ● {item.relevance.toUpperCase()}
+              </span>
+              <span className={`news-item-badge ${item.isLive ? 'news-item-badge--live' : 'news-item-badge--mock'}`}>
+                {item.isLive ? 'LIVE' : 'MOCK'}
               </span>
               <span className="news-date">{fmtDate(item.date)}</span>
             </div>

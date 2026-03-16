@@ -8,6 +8,29 @@ All notable changes to this project. Format: [version] — date — description.
 
 ---
 
+## [0.12.0] — 2026-03-16
+
+### Phase 12 — Live News Layer
+
+#### Added
+- `src/utils/newsParser.js` — pure RSS parsing and sanitization utilities. `stripHtml(str)` extracts text via `DOMParser('text/html').body.textContent` — no markup survives. `parseRssFeed(xmlText)` parses RSS XML via `DOMParser('application/xml')`, returns `[]` on parse error. `classifyCategory(headline, body)` → `'fight'|'injury'|'camp'|'weigh-in'|'result'` by keyword matching. `classifyRelevance(headline, body)` → `'high'|'medium'|'low'`. `matchFighterName(headline, body, fighters)` → `fighter_id|null` by last-name occurrence (≥ 3 chars). `rssItemToNewsItem(rawItem, source, fighters, idx)` — full transform to NewsItem schema with `isLive: true`; headline capped at 160 chars, body at 600 chars.
+- `src/hooks/useNews.js` — `useNews()` hook. Fetches MMA Fighting RSS (`https://www.mmafighting.com/rss/current`) and MMA Junkie RSS (`https://mmajunkie.usatoday.com/feed`) in parallel. 30-min sessionStorage cache (`cache_news_v1`). Per-source silent degradation (CORS, network, non-200). Falls back to static `NEWS` mock with `isLive: false` when all sources yield nothing. Returns `{ items, loading, isLive }`.
+- `src/screens/NewsScreen.jsx` — updated to consume `useNews()`. Source status badge in topbar (`LOADING` / `LIVE` / `MOCK`). Per-item `LIVE`/`MOCK` badge on each news card. Fighter filter dropdown and filtered list derive from live items.
+- `src/tabs/TabOverview.jsx` — added `newsItems` prop (array of up to 2 `NewsItem` objects matched to this fighter). Renders a `RECENT NEWS` section below TRADER NOTES when items are present; each shows category, live/mock badge, date, and headline.
+- `src/screens/FighterScreen.jsx` — calls `useNews()` once; derives `fighterNews` (top 2 items matching `sel.id`) via `useMemo`; passes to `TabOverview`.
+- `src/styles/app.css` — `.news-source-badge`, `.news-source-badge--live`, `.news-source-badge--mock`, `.news-item-badge`, `.news-item-badge--live`, `.news-item-badge--mock`, `.overview-news-list`, `.overview-news-item`, `.overview-news-meta`, `.overview-news-cat`, `.overview-news-date`, `.overview-news-headline`.
+- `netlify.toml` + `vercel.json` — added `https://www.mmafighting.com` and `https://mmajunkie.usatoday.com` to `connect-src`.
+
+#### Security
+- Feed content is text-extracted only — `stripHtml()` uses `DOMParser` + `.textContent`; no HTML is passed to the DOM. `dangerouslySetInnerHTML` is not used with feed content.
+- XSS inputs tested explicitly: `<script>`, `<img onerror>`, `<a href="javascript:">` — all neutralised in `newsParser.test.js`.
+
+#### Testing
+- `src/utils/newsParser.test.js` — 44 tests covering all branches of all 6 exported functions, including XSS attack vectors in title and description fields.
+- `src/hooks/useNews.test.js` — 12 tests: initial state, live fetch success (merge + sort + isLive), per-source silent degradation (CORS rejection, HTTP 403, empty RSS), full fallback to mock, and sessionStorage cache hit (no second fetch).
+
+---
+
 ## [0.11.0] — 2026-03-16
 
 ### Phase 11 — Alerts + Notifications

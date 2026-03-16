@@ -36,6 +36,7 @@ export default [
         Number:          'readonly',
         navigator:       'readonly',
         Notification:    'readonly',
+        DOMParser:       'readonly',
       },
       parserOptions: {
         ecmaFeatures: { jsx: true },

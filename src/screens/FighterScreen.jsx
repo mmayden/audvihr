@@ -8,6 +8,7 @@ import { TabGrappling } from '../tabs/TabGrappling';
 import { TabPhysical } from '../tabs/TabPhysical';
 import { TabHistory } from '../tabs/TabHistory';
 import { TabMarket } from '../tabs/TabMarket';
+import { useNews } from '../hooks/useNews';
 
 /** Weight class filter options derived from the static FIGHTERS roster. */
 const WEIGHT_FILTERS = ['ALL', ...new Set(FIGHTERS.map(f => f.weight))];
@@ -27,6 +28,7 @@ export const FighterScreen = ({onBack, initialFighter}) => {
   const [sel, setSel] = useState(initialFighter || FIGHTERS[0]);
   const [tab, setTab] = useState('OVERVIEW');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { items: allNews } = useNews();
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return FIGHTERS.filter(f =>
@@ -36,6 +38,10 @@ export const FighterScreen = ({onBack, initialFighter}) => {
   }, [search, weightFilter]);
   const pick = (f) => { setSel(f); setTab('OVERVIEW'); setSidebarOpen(false); };
   const ac = sel ? ARCH_COLORS[sel.archetype] : null;
+  const fighterNews = useMemo(
+    () => sel ? allNews.filter(n => n.fighter_id === sel.id).slice(0, 2) : [],
+    [allNews, sel]
+  );
   /** Derive two-letter initials from a fighter name for the portrait fallback. */
   const initials = sel ? sel.name.split(' ').map(w => w[0]).slice(0, 2).join('') : '';
   return (
@@ -101,7 +107,7 @@ export const FighterScreen = ({onBack, initialFighter}) => {
             </div>
             <div className="tabs-bar">{TABS.map(t=><button key={t} className={`tab-btn ${tab===t?'active':''}`} onClick={()=>setTab(t)}>{t}</button>)}</div>
             <div className="tab-content">
-              {tab==='OVERVIEW'  && <TabOverview  fighter={sel}/>}
+              {tab==='OVERVIEW'  && <TabOverview  fighter={sel} newsItems={fighterNews}/>}
               {tab==='STRIKING'  && <TabStriking  fighter={sel}/>}
               {tab==='GRAPPLING' && <TabGrappling fighter={sel}/>}
               {tab==='PHYSICAL'  && <TabPhysical  fighter={sel}/>}

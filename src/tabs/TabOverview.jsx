@@ -1,12 +1,21 @@
-import { CHIN_COLOR, CARDIO_COLOR, CUT_COLOR } from '../constants/qualifiers';
+import { CHIN_COLOR, CARDIO_COLOR, CUT_COLOR, CATEGORY_COLOR } from '../constants/qualifiers';
+
+/** Format ISO date string as 'Mar 14 2026'. */
+function fmtDate(iso) {
+  return new Date(iso + 'T12:00:00Z').toLocaleDateString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC',
+  });
+}
 
 /**
  * TabOverview — renders the Overview tab for a fighter profile.
  * Shows key numbers (streak, finish rate, method breakdown, striking/grappling
- * highlights), qualitative flags (chin, cardio, weight cut), and trader notes.
- * @param {object} fighter - fighter object from FIGHTERS
+ * highlights), qualitative flags (chin, cardio, weight cut), trader notes,
+ * and the latest 2 news items matched to this fighter (if any).
+ * @param {object}   fighter   - fighter object from FIGHTERS
+ * @param {object[]} [newsItems=[]] - up to 2 NewsItem objects matched to this fighter
  */
-export const TabOverview = ({ fighter }) => {
+export const TabOverview = ({ fighter, newsItems = [] }) => {
   return <div className="anim-fade">
     <div className="sec-label">KEY NUMBERS</div>
     <div className="stat-grid">
@@ -29,5 +38,27 @@ export const TabOverview = ({ fighter }) => {
     </div>
     <div className="sec-label">TRADER NOTES</div>
     <div className="trader-notes-block">{fighter.trader_notes}</div>
+    {newsItems.length > 0 && <>
+      <div className="sec-label">RECENT NEWS</div>
+      <div className="overview-news-list">
+        {newsItems.map(item => (
+          <div key={item.id} className="overview-news-item">
+            <div className="overview-news-meta">
+              <span
+                className="overview-news-cat"
+                style={{ color: CATEGORY_COLOR[item.category] ?? 'var(--text-dim)' }}
+              >
+                {item.category.toUpperCase()}
+              </span>
+              <span className={`news-item-badge ${item.isLive ? 'news-item-badge--live' : 'news-item-badge--mock'}`}>
+                {item.isLive ? 'LIVE' : 'MOCK'}
+              </span>
+              <span className="overview-news-date">{fmtDate(item.date)}</span>
+            </div>
+            <div className="overview-news-headline">{item.headline}</div>
+          </div>
+        ))}
+      </div>
+    </>}
   </div>;
 };
