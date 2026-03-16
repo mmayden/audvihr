@@ -18,12 +18,34 @@ These are non-negotiable. Do not skip them to save time or complexity.
 - **SRI on all CDN resources.** Any `<script src>` or `<link rel="stylesheet">` loading from an external CDN must have `integrity="sha384-..."` and `crossorigin="anonymous"`. No exceptions. Compute hashes with `openssl dgst -sha384 -binary <file> | openssl base64 -A` or fetch from the provider's SRI registry.
 - **No `eval()`, `new Function()`, or `innerHTML` with user data.** React JSX escapes by default — do not bypass this with `dangerouslySetInnerHTML` unless absolutely necessary, and never with untrusted input.
 - **No hardcoded secrets.** API keys, tokens, credentials go in `.env` (Vite: `VITE_` prefix). `.env` files are gitignored. Never commit secrets.
-- **localStorage input validation.** All reads from localStorage must be wrapped in `try/catch` and validated against an expected shape. If validation fails, fall back to the typed default — never use raw parsed data unsanitized.
+- **localStorage / sessionStorage input validation.** All reads from localStorage or sessionStorage must be wrapped in `try/catch` and validated against an expected shape. If validation fails, fall back to the typed default — never use raw parsed data unsanitized.
 - **User input sanitization at the boundary.** Validate and sanitize all form inputs (odds fields, notes) before using them in calculations. `parseInt()` with `isNaN` guard is the current pattern — maintain it.
-- **CSP required for web deployment.** Configured in `netlify.toml` and `vercel.json`. Current policy includes: `default-src 'self'`; `script-src 'self'`; `worker-src 'self'` (for Service Worker); `style-src 'self' fonts.googleapis.com`; `font-src fonts.gstatic.com`; `connect-src 'self'` + 3 API domains; `img-src 'self' data:`; `frame-ancestors 'none'`. Do not weaken any directive. Every new external domain must be added to both files and documented in PLANNING.md decisions log.
+- **CSP required for web deployment.** Configured in `netlify.toml` and `vercel.json`. Current policy includes: `default-src 'self'`; `script-src 'self'`; `worker-src 'self'` (for Service Worker); `style-src 'self' fonts.googleapis.com`; `font-src fonts.gstatic.com`; `connect-src 'self'` + 5 API/feed domains (The Odds API, Polymarket, Kalshi, MMA Fighting, MMA Junkie); `img-src 'self' data:`; `frame-ancestors 'none'`. Do not weaken any directive. Every new external domain must be added to both files and documented in PLANNING.md decisions log.
+- **External feed content is untrusted — text extraction only.** `src/utils/newsParser.js` owns all RSS sanitization. `stripHtml()` uses `DOMParser('text/html').body.textContent` — tags are never rendered, only text extracted. `parseRssFeed()` uses `DOMParser('application/xml')`. Feed content (title, description) must never be passed to `innerHTML`, `dangerouslySetInnerHTML`, or any DOM-insertion API. Headline capped at 160 chars, body at 600 chars. XSS test coverage is mandatory.
 - **Alert notifications use plain text only.** The Notification API body must be constructed with string concatenation of validated values only. No HTML template literals, no `innerHTML`, no `dangerouslySetInnerHTML`. Browsers do not render HTML in notification bodies — never attempt to inject markup.
+- **CSV export must guard against formula injection.** Any value exported as CSV that begins with `=`, `+`, `-`, or `@` must be prefixed with a single quote `'` to prevent spreadsheet formula execution.
 - **`noindex, nofollow` robots meta tag.** This is a personal trading tool — it must not be indexed by search engines. The tag is already present in `index.html`; do not remove it.
-- **Dependency hygiene.** After Vite migration: run `npm audit` before every merge to `master`. Fix all critical/high severity issues before merging. Document any accepted moderate issues in PLANNING.md.
+- **URL params carry fighter IDs only.** When React Router is introduced (Phase 13), URL parameters must contain only numeric fighter IDs and screen slugs. No API keys, no localStorage state, no session tokens in URLs.
+- **Dependency hygiene.** Run `npm audit` before every merge to `master`. Fix all critical/high severity issues before merging. Document any accepted moderate issues in PLANNING.md.
+
+### Storage Key Ownership
+
+Each storage key is owned by exactly one module. No other module reads or writes it.
+
+| Key | Storage | Owner | Type |
+|-----|---------|-------|------|
+| `cl_{f1id}_{f2id}` | localStorage | ChecklistPanel / CompareScreen | per-matchup checklist state |
+| `mkt_{fighter.id}` | localStorage | TabMarket | per-fighter market tab data |
+| `watchlist_markets` | localStorage | useWatchlist | array of market IDs |
+| `clv_log` | localStorage | `src/utils/clv.js` | CLV snapshot log (500-entry cap) |
+| `opening_lines` | localStorage | `src/utils/clv.js` | opening line archive (never evicted) |
+| `theme` | localStorage | `src/hooks/useTheme.js` | `'light'\|'dark'\|'system'` |
+| `alerts_enabled` | localStorage | `src/utils/alerts.js` | boolean global toggle |
+| `alert_rules` | localStorage | `src/utils/alerts.js` | `{ [fightKey]: { enabled, threshold } }` |
+| `alerts_prev_lines` | sessionStorage | `src/utils/alerts.js` | transient prev-ML snapshot |
+| `cache_odds_v1` | sessionStorage | `src/hooks/useOdds.js` via `cache.js` | 15-min Odds API response cache |
+| `cache_news_v1` | sessionStorage | `src/hooks/useNews.js` via `cache.js` | 30-min RSS feed response cache |
+| Polymarket/Kalshi cache | sessionStorage | respective hooks via `cache.js` | 10-min market price cache |
 
 ### Code Quality
 
@@ -59,6 +81,7 @@ These are non-negotiable. Do not skip them to save time or complexity.
   - Every util function in `src/utils/` — test all branches (happy path, edge cases, null/invalid input).
   - Every custom hook in `src/hooks/` — use `renderHook` + `act` from `@testing-library/react`. Reset localStorage in `beforeEach`.
   - Every component in `src/components/` that has conditional render paths — use `@testing-library/react`. Test DOM output, not implementation details.
+  - Security-critical functions must have explicit XSS and injection attack tests (see `newsParser.test.js` for the pattern).
   - Screens and tabs are integration-heavy — smoke tests plus targeted feature tests for new additions. Full integration rendering tests are deferred.
 - **Coverage target: 80%** on utils and hooks. Run `npm run test:coverage` and check the `text` output before merging.
 - **Test files co-located with source.** `src/utils/odds.test.js` lives next to `src/utils/odds.js`. Pattern: `<name>.test.{js,jsx}`.
@@ -71,40 +94,43 @@ File and folder structure must match the following layout. Do not put components
 
 ```
 public/
-│   └── sw.js                 Service Worker — install/activate only; scope /; no fetch handler
+│   ├── sw.js                 Service Worker — install/activate only; scope /; no fetch handler
+│   └── assets/portraits/     Self-hosted fighter portrait images (*.jpg); no CDN, no CSP change
 src/
 ├── main.jsx                  Entry point — ReactDOM.createRoot + StrictMode; SW registration
 ├── App.jsx                   Screen router — useState only, no business logic
 ├── styles/
 │   └── app.css               All global styles, CSS variables, component classes
 ├── constants/
-│   ├── archetypes.js         ARCH_COLORS, MOD_COLORS
-│   ├── checklist.js          CHECKLIST array, TABS array
+│   ├── archetypes.js         ARCH_COLORS (8 archetypes), MOD_COLORS (10 modifiers) — CSS var refs
+│   ├── checklist.js          CHECKLIST array (17 items), TABS array (6 tab names)
 │   ├── compareRows.js        15 stat-row definitions — (f1, f2) → row functions for CompareScreen
-│   └── qualifiers.js         CHIN_COLOR, CARDIO_COLOR, CUT_COLOR, ORG_COLOR
+│   └── qualifiers.js         CHIN_COLOR, CARDIO_COLOR, CUT_COLOR, ORG_COLOR, RELEVANCE_COLOR, CATEGORY_COLOR
 ├── data/
 │   ├── fighters.js           FIGHTERS array — generated by fetch-data.js (live UFCStats)
-│   ├── events.js             EVENTS array — generated by fetch-data.js (upcoming UFC cards)
-│   ├── markets.js            MARKETS array — prediction market data (Phase 4)
-│   └── news.js               NEWS array — fighter news feed (Phase 5)
+│   ├── events.js             EVENTS array — generated by fetch-data.js (upcoming UFC cards + Tapology %)
+│   ├── markets.js            MARKETS array — 8 mock prediction markets (Phase 4 — static)
+│   └── news.js               NEWS array — 12 mock news items; static fallback for useNews when RSS unavailable
 ├── scripts/                  Build-time tools only — not bundled into the app
 │   ├── fetch-data.js         UFCStats + Tapology scraper (Node ESM, cheerio, browser UA for Tapology)
 │   └── fighter-seed.json     Editorial data per fighter (archetype, mods, notes, ufcstats_url)
 ├── hooks/
 │   ├── useLocalStorage.js    useLocalStorage — JSON-serialised state with try/catch
 │   ├── useWatchlist.js       useWatchlist — watchlist set over useLocalStorage
-│   ├── useOdds.js            useOdds — The Odds API moneylines; sessionStorage cache; silent degradation
+│   ├── useOdds.js            useOdds — The Odds API moneylines; 15-min sessionStorage cache; silent degradation
 │   ├── usePolymarket.js      usePolymarket — Polymarket CLOB prices + lazy history; CLV snapshot
 │   ├── useKalshi.js          useKalshi — Kalshi REST API prices + lazy history; CLV snapshot; silent degradation
-│   ├── useTheme.js           useTheme — colour-scheme toggle; localStorage persistence; data-theme on html
-│   └── useAlerts.js          useAlerts — alert rules, permission state, Notification API dispatch; owns alerts_enabled + alert_rules keys
+│   ├── useTheme.js           useTheme — colour-scheme toggle; persists 'light'|'dark'|'system'; data-theme on <html>
+│   ├── useAlerts.js          useAlerts — alert rules, permission state, Notification API dispatch; owns alerts_enabled + alert_rules keys
+│   └── useNews.js            useNews — fetches MMA Fighting + MMA Junkie RSS; 30-min cache; fallback to news.js mock; returns { items, loading, isLive }
 ├── utils/
 │   ├── odds.js               mlToImplied(), lineMovement()
 │   ├── date.js               daysUntil(), isPast() — shared date helpers
 │   ├── normalizeOdds.js      fightKey(), probToML(), normalize*() — API response transforms
 │   ├── cache.js              readCache(), writeCache(), evictCache() — sessionStorage helpers
-│   ├── clv.js                appendCLVEntries(), readCLVLog(), appendOpeningLine(), readOpeningLines(), CLV_LOG_KEY, CLV_OPENING_KEY, CLV_MAX_ENTRIES — CLV log + opening line localStorage helpers
-│   └── alerts.js             readAlertsEnabled/writeAlertsEnabled, readAlertRules/writeAlertRules, readPrevLines/writePrevLines, detectMovements() — alert pure functions; owns alerts_prev_lines sessionStorage key
+│   ├── clv.js                appendCLVEntries(), readCLVLog(), appendOpeningLine(), readOpeningLines() — CLV + opening line localStorage helpers; owns clv_log + opening_lines keys
+│   ├── alerts.js             readAlertsEnabled/writeAlertsEnabled, readAlertRules/writeAlertRules, readPrevLines/writePrevLines, detectMovements() — alert pure functions; owns alerts_prev_lines key
+│   └── newsParser.js         stripHtml(), parseRssFeed(), classifyCategory(), classifyRelevance(), matchFighterName(), rssItemToNewsItem() — RSS sanitization + normalization; text-only, no DOM injection
 ├── components/
 │   ├── StatBar.jsx           Horizontal proportional fill bar
 │   ├── FighterName.jsx       Name → profile link resolver
@@ -112,19 +138,19 @@ src/
 │   ├── ErrorBoundary.jsx     Class component error boundary wrapping all screens
 │   └── PriceChart.jsx        SVG sparkline for prediction-market probability-over-time
 ├── tabs/
-│   ├── TabOverview.jsx
-│   ├── TabStriking.jsx
-│   ├── TabGrappling.jsx
-│   ├── TabPhysical.jsx
-│   ├── TabHistory.jsx
+│   ├── TabOverview.jsx       Key numbers, flags, trader notes, RECENT NEWS (top 2 items via newsItems prop)
+│   ├── TabStriking.jsx       Striking volume, accuracy, knockdowns, position
+│   ├── TabGrappling.jsx      Takedowns, submissions, ground control, transitions
+│   ├── TabPhysical.jsx       Physical attributes, camp, durability, loss methods
+│   ├── TabHistory.jsx        Fight log table
 │   └── TabMarket.jsx         Manual odds entry + live Polymarket/Kalshi prices when matched
 ├── screens/
-│   ├── MenuScreen.jsx        ⚙ ALERTS settings panel (global toggle + permission request)
-│   ├── FighterScreen.jsx
-│   ├── CompareScreen.jsx
-│   ├── CalendarScreen.jsx
-│   ├── MarketsScreen.jsx     Unified live market dashboard + alert bell per fight
-│   └── NewsScreen.jsx        Fighter news feed with filters
+│   ├── MenuScreen.jsx        Main navigation (5 ACTIVE items) + ⚙ ALERTS settings panel
+│   ├── FighterScreen.jsx     Sidebar + hero card + 6-tab profile; calls useNews(); passes fighterNews to TabOverview
+│   ├── CompareScreen.jsx     Two-fighter selector + stat table + checklist + edge signal panel
+│   ├── CalendarScreen.jsx    Event sidebar + card detail + fighter deep-links
+│   ├── MarketsScreen.jsx     Unified live market dashboard (sportsbook + Polymarket + Kalshi + opening line + Tapology %) + alert bell per fight
+│   └── NewsScreen.jsx        Fighter news feed with filters; LIVE/MOCK source badge; per-item LIVE/MOCK badge
 └── test/
     └── setup.js              Vitest setup — jest-dom + in-memory localStorage mock
 ```
@@ -138,9 +164,10 @@ src/
 ## Key Constraints
 
 - **Vite + React, web-deployed.** The single-file prototype (`mma-trader.html`) is retired. All work goes into the Vite project. `babel-standalone` is gone permanently.
-- **Fighter and event data is live (build-time scraped).** `fighters.js` and `events.js` are generated by `scripts/fetch-data.js` at `npm run build`. Do not hand-edit them. `markets.js` and `news.js` remain mock — live market data comes from the three Phase 7 runtime hooks.
+- **Fighter and event data is live (build-time scraped).** `fighters.js` and `events.js` are generated by `scripts/fetch-data.js` at `npm run build`. Do not hand-edit them. `markets.js` is static mock. `news.js` is the static fallback seed for `useNews` — do not hand-edit it either (it's loaded when RSS sources are unavailable).
 - **Three live market hooks (Phase 7+).** `useOdds`, `usePolymarket`, and `useKalshi` make runtime API calls. All three degrade silently when their key is absent or the API is unreachable. `VITE_ODDS_API_KEY` (The Odds API) and `VITE_KALSHI_API_KEY` (Kalshi) go in `.env`. Polymarket is unauthenticated. Do not move API calls into `useEffect`-free code paths.
-- **sessionStorage for API response caching.** Cache TTL: 15 min for The Odds API (quota budget), 10 min for Polymarket + Kalshi. Use `src/utils/cache.js` helpers — do not re-implement cache logic inline.
+- **Live news hook (Phase 12+).** `useNews` fetches MMA Fighting + MMA Junkie RSS, parses via `newsParser.js`, caches 30 min in sessionStorage. Degrades silently to `news.js` mock when CORS blocks. All feed content is text-only — no HTML reaches the DOM.
+- **sessionStorage for API response caching.** Cache TTL: 15 min for The Odds API (quota budget), 10 min for Polymarket + Kalshi, 30 min for RSS news. Use `src/utils/cache.js` helpers — do not re-implement cache logic inline.
 - **CLV log in localStorage.** `src/utils/clv.js` owns the CLV log key (`clv_log`, 500-entry cap) and the opening line key (`opening_lines`, never evicted). Do not write to either key from any other path.
 - **All numbers and labels use JetBrains Mono.** All colors come from CSS variables — never hardcode hex values in JSX inline styles.
 - **CSS variables are the design system.** Do not use Tailwind, CSS Modules, or styled-components until a deliberate design system decision is made and logged in PLANNING.md.
@@ -149,6 +176,7 @@ src/
 - **Alert storage keys owned exclusively by `alerts.js`.** `alerts_enabled` and `alert_rules` (localStorage) and `alerts_prev_lines` (sessionStorage) may only be read/written by `src/utils/alerts.js` and `src/hooks/useAlerts.js`. No other module touches these keys.
 - **Service Worker is minimal and static.** `public/sw.js` contains only install/activate handlers. It makes no fetch calls. Do not add caching logic or background sync to it without a deliberate architecture decision. SW registration lives in `main.jsx` only.
 - **`worker-src 'self'` in CSP.** The SW is registered from the same origin. Both `netlify.toml` and `vercel.json` include `worker-src 'self'` in the Content-Security-Policy header. Do not remove it.
+- **Current test count: 308 passing.** Do not merge changes that reduce this number without a documented reason.
 
 ---
 
@@ -158,5 +186,5 @@ src/
 - `feature/*` — one branch per phase or feature
 - Commit per logical unit of work, not per file save
 - Update `CHANGELOG.md` and `TASKS.md` before merging to `master`
-- Run `npm audit` before merging to `master` (post-Vite)
+- Run `npm audit` before merging to `master`
 - Never force-push `master`

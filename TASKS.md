@@ -11,49 +11,91 @@
 ## Current Sprint
 
 **Branch:** `master`
-**Phase:** 12 — Live News Layer
-**Status:** Complete. v0.12.0. 2026-03-16.
+**Phase:** 13 — Sharing + Export
+**Status:** Not started.
 
-### ✅ Phase 12 Active Tasks
+### Phase 13 Active Tasks
 
-- [x] Service Worker registration
-  - SW scope limited to `/`; only fetches from existing `connect-src` domains
-  - `npm run build` output includes SW registration in `main.jsx` (not inline script — no CSP `unsafe-inline`)
-- [x] Browser Notification API integration
-  - Request permission on first use; respect denial gracefully (no re-prompt spam)
-  - Alert content: `textContent` only — never `innerHTML` with any variable content
-- [x] Line movement alert rules
-  - User-configurable threshold per fight (default: ±5 moneyline points)
-  - Alert fires when line moves beyond threshold; per-fight must be explicitly enabled
-  - Alerts stored in sessionStorage; dismissed on click; no persistent notification log
-- [x] Alert settings UI
-  - Toggle alerts per fight in MarketsScreen (bell icon on each row) + inline threshold input
-  - Global on/off toggle in settings panel (`⚙ ALERTS` button in MenuScreen topbar)
-  - Settings persisted to localStorage via `useAlerts`
-- [x] Tests + docs: 239 tests all passing (up from 186); 0 lint errors; `npm run build` passes; CHANGELOG updated
+- [ ] React Router integration (`react-router-dom`)
+  - Routes: `/` (menu), `/fighters/:id`, `/compare/:f1id/:f2id`, `/calendar`, `/markets`, `/news`
+  - URL params: fighter IDs only (numeric slugs) — no sensitive data, no localStorage state in URLs
+  - Preserve existing screen navigation; URL changes on screen transition
+  - `noindex` meta tag stays — shareable links are for personal use, not SEO
+  - **Security:** validate URL params as integers; reject non-numeric slugs before passing to FIGHTERS lookup
+- [ ] Shareable compare URL
+  - `/compare/12/7` → opens CompareScreen pre-loaded with those two fighters
+  - Copy-to-clipboard button in CompareScreen header (navigator.clipboard.writeText)
+  - **Security:** clipboard write is user-initiated only (button click); no auto-write on render
+- [ ] Export: checklist + notes as markdown
+  - Client-side markdown string from checklist state + notes + fighter names
+  - Download via `URL.createObjectURL(new Blob([md], { type: 'text/plain' }))` — no library
+  - Revoke object URL after download to avoid memory leak
+  - Output includes: fight date, fighters, checklist items (checked/unchecked), notes, edge signals
+  - **Security:** all values are text; no HTML generation; no external service receives data
+- [ ] Export: CLV log as CSV
+  - Client-side CSV string from `readCLVLog()` output
+  - Same Blob/createObjectURL download pattern; revoke after download
+  - **Security:** client-side only; CSV values must be sanitised against formula injection (prefix values starting with `=`, `+`, `-`, `@` with a single quote)
+- [ ] Tests + docs: URL routing smoke tests; export format tested; CHANGELOG updated; `npm audit` clean before merge
 
 ---
 
 ## ✅ Completed Sprints
 
-### ✅ Phase 9 — Roster Expansion + Public Signal (v0.9.0) — merged to master
+### ✅ Phase 12 — Live News Layer (v0.12.0) — 2026-03-16
 
-- [x] Opening line preservation (`appendOpeningLine` + `readOpeningLines` in `clv.js`; `useOdds` writes on first fetch; MarketsScreen SPORTSBOOK column shows "OPEN f1ml / f2ml")
+- [x] News source evaluation: MMA Fighting RSS + MMA Junkie RSS selected; documented in PLANNING.md; `connect-src` updated in `netlify.toml` + `vercel.json`
+- [x] `src/utils/newsParser.js` — `stripHtml` (DOMParser textContent only — no innerHTML), `parseRssFeed` (DOMParser application/xml), `classifyCategory`, `classifyRelevance`, `matchFighterName` (last-name, ≥3 chars), `rssItemToNewsItem`; headline ≤160, body ≤600 chars
+- [x] `src/hooks/useNews.js` — fetches 2 RSS sources in parallel; 30-min sessionStorage cache (`cache_news_v1`); per-source silent degradation; falls back to static `NEWS` mock when CORS blocks; returns `{ items, loading, isLive }`
+- [x] Fighter name matching — last-name `includes()` lookup against FIGHTERS; `fighter_id`/`fighter_name` populated; null on no match
+- [x] `NewsScreen.jsx` — consumes `useNews()`; LIVE/MOCK source badge in topbar; per-item LIVE/MOCK badge; filter dropdown derives from live items
+- [x] `TabOverview.jsx` — `newsItems` prop; RECENT NEWS section (top 2 matched items) below TRADER NOTES
+- [x] `FighterScreen.jsx` — calls `useNews()` once; derives `fighterNews` via `useMemo`; passes to TabOverview
+- [x] `eslint.config.js` — `DOMParser` added to browser globals
+- [x] Security: all feed content text-extracted only; XSS test coverage (`<script>`, `img onerror`, `javascript:` href) in `newsParser.test.js`
+- [x] 308 tests all passing (up from 239); 0 lint errors; build passes (95.22 kB gzipped)
+
+### ✅ Phase 11 — Alerts + Notifications (v0.11.0) — 2026-03-16
+
+- [x] `public/sw.js` — minimal Service Worker (install/activate only; no fetch handler; scope `/`)
+- [x] SW registration in `src/main.jsx` — no inline script, no CSP `unsafe-inline`
+- [x] `src/utils/alerts.js` — `readAlertsEnabled`, `writeAlertsEnabled`, `readAlertRules`, `writeAlertRules`, `readPrevLines`, `writePrevLines`, `detectMovements()` — pure functions; all localStorage/sessionStorage reads try/catch-wrapped with typed defaults
+- [x] `src/hooks/useAlerts.js` — `alertsEnabled`, `alertRules`, `permissionState`, `requestPermission`, `toggleAlerts`, `toggleFightAlert`, `setFightThreshold`; silent degradation when Notification absent/denied
+- [x] `MenuScreen.jsx` — ⚙ ALERTS settings panel: global toggle + permission badge + REQUEST button
+- [x] `MarketsScreen.jsx` — bell icon per fight card; inline threshold input; calls `useAlerts(oddsData)` for monitoring
+- [x] Alert body: string concatenation only — no template-literal HTML tags, no `innerHTML`
+- [x] `worker-src 'self'` added to CSP in both `netlify.toml` + `vercel.json`
+- [x] `navigator` + `Notification` added to ESLint browser globals
+- [x] 239 tests all passing (up from 186); 0 lint errors; 0 CVEs
+
+### ✅ Phase 10 — Mobile + UX Polish (v0.10.0) — 2026-03-16
+
+- [x] `src/hooks/useTheme.js` — persists `'light'|'dark'|'system'` to localStorage; applies `data-theme` on `<html>`; exports `{ theme, toggle, label }`
+- [x] `App.jsx` — bottom nav (`.bottom-nav`), hidden desktop / fixed mobile; floating theme toggle (desktop top-right); `navTo()` helper clears deep-fighter state
+- [x] `FighterScreen.jsx` + `CalendarScreen.jsx` — `sidebarOpen` state, ROSTER/EVENTS topbar button, `.sidebar-backdrop`, `.sidebar--open`
+- [x] Portrait support in FighterScreen — `<img>` when `sel.portrait` set; 2-letter JetBrains Mono initials fallback
+- [x] `app.css` — light-theme CSS variable set + `prefers-color-scheme` fallback; `@media (max-width: 767px)` responsive block; `fighter-link` → `--blue`; `.flag-value` + `.stat-cell-attr-val` → `font-family: var(--mono)`
+- [x] `FighterScreen.test.jsx` + `App.test.jsx` + `useTheme.test.js` added (35 new tests)
+- [x] 186 tests all passing; 0 lint errors; 0 CVEs; `vi.hoisted()` pattern documented
+
+### ✅ Phase 9 — Roster Expansion + Public Signal (v0.9.0) — 2026-03-16
+
+- [x] Opening line preservation — `appendOpeningLine` + `readOpeningLines` in `clv.js`; `useOdds` writes on first fetch; MarketsScreen SPORTSBOOK column shows "OPEN f1ml / f2ml"
 - [x] "NOT IN ROSTER" badge on live-only stub fight rows in MarketsScreen
 - [x] Roster expansion — 55 new fighters (IDs 15–69), all 8 weight classes, 69/69 scraped OK; archetype/mod/qualitative flags verified
 - [x] Tapology community % — build-time scrape; `scrapeTapologyEventPct()` + `matchTapologyPct()`; `tapology_pct` embedded in `events.js`; MarketsScreen PUBLIC row + FADE badge (≥15pt divergence)
 - [x] 165 tests (all passing), 0 lint errors, 0 audit vulnerabilities; CHANGELOG and TASKS updated
 
-### ✅ Phase 8 — CSS Extraction + Phase 7 Should-Haves (v0.8.0) — merged to master
+### ✅ Phase 8 — CSS Extraction + Phase 7 Should-Haves (v0.8.0) — 2026-03-16
 
 - [x] Extract inline styles → named CSS classes (~33 style blocks → 35 CSS classes in app.css)
 - [x] `src/constants/compareRows.js` — 15 stat-row definitions extracted from CompareScreen
 - [x] `opp_quality` field on fight history entries (elite / contender / gatekeeper / unknown)
 - [x] `weigh_in` and `judges` fields on event card fight entries (UFC 314–317 covered)
 - [x] Edge signal panel in CompareScreen — `computeEdgeSignals()` (archetype mismatch, modifier flags, market discrepancy); labeled "RESEARCH PROMPT — NOT A PICK"
-- [x] CHANGELOG promoted to v0.8.0, TASKS updated, memory updated
+- [x] CHANGELOG promoted to v0.8.0, TASKS updated
 
-### ✅ Phase 7 — Live Odds + Market Intelligence (v0.7.0) — merged to master
+### ✅ Phase 7 — Live Odds + Market Intelligence (v0.7.0) — 2026-03-16
 
 - [x] `src/utils/normalizeOdds.js` — 6 transform/validate functions; 31 tests
 - [x] `src/utils/cache.js` — shared sessionStorage helpers; 100% coverage
@@ -66,31 +108,16 @@
 - [x] TabMarket live prices + auto-loaded history for matched roster fighters
 - [x] `VITE_KALSHI_API_KEY` in `.env.example`; CSP updated in `netlify.toml` + `vercel.json`
 - [x] 142 tests, 0 lint errors, `npm run build` passes (71 kB gzipped); Merge to `master`, tag v0.7.0
-- [x] `src/constants/compareRows.js` — 15 stat-row definitions from CompareScreen (Should Have)
-- [x] Edge signal panel in CompareScreen — `computeEdgeSignals()` (Should Have)
 
 ### ✅ Phase 5 — Fighter News Feed (v0.5.0) — complete
+
 - [x] Design NEWS data model (id, date, fighter_id, category, headline, body, source, relevance)
-- [x] `src/data/news.js` with full schema comment and 12 mock items
+- [x] `src/data/news.js` with full schema comment and 12 mock items (now serves as static fallback for `useNews`)
 - [x] `src/screens/NewsScreen.jsx` — sorted news list with fighter links
 - [x] Filter by category (fight / injury / camp / weigh-in / result)
 - [x] Filter by fighter (select from roster)
 - [x] `FighterName` links from news items → fighter profile
 - [x] News CSS added to `app.css`
-- [x] Menu badge updated to ACTIVE, version bumped to v0.5.0
-- [x] `npm run build` passes — 66 kB gzipped
-- [x] ESLint clean (0 errors, 0 warnings)
-- [x] Smoke test: filters work, fighter link navigates correctly
-- [x] Commit and merge to `master`, tag v0.5.0
-
----
-
-### expand-roster — complete
-- [x] Add fighters — Lightweight division (Oliveira, Gaethje, Tsarukyan)
-- [x] Add fighters — Welterweight division (Muhammad, Edwards, Della Maddalena)
-- [x] Add fighters — Heavyweight (Jones, Aspinall)
-- [x] Verify all fighter data internally consistent
-- [x] Merged to `master`, tagged v0.3.0
 
 ---
 
@@ -127,8 +154,6 @@
 - Full Vite + React project, 14 modular components, 0 CVEs, deployable to Netlify/Vercel
 
 ### ✅ Phase 4 — Markets Dashboard (v0.4.0)
-**Branch:** `feature/phase-4-markets`
-
 - 8 active UFC markets across Polymarket, Kalshi, Novig
 - Moneyline + implied % per platform per fighter
 - Cross-platform arb detection (best-of sum < 100%)
@@ -138,10 +163,9 @@
 
 ### ✅ Phase 5 — Fighter News Feed (v0.5.0)
 - 12 mock news items, category + fighter filters, relevance signal, fighter deep links
+- `news.js` data file now serves as static fallback for the Phase 12 live `useNews` hook
 
 ### ✅ Phase 6 — Live Data Layer (v0.6.0)
-**Branch:** `feature/phase-6-live-data`
-
 - UFCStats build-time scraper (cheerio, native fetch) — no API key required
 - Fighter stats auto-populated from live UFCStats pages at build time
 - Fight history parsed from full career records
@@ -187,16 +211,7 @@
 
 ---
 
-### ✅ Phase 12 — Live News Layer (v0.12.0) — 2026-03-16
-
-- [x] News source evaluation: MMA Fighting RSS + MMA Junkie RSS selected; documented in PLANNING.md; `connect-src` updated in `netlify.toml` + `vercel.json`
-- [x] `src/utils/newsParser.js` — `stripHtml`, `parseRssFeed`, `classifyCategory`, `classifyRelevance`, `matchFighterName`, `rssItemToNewsItem`; all text-only, no HTML DOM injection
-- [x] `src/hooks/useNews.js` — fetches 2 RSS sources in parallel; 30-min sessionStorage cache; per-source degradation; falls back to static mock; returns `{ items, loading, isLive }`
-- [x] Fighter name matching — last-name lookup (≥ 3 chars) against FIGHTERS roster; `fighter_id`/`fighter_name` populated on matched items; null on no match
-- [x] NewsScreen — consumes `useNews()`; LIVE/MOCK source badge in topbar; per-item LIVE/MOCK badge
-- [x] TabOverview — `newsItems` prop; RECENT NEWS section (top 2 matched items) below TRADER NOTES
-- [x] FighterScreen — calls `useNews()` once; derives `fighterNews` via `useMemo`; passes to TabOverview
-- [x] Tests + docs: `newsParser.test.js` (44 tests, all XSS vectors covered), `useNews.test.js` (12 tests, mocked fetch); CHANGELOG + PLANNING.md updated
+### ✅ Phase 12 — Live News Layer (v0.12.0) — merged to master
 
 ---
 
@@ -204,7 +219,7 @@
 
 **Theme:** Make research shareable and exportable. The tool becomes more useful when a breakdown can be sent to someone or archived.
 
-**Security note: URLs must not encode secrets. Export must be client-side only — no data leaves the browser to a third party.**
+**Security note: URLs must not encode secrets or sensitive state. Export must be client-side only — no data leaves the browser to a third party. CSV export must guard against formula injection.**
 
 - [ ] React Router integration (`react-router-dom`)
   - Routes: `/` (menu), `/fighters/:id`, `/compare/:f1id/:f2id`, `/calendar`, `/markets`, `/news`
@@ -217,10 +232,12 @@
 - [ ] Export: checklist + notes as markdown
   - Client-side markdown string generation from checklist state + notes + fighter names
   - Download via `URL.createObjectURL(new Blob([markdown], { type: 'text/plain' }))` — no external library needed
+  - Revoke object URL after download
   - Output includes: fight date, fighters, checklist items (checked/unchecked), notes, edge signals summary
 - [ ] Export: CLV log as CSV
   - Client-side CSV string from `readCLVLog()` output
   - Same Blob download pattern as markdown export
+  - Guard CSV cells against formula injection (prefix `=`, `+`, `-`, `@` with `'`)
 - [ ] Tests + docs: URL routing smoke tests; export output format tested; CHANGELOG updated; `npm audit` clean before merge
 
 ---
@@ -228,6 +245,7 @@
 ## Backlog (Unscheduled — Post Phase 13)
 
 ### High value
+- [ ] CORS proxy for live news RSS — makes `useNews` actually load live content in production (Phase 12 hook is ready; proxy is the only missing piece)
 - [ ] Matchup context engine — archetype-aware auto-warnings in compare view ("WRESTLER vs COUNTER STRIKER — takedown threat flagged + judge venue bias noted")
 - [ ] Trend lines in fighter history — stat trajectory over last N fights (requires scraper enhancement to store per-fight stats, not just career averages)
 - [ ] Fighter search by stat range (e.g. "TD def > 80%", "SLpM > 5")
