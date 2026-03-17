@@ -10,132 +10,44 @@
 
 ## Current Sprint
 
-**Branch:** `feature/phase-14-qol-visual`
-**Phase:** 14 — QoL + Visual Overhaul
-**Status:** Planning
-
-### Overview
-
-Phase 14 targets three things that make the tool feel like a product rather than a spreadsheet:
-
-1. **Navigation friction** — replace scroll dropdowns with type-to-search everywhere; add quick-compare from profile and calendar
-2. **Data context** — raw numbers become meaningful with percentile badges and tier labels; no more "is 4.5 SLpM good?"
-3. **Visual identity** — pill-style archetype/modifier badges, fighter card components with portraits, compare screen hero header
-
-**Security note:** The new pick log writes to localStorage. Key `pick_log` is exclusively owned by `src/utils/pickLog.js`. All reads must be `try/catch`-wrapped with a typed default (`[]`). Any user input (outcome notes) is stored as plain text — no HTML, no eval. The fighter search input filters a static in-memory array — no API calls, no reflected output via innerHTML.
-
----
-
-### Phase 14 Tasks
-
-#### Navigation & Discovery
-
-- [ ] **`FighterSearch` component** (`src/components/FighterSearch.jsx`)
-  - Text input that filters FIGHTERS in real time (case-insensitive, trims whitespace)
-  - Renders a dropdown list of matching fighters; selects on click or Enter
-  - Used in CompareScreen fighter selectors (replaces scroll dropdowns) and FighterScreen roster sidebar
-  - Input sanitized with `.trim()` + `.toLowerCase()` before filtering; never passed to innerHTML
-  - `role="combobox"`, `aria-autocomplete="list"`, `aria-expanded` on input; `role="option"` + `aria-selected` on list items
-  - Add `src/components/FighterSearch.test.jsx` — test: filter renders correct results, empty state, keyboard Enter selects, XSS input (`<script>`) does not reach DOM
-
-- [ ] **Quick compare from fighter profile**
-  - Add a **VS.** button in FighterScreen hero card
-  - Navigates to `/compare/:currentFighterId` (one-fighter pre-load) or `/compare/:currentFighterId/:previousFighterId` if a "previous" fighter is in recent history
-  - No new route needed — CompareScreen already handles partial pre-load gracefully (`f2id` resolves to null → empty second slot)
-
-- [ ] **One-click compare from calendar**
-  - Each fight row in CalendarScreen gets a **COMPARE** button
-  - Navigates to `/compare/:f1id/:f2id` — both fighters looked up by name against FIGHTERS roster
-  - If either fighter is not in roster: button is hidden (not shown as disabled) — avoids dead-end navigation
-  - Name → ID lookup extracted to a pure util `findFighterByName(name, fighters)` in `src/utils/fighters.js`
-
-- [ ] **Recently viewed fighter strip** (optional stretch — add only if quick-compare is clean)
-  - Last 3 viewed fighter IDs in sessionStorage (key: `recent_fighters`, owned by `FighterScreen` only)
-  - Shown as small portrait/initial pills at the top of the roster sidebar
-  - Tap/click → navigate directly to that fighter's profile
-
-#### Data Context
-
-- [ ] **`computePercentiles` utility** (`src/utils/percentiles.js`)
-  - Takes a fighter object and the full FIGHTERS array
-  - Returns `{ slpm, str_acc, sapm, str_def, td_def, td_per15, finish_rate }` as 0–100 percentile ranks
-  - Pure function, no side effects, fully testable
-  - Add `src/utils/percentiles.test.js` — test: champion-tier fighter ranks top, gatekeeper ranks low; ties handled correctly
-
-- [ ] **Percentile badges in TabOverview**
-  - Next to SLpM, Str Def, TD Def, and Finish Rate in the Key Numbers section
-  - Badge label: `TOP X%` (e.g. `TOP 8%`) computed via `computePercentiles`
-  - Tiers: ≤10% → `--green`; 11–35% → `--accent`; 36–65% → `--text-dim`; >65% → no badge (below average, not shown)
-  - New CSS class `.percentile-badge` — JetBrains Mono, small caps, no hardcoded colors
-
-- [ ] **Stat tier labels in compare rows**
-  - Each stat cell in CompareScreen gets a sub-label: `ELITE` / `ABOVE AVG` / `AVG` / `BELOW AVG`
-  - Thresholds defined in a new constant `src/constants/statTiers.js` (one object per stat, four threshold values)
-  - Labels use `--text-dim` (muted, secondary) — they add context without competing with the primary number
-  - No color coding on labels themselves — just text; percentile badge handles color signal
-
-- [ ] **Color-coded matchup edge indicator on compare rows**
-  - A 3px left-border stripe on each compare row category group (not individual rows)
-  - Green border: F1 wins majority of rows in category; Red: F2 wins; No border: split/even
-  - Computed from existing `compareRows.js` win/lose flags — no new data needed
-  - CSS modifier: `.compare-category--f1-edge`, `.compare-category--f2-edge`; colors from `--green`/`--red`
-
-#### Visual Identity
-
-- [ ] **Archetype + modifier pill badges** (CSS only — no new component needed)
-  - New CSS class `.arch-badge` — pill shape (`border-radius: 4px`, padding, monospace, uppercase)
-  - New CSS class `.mod-badge` — smaller pill, slightly dimmer
-  - Applied in: FighterScreen hero card, CompareScreen fighter header, TabOverview
-  - Replace the current colored inline text spans with `.arch-badge` + inline color style (color still from `ARCH_COLORS` lookup → inline style is correct here per CLAUDE.md)
-  - Add `.mod-badge` pill rendering for modifier tags (currently rendered as plain text)
-
-- [ ] **`FighterCard` component** (`src/components/FighterCard.jsx`)
-  - Compact card: portrait (or 2-letter initials fallback) + name + record + archetype badge + top 2 mod badges
-  - Used in CompareScreen fighter selector (replacing raw text dropdowns) and potentially in roster sidebar
-  - Props: `fighter` (Fighter object), `onClick` (optional), `isSelected` (bool)
-  - `role="button"`, `aria-pressed={isSelected}`, `aria-label={fighter.name}` when interactive
-  - Add `src/components/FighterCard.test.jsx`
-
-- [ ] **CompareScreen hero header**
-  - When both fighters are selected: show two `FighterCard` components side by side above the stat table
-  - Between them: a center divider with `VS` and the implied probability gap (from live odds if available, else from sportsbook column if populated)
-  - Replaces the current plain text fighter name display at the top of the compare screen
-
-- [ ] **Updated TabOverview card layout**
-  - Current: labeled text sections stacked vertically
-  - Target: portrait/initials top-left; name + record + streak badge top-right; archetype + mods as pill badges below; then flags row (chin/cardio/weight cut as inline pills); then trader notes
-  - Flags use existing CHIN_COLOR / CARDIO_COLOR / CUT_COLOR inline style (runtime lookup map — inline style is correct per CLAUDE.md)
-
-#### Pick Log
-
-- [ ] **`src/utils/pickLog.js`**
-  - `readPickLog()` — `try/catch`, returns `[]` on error
-  - `appendPick({ fightKey, fighter, method, confidence, outcome, notes, ts })` — appends to array in localStorage; cap at 200 entries (same eviction pattern as CLV log)
-  - `updatePickOutcome(fightKey, outcome)` — updates `outcome` field on existing entry
-  - `KEY = 'pick_log'` — exported constant; only this module reads/writes it
-  - All input fields stored as plain text strings — no HTML, no eval
-  - Add `src/utils/pickLog.test.js` — test: append, cap enforcement, outcome update, try/catch on corrupt data, XSS strings stored as plain text
-
-- [ ] **Pick log UI in MarketsScreen**
-  - Small "+ PICK" button per fight row (next to the alert bell)
-  - Opens an inline form: fighter selector (pre-filled from row), method (KO/TKO/Sub/Dec), confidence (1–5), notes textarea
-  - Notes field: stored as-is, rendered via JSX (safe by default) — no innerHTML
-  - After a fight: "RESULT" button to log outcome; pick row shows W/L badge and CLV-like delta
-  - Log panel (collapsible, below CLV panel): shows last 20 picks with W/L/P record and ROI if odds were entered
-
-- [ ] **Storage key table in CLAUDE.md updated** with `pick_log` key, owned by `src/utils/pickLog.js`
-
-#### Testing & Docs
-
-- [ ] All new utils at ≥80% branch coverage
-- [ ] All new components have smoke tests + conditional render paths tested
-- [ ] `npm run lint` exits 0; `npm audit` clean
-- [ ] CHANGELOG.md `[Unreleased]` updated as tasks complete
-- [ ] PLANNING.md decisions log updated with Phase 14 architectural decisions
+**Branch:** `master` (Phase 14 complete — no active sprint)
+**Last completed:** Phase 14 — QoL + Visual Overhaul (v0.14.0, 2026-03-17)
+**Next:** See Backlog below. Cut a `feature/phase-15-*` branch when the next phase is scoped.
 
 ---
 
 ## ✅ Completed Sprints
+
+### ✅ Phase 14 — QoL + Visual Overhaul (v0.14.0) — 2026-03-17
+
+#### Navigation & Discovery
+- [x] `FighterSearch` component — type-to-search combobox; ARIA-compliant; XSS-safe; blur race guard
+- [x] Quick compare from fighter profile — VS./COMPARE button in FighterScreen hero → `/compare/:id`
+- [x] One-click compare from calendar — COMPARE button per in-roster bout; `useCompareNav()` module-scope hook
+- [ ] Recently viewed fighter strip (deferred — optional stretch; `recent_fighters` sessionStorage key reserved)
+
+#### Data Context
+- [x] `computePercentiles` utility — per-stat percentile rank vs full 69-fighter roster
+- [x] `TOP X%` percentile badges in TabOverview — finish_rate, slpm, sapm, str_def, td_def
+- [x] `statTiers.js` + stat tier labels in CompareScreen cells — ELITE / ABOVE AVG / AVG / BELOW AVG
+- [x] Category edge stripe in CompareScreen — `categoryEdges` useMemo; `.cat-row--f1-edge/f2-edge` (3px left border)
+
+#### Visual Identity
+- [x] Arch-badge + mod-badge pill rendering — `.arch-badge` / `.mod-badge` CSS classes everywhere
+- [x] `FighterCard` component — portrait/initials + name + record + arch/mod badges; interactive + static contexts
+- [x] CompareScreen hero header — two `FighterCard` components + VS center + normalized implied probability gap
+- [x] TabOverview FLAGS → `.flags-pill-row` — CHIN / CARDIO / CUT as colored inline pills
+
+#### Pick Log
+- [x] `src/utils/pickLog.js` — `readPickLog()`, `appendPick()`, `updatePickOutcome()`; 200-entry cap; plain text only
+- [x] Pick log UI in MarketsScreen — `+ PICK` per card, inline form, PICKS topbar panel with W/L/P record
+- [x] Storage key table in CLAUDE.md updated with `pick_log` key
+
+#### Testing & Docs
+- [x] 392 tests all passing; 0 lint errors; 0 CVEs
+- [x] CHANGELOG.md promoted to v0.14.0; TASKS.md, PLANNING.md, CLAUDE.md all updated
+
+---
 
 ### ✅ Post-Phase-13 Maintenance — Code Quality & Modular Design Cleanup
 

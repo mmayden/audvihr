@@ -57,10 +57,16 @@ export const TabOverview = ({ fighter, newsItems = [] }) => {
       ))}
     </div>
     <div className="sec-label">FLAGS</div>
-    <div className="stat-grid stat-grid--narrow">
-      <div className="stat-cell"><div className="stat-cell-label">CHIN</div><div className="flag-value" style={{color:CHIN_COLOR[fighter.chin]||'var(--text)'}}>{fighter.chin}</div></div>
-      <div className="stat-cell"><div className="stat-cell-label">CARDIO</div><div className="flag-value" style={{color:CARDIO_COLOR[fighter.cardio]||'var(--text)'}}>{fighter.cardio}</div></div>
-      <div className="stat-cell"><div className="stat-cell-label">WEIGHT CUT</div><div className="flag-value" style={{color:CUT_COLOR[fighter.weight_cut]||'var(--text)'}}>{fighter.weight_cut}</div></div>
+    <div className="flags-pill-row">
+      <span className="flag-pill" style={{color:CHIN_COLOR[fighter.chin]||'var(--text)',borderColor:CHIN_COLOR[fighter.chin]||'var(--border2)'}}>
+        <span className="flag-pill-key">CHIN</span>{fighter.chin}
+      </span>
+      <span className="flag-pill" style={{color:CARDIO_COLOR[fighter.cardio]||'var(--text)',borderColor:CARDIO_COLOR[fighter.cardio]||'var(--border2)'}}>
+        <span className="flag-pill-key">CARDIO</span>{fighter.cardio}
+      </span>
+      <span className="flag-pill" style={{color:CUT_COLOR[fighter.weight_cut]||'var(--text)',borderColor:CUT_COLOR[fighter.weight_cut]||'var(--border2)'}}>
+        <span className="flag-pill-key">CUT</span>{fighter.weight_cut}
+      </span>
     </div>
     <div className="sec-label">TRADER NOTES</div>
     <div className="trader-notes-block">{fighter.trader_notes}</div>

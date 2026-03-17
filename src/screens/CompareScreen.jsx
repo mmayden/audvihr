@@ -1,11 +1,12 @@
 import { useState, useMemo, useCallback, Fragment } from 'react';
 import { FIGHTERS } from '../data/fighters';
-import { ARCH_COLORS, MOD_COLORS } from '../constants/archetypes';
 import { COMPARE_ROW_DEFS } from '../constants/compareRows';
 import { CHECKLIST } from '../constants/checklist';
 import { ChecklistPanel } from '../components/ChecklistPanel';
+import { FighterCard } from '../components/FighterCard';
 import { FighterSearch } from '../components/FighterSearch';
 import { mlToImplied } from '../utils/odds';
+import { getStatTier } from '../constants/statTiers';
 import { checklistToMarkdown, downloadBlob } from '../utils/export';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
@@ -143,6 +144,16 @@ export const CompareScreen = ({ onBack, initialF1Id = '', initialF2Id = '' }) =>
   const rows    = useMemo(() => f1 && f2 ? COMPARE_ROW_DEFS.map(def => def(f1, f2)) : [], [f1, f2]);
   const signals = useMemo(() => f1 && f2 ? computeEdgeSignals(f1, f2, rows) : [], [f1, f2, rows]);
 
+  /** Normalized implied probability from fighter market.ml_current (if available). */
+  const impliedProb = useMemo(() => {
+    if (!f1 || !f2) return null;
+    const i1 = parseFloat(mlToImplied(f1.market?.ml_current));
+    const i2 = parseFloat(mlToImplied(f2.market?.ml_current));
+    if (isNaN(i1) || isNaN(i2) || i1 + i2 === 0) return null;
+    const n1 = Math.round(i1 / (i1 + i2) * 100);
+    return { f1: n1, f2: 100 - n1 };
+  }, [f1, f2]);
+
   /** Per-category edge: 'f1' | 'f2' | null based on majority of contested rows. */
   const categoryEdges = useMemo(() => {
     if (!rows.length) return {};
@@ -211,27 +222,20 @@ export const CompareScreen = ({ onBack, initialF1Id = '', initialF2Id = '' }) =>
               <div className="anim-fade">
                 <div className="compare-fighter-header">
                   <div className="compare-fighter-col">
-                    <div className="compare-fighter-name">{f1.name}</div>
-                    <div className="compare-fighter-record compare-fighter-record--f1">{f1.record} · {f1.rank}</div>
-                    <div className="compare-fighter-arch">
-                      <span className="arch-badge" style={{color:ARCH_COLORS[f1.archetype],borderColor:ARCH_COLORS[f1.archetype]}}>{f1.archetype}</span>
-                      {(f1.mods ?? []).slice(0,2).map(m => {
-                        const c = MOD_COLORS[m] ?? 'var(--text-dim)';
-                        return <span key={m} className="mod-badge" style={{color:c,borderColor:c}}>{m}</span>;
-                      })}
-                    </div>
+                    <FighterCard fighter={f1} />
                   </div>
-                  <div className="compare-vs-col">VS</div>
+                  <div className="compare-vs-col">
+                    VS
+                    {impliedProb && (
+                      <div className="compare-implied-gap">
+                        <span style={{color:'var(--accent)'}}>{impliedProb.f1}%</span>
+                        <span className="compare-implied-sep">·</span>
+                        <span style={{color:'var(--blue)'}}>{impliedProb.f2}%</span>
+                      </div>
+                    )}
+                  </div>
                   <div className="compare-fighter-col compare-fighter-col--right">
-                    <div className="compare-fighter-name">{f2.name}</div>
-                    <div className="compare-fighter-record compare-fighter-record--f2">{f2.record} · {f2.rank}</div>
-                    <div className="compare-fighter-arch compare-fighter-arch--right">
-                      {(f2.mods ?? []).slice(0,2).map(m => {
-                        const c = MOD_COLORS[m] ?? 'var(--text-dim)';
-                        return <span key={m} className="mod-badge" style={{color:c,borderColor:c}}>{m}</span>;
-                      })}
-                      <span className="arch-badge" style={{color:ARCH_COLORS[f2.archetype],borderColor:ARCH_COLORS[f2.archetype]}}>{f2.archetype}</span>
-                    </div>
+                    <FighterCard fighter={f2} />
                   </div>
                 </div>
                 <table className="ctable">
@@ -243,9 +247,15 @@ export const CompareScreen = ({ onBack, initialF1Id = '', initialF2Id = '' }) =>
                     return <Fragment key={i}>
                       {sc && <tr className={`cat-row${edgeCls}`}><td colSpan={3}>{r.cat}</td></tr>}
                       <tr>
-                        <td className={tie ? '' : f1w ? 'win' : 'lose'}>{r.v1}</td>
+                        <td className={tie ? '' : f1w ? 'win' : 'lose'}>
+                          {r.v1}
+                          {r.statKey && <span className="stat-tier-label">{getStatTier(r.statKey, r.n1)}</span>}
+                        </td>
                         <td className="center">{r.l}</td>
-                        <td className={`r ${tie ? '' : !f1w ? 'win' : 'lose'}`}>{r.v2}</td>
+                        <td className={`r ${tie ? '' : !f1w ? 'win' : 'lose'}`}>
+                          {r.statKey && <span className="stat-tier-label">{getStatTier(r.statKey, r.n2)}</span>}
+                          {r.v2}
+                        </td>
                       </tr>
                     </Fragment>;
                   })}</tbody>

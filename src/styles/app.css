@@ -496,6 +496,50 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
 /* TabOverview stat-cell with percentile badge */
 .stat-cell-val-row { display: flex; align-items: baseline; gap: 0; }
 
+/* Compare hero header — FighterCard in non-interactive context */
+.compare-fighter-col .fighter-card { cursor: default; border: none; background: transparent; padding: 0; }
+.compare-fighter-col .fighter-card:hover { border: none; background: transparent; }
+
+/* Implied probability gap in compare VS column */
+.compare-vs-col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+.compare-implied-gap { display: flex; align-items: center; gap: 4px; font-size: 9px; font-family: var(--mono); font-weight: 700; letter-spacing: .04em; }
+.compare-implied-sep { color: var(--text-dim); }
+
+/* TabOverview flags as inline pills */
+.flags-pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.flag-pill { display: inline-flex; align-items: center; gap: 5px; border: 1px solid currentColor; border-radius: 10px; padding: 3px 10px; font-size: 10px; font-family: var(--mono); letter-spacing: .04em; }
+.flag-pill-key { opacity: .5; font-size: 9px; }
+
+/* MarketsScreen — Pick log UI */
+.markets-pick-panel { border-bottom: 1px solid var(--border); padding: 12px 16px; background: var(--surface); }
+.mkt-pick-btn { font-size: 9px; font-family: var(--mono); font-weight: 700; letter-spacing: .06em; padding: 2px 7px; background: transparent; border: 1px solid var(--border2); color: var(--text-dim); cursor: pointer; transition: all .12s; flex-shrink: 0; }
+.mkt-pick-btn:hover, .mkt-pick-btn.on { border-color: var(--accent); color: var(--accent); }
+.mkt-pick-form { padding: 10px 14px; border-top: 1px solid var(--border); background: var(--surface); display: flex; flex-direction: column; gap: 8px; }
+.mkt-pick-form-row { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.mkt-pick-label { font-size: 9px; font-family: var(--mono); font-weight: 700; letter-spacing: .07em; color: var(--text-dim); width: 46px; flex-shrink: 0; }
+.mkt-pick-chip { font-size: 9px; font-family: var(--mono); font-weight: 600; letter-spacing: .04em; padding: 3px 8px; background: transparent; border: 1px solid var(--border2); color: var(--text-dim); cursor: pointer; transition: all .1s; }
+.mkt-pick-chip:hover { border-color: var(--text-dim); color: var(--text); }
+.mkt-pick-chip.on { border-color: var(--accent); color: var(--accent); background: rgba(212,168,67,.07); }
+.mkt-pick-notes { flex: 1; background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-family: var(--mono); font-size: 11px; padding: 5px 8px; resize: vertical; outline: none; width: 100%; min-width: 0; box-sizing: border-box; }
+.mkt-pick-notes:focus { border-color: var(--border2); }
+.mkt-pick-form-actions { display: flex; gap: 6px; }
+.mkt-pick-save { font-size: 10px; font-family: var(--mono); font-weight: 700; letter-spacing: .06em; padding: 4px 12px; background: transparent; border: 1px solid var(--accent); color: var(--accent); cursor: pointer; transition: all .12s; }
+.mkt-pick-save:disabled { opacity: .4; cursor: default; border-color: var(--border2); color: var(--text-dim); }
+.mkt-pick-save:not(:disabled):hover { background: rgba(212,168,67,.1); }
+.mkt-pick-cancel { font-size: 10px; font-family: var(--mono); font-weight: 600; letter-spacing: .06em; padding: 4px 12px; background: transparent; border: 1px solid var(--border); color: var(--text-dim); cursor: pointer; transition: all .12s; }
+.mkt-pick-cancel:hover { border-color: var(--border2); color: var(--text); }
+/* Pick log panel */
+.pick-log-table { display: flex; flex-direction: column; }
+.pick-log-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 10px; font-family: var(--mono); }
+.pick-log-fight { color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
+.pick-log-fighter { color: var(--text-bright); font-weight: 600; flex-shrink: 0; }
+.pick-log-method { color: var(--text-dim); flex-shrink: 0; }
+.pick-log-conf { color: var(--accent); flex-shrink: 0; }
+.pick-log-outcome--w { color: var(--green); font-weight: 700; flex-shrink: 0; }
+.pick-log-outcome--l { color: var(--red); font-weight: 700; flex-shrink: 0; }
+.pick-log-result-btn { font-size: 9px; font-family: var(--mono); font-weight: 700; padding: 1px 5px; background: transparent; border: 1px solid var(--border2); color: var(--text-dim); cursor: pointer; }
+.pick-log-result-btn:hover { border-color: var(--accent); color: var(--accent); }
+
 @media (max-width: 767px) {
   /* Bottom nav bar */
   .bottom-nav {

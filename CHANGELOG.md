@@ -4,14 +4,38 @@ All notable changes to this project. Format: [version] — date — description.
 
 ---
 
-## [Unreleased]
+## [0.14.0] — 2026-03-17
 
-### Phase 14 — QoL + Visual Overhaul (in planning)
+### Phase 14 — QoL + Visual Overhaul
 
-Navigation: `FighterSearch` component (type-to-search replacing scroll dropdowns), quick compare from fighter profile, one-click compare from calendar, recently viewed fighter strip.
-Data context: `computePercentiles` util + `TOP X%` badges in TabOverview, stat tier labels (ELITE/ABOVE AVG/AVG/BELOW AVG) in compare rows, color-coded matchup edge stripe on compare categories.
-Visual: archetype + modifier pill badges (`.arch-badge` / `.mod-badge`), `FighterCard` component, CompareScreen hero header with two cards + VS + implied probability gap, TabOverview card layout.
-Pick log: `src/utils/pickLog.js` (200-entry cap, localStorage `pick_log` key), pick UI in MarketsScreen, outcome tracking, W/L/P record display.
+#### Added
+- `src/components/FighterSearch.jsx` — type-to-search combobox replacing scroll dropdowns in CompareScreen; ARIA-compliant (`role="combobox"`, `aria-expanded`, `role="listbox"`, `role="option"`); XSS-safe (JSX only, no innerHTML); `onMouseDown` + `setTimeout` blur guard prevents selection race condition.
+- `src/components/FighterCard.jsx` — compact fighter card: portrait or 2-letter initials fallback, name, record, arch-badge, up to 2 mod-badges; interactive via `role="button"`, `aria-pressed`, Enter/Space keyboard handler; non-interactive context (compare header) has cursor/border stripped via CSS override.
+- `src/utils/percentiles.js` — `computePercentiles(fighter, allFighters)` returns per-stat percentile ranks 1–100 (lower = better) for 7 key stats.
+- `src/utils/fighters.js` — `findFighterByName(name, fighters)` — exact full-name match + last-name fallback (≥3 chars); used by CalendarScreen → compare navigation.
+- `src/utils/pickLog.js` — `readPickLog()`, `appendPick()`, `updatePickOutcome()`; 200-entry cap; exclusively owns `pick_log` localStorage key; all stored values plain text; `try/catch` on every read.
+- `src/constants/statTiers.js` — `STAT_TIERS` thresholds + `getStatTier(statKey, value)` → `ELITE | ABOVE AVG | AVG | BELOW AVG` for 8 stats.
+- **CompareScreen** — stat tier labels in each tiered stat cell (`.stat-tier-label`; `statKey` field added to 10 of 15 rows in `compareRows.js`); category edge stripe (`categoryEdges` useMemo; `.cat-row--f1-edge` / `.cat-row--f2-edge`, 3px left border); hero header replaced with two `FighterCard` components side by side + VS center column with normalized implied probability gap when `fighter.market.ml_current` is available on both fighters.
+- **TabOverview** — `TOP X%` percentile badges on key stats (finish_rate, slpm, sapm, str_def, td_def); ≤10% → green elite badge, 11–35% → accent badge, >35% → hidden; FLAGS section replaced with `.flags-pill-row` — CHIN / CARDIO / CUT as colored rounded pill badges (`.flag-pill`, `.flag-pill-key`); STR DEFENSE % stat added to key numbers.
+- **FighterScreen** — arch-badge + mod-badge pill rendering in hero card; VS./COMPARE button navigates to `/compare/:id` via `useNavigate`.
+- **CalendarScreen** — COMPARE button per in-roster bout (main event, co-main, prelims, early prelims); `useCompareNav()` module-scope hook resolves both fighters via `findFighterByName` and navigates to `/compare/:f1id/:f2id`; hidden when either fighter is not in roster.
+- **MarketsScreen** — `+ PICK` button per market card opens inline form (fighter chip selector, method chips KO/TKO / Submission / Decision / Any, confidence 1–5, notes textarea maxLength 200, plain text only); SAVE disabled until fighter is selected; PICKS topbar panel shows last 20 picks, W/L/P record, inline W/L outcome buttons for pending picks.
+- Phase 14 CSS additions in `app.css`: `.arch-badge`, `.mod-badge`, `.percentile-badge--elite/top35`, `.stat-tier-label`, `.cat-row--f1-edge/f2-edge`, `.vs-btn`, `.cal-compare-btn`, `.compare-fighter-col .fighter-card` (non-interactive override), `.compare-implied-gap`, `.flags-pill-row`, `.flag-pill`, `.flag-pill-key`, `.fighter-card-*`, `.fighter-search-*`, `.mkt-pick-btn`, `.mkt-pick-form`, `.mkt-pick-chip`, `.mkt-pick-notes`, `.mkt-pick-save/cancel`, `.pick-log-*`, `.markets-pick-panel`.
+
+#### Security
+- `FighterSearch` input sanitized with `.trim()` + `.toLowerCase()` before filtering the in-memory FIGHTERS array. Filtered results rendered via JSX only — no innerHTML, no dangerouslySetInnerHTML.
+- `pick_log` localStorage key owned exclusively by `src/utils/pickLog.js`. All stored values coerced to `String()` — never HTML, never eval, never template-literal markup. XSS strings stored as-is (text) and never reach innerHTML anywhere.
+- Implied probability gap in CompareScreen computed from pre-validated numeric values — no raw string from external sources interpolated into the DOM.
+- No new external domains; no CSP changes; no new npm runtime dependencies.
+
+#### Testing
+- `FighterSearch.test.jsx` — 13 tests including XSS safety (script injection in input does not reach DOM).
+- `FighterCard.test.jsx` — 13 tests: portrait/initials, badges, interactive role, keyboard handler.
+- `percentiles.test.js` — 8 tests.
+- `fighters.test.js` — 8 tests: exact match, last-name fallback, ≥3 char guard, null-safety.
+- `pickLog.test.js` — 13 tests: round-trip, 200-entry cap eviction, XSS plain-text storage, outcome update.
+- `FighterScreen.test.jsx` — MemoryRouter wrapper added for `useNavigate` compatibility.
+- Total: **392 tests, all passing. 0 lint errors.**
 
 ---
 
