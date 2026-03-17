@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { FighterScreen } from './FighterScreen';
+
+const renderInRouter = (ui) => render(<MemoryRouter>{ui}</MemoryRouter>);
 
 // vi.mock is hoisted — fixtures must be defined via vi.hoisted so they exist
 // when the factory executes (before module imports run).
@@ -41,7 +44,7 @@ beforeEach(() => { localStorage.clear(); });
 
 describe('FighterScreen — portrait', () => {
   it('shows initials fallback when fighter has no portrait', () => {
-    render(<FighterScreen onBack={() => {}} initialFighter={FIGHTER_NO_PORTRAIT} />);
+    renderInRouter(<FighterScreen onBack={() => {}} initialFighter={FIGHTER_NO_PORTRAIT} />);
     // Islam Makhachev → IM
     expect(screen.getByText('IM')).toBeTruthy();
     expect(document.querySelector('.portrait-initials')).toBeTruthy();
@@ -49,7 +52,7 @@ describe('FighterScreen — portrait', () => {
   });
 
   it('shows portrait img when fighter has a portrait path', () => {
-    render(<FighterScreen onBack={() => {}} initialFighter={FIGHTER_WITH_PORTRAIT} />);
+    renderInRouter(<FighterScreen onBack={() => {}} initialFighter={FIGHTER_WITH_PORTRAIT} />);
     const img = document.querySelector('.portrait-img');
     expect(img).toBeTruthy();
     expect(img.getAttribute('src')).toBe('/assets/portraits/poirier.jpg');
@@ -58,26 +61,26 @@ describe('FighterScreen — portrait', () => {
   });
 
   it('initials use first letter of each name word (max 2)', () => {
-    render(<FighterScreen onBack={() => {}} initialFighter={FIGHTER_NO_PORTRAIT} />);
+    renderInRouter(<FighterScreen onBack={() => {}} initialFighter={FIGHTER_NO_PORTRAIT} />);
     expect(screen.getByText('IM')).toBeTruthy();
   });
 });
 
 describe('FighterScreen — sidebar toggle', () => {
   it('renders the ROSTER button', () => {
-    render(<FighterScreen onBack={() => {}} initialFighter={FIGHTER_NO_PORTRAIT} />);
+    renderInRouter(<FighterScreen onBack={() => {}} initialFighter={FIGHTER_NO_PORTRAIT} />);
     expect(screen.getByText('ROSTER')).toBeTruthy();
   });
 
   it('clicking ROSTER shows the sidebar-backdrop', () => {
-    render(<FighterScreen onBack={() => {}} initialFighter={FIGHTER_NO_PORTRAIT} />);
+    renderInRouter(<FighterScreen onBack={() => {}} initialFighter={FIGHTER_NO_PORTRAIT} />);
     expect(document.querySelector('.sidebar-backdrop')).toBeNull();
     fireEvent.click(screen.getByText('ROSTER'));
     expect(document.querySelector('.sidebar-backdrop')).toBeTruthy();
   });
 
   it('clicking backdrop closes the sidebar', () => {
-    render(<FighterScreen onBack={() => {}} initialFighter={FIGHTER_NO_PORTRAIT} />);
+    renderInRouter(<FighterScreen onBack={() => {}} initialFighter={FIGHTER_NO_PORTRAIT} />);
     fireEvent.click(screen.getByText('ROSTER'));
     const backdrop = document.querySelector('.sidebar-backdrop');
     fireEvent.click(backdrop);
@@ -85,7 +88,7 @@ describe('FighterScreen — sidebar toggle', () => {
   });
 
   it('sidebar gets sidebar--open class when open', () => {
-    render(<FighterScreen onBack={() => {}} initialFighter={FIGHTER_NO_PORTRAIT} />);
+    renderInRouter(<FighterScreen onBack={() => {}} initialFighter={FIGHTER_NO_PORTRAIT} />);
     fireEvent.click(screen.getByText('ROSTER'));
     expect(document.querySelector('.sidebar--open')).toBeTruthy();
   });

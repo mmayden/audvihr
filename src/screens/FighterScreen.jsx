@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FIGHTERS } from '../data/fighters';
 import { ARCH_COLORS, MOD_COLORS } from '../constants/archetypes';
 import { TABS } from '../constants/checklist';
@@ -23,6 +24,7 @@ const WEIGHT_FILTERS = ['ALL', ...new Set(FIGHTERS.map(f => f.weight))];
  * @param {object|null} initialFighter - fighter object to pre-select on mount
  */
 export const FighterScreen = ({onBack, initialFighter}) => {
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [weightFilter, setWeightFilter] = useState('ALL');
   const [sel, setSel] = useState(initialFighter || FIGHTERS[0]);
@@ -87,9 +89,16 @@ export const FighterScreen = ({onBack, initialFighter}) => {
                   <span className="id-pill">{sel.country}</span>
                 </div>
                 <div className="archetype-row">
-                  {ac && <span className="arch-tag" style={{borderColor:ac,color:ac}}>{sel.archetype}</span>}
-                  {sel.mods.map(m=><span key={m} className="arch-tag" style={{borderColor:MOD_COLORS[m]||'var(--border2)',color:MOD_COLORS[m]||'var(--text-dim)',opacity:.8}}>{m}</span>)}
+                  {ac && <span className="arch-badge" style={{borderColor:ac,color:ac}}>{sel.archetype}</span>}
+                  {sel.mods.map(m=><span key={m} className="mod-badge" style={{borderColor:MOD_COLORS[m]||'var(--border2)',color:MOD_COLORS[m]||'var(--text-dim)'}}>{m}</span>)}
                 </div>
+                <button
+                  className="vs-btn"
+                  onClick={() => navigate('/compare/' + sel.id)}
+                  aria-label={`Compare ${sel.name}`}
+                >
+                  VS. / COMPARE
+                </button>
               </div>
               <div className="card-record">
                 <div className="record-big">{sel.record}</div>

@@ -1,9 +1,10 @@
 import { useState, useMemo, useCallback, Fragment } from 'react';
 import { FIGHTERS } from '../data/fighters';
-import { ARCH_COLORS } from '../constants/archetypes';
+import { ARCH_COLORS, MOD_COLORS } from '../constants/archetypes';
 import { COMPARE_ROW_DEFS } from '../constants/compareRows';
 import { CHECKLIST } from '../constants/checklist';
 import { ChecklistPanel } from '../components/ChecklistPanel';
+import { FighterSearch } from '../components/FighterSearch';
 import { mlToImplied } from '../utils/odds';
 import { checklistToMarkdown, downloadBlob } from '../utils/export';
 import { useLocalStorage } from '../hooks/useLocalStorage';
@@ -142,6 +143,24 @@ export const CompareScreen = ({ onBack, initialF1Id = '', initialF2Id = '' }) =>
   const rows    = useMemo(() => f1 && f2 ? COMPARE_ROW_DEFS.map(def => def(f1, f2)) : [], [f1, f2]);
   const signals = useMemo(() => f1 && f2 ? computeEdgeSignals(f1, f2, rows) : [], [f1, f2, rows]);
 
+  /** Per-category edge: 'f1' | 'f2' | null based on majority of contested rows. */
+  const categoryEdges = useMemo(() => {
+    if (!rows.length) return {};
+    const counts = {};
+    for (const r of rows) {
+      if (!counts[r.cat]) counts[r.cat] = { f1: 0, f2: 0 };
+      if (r.n1 === r.n2) continue;
+      if (r.higherIsBetter ? r.n1 > r.n2 : r.n1 < r.n2) counts[r.cat].f1++;
+      else counts[r.cat].f2++;
+    }
+    return Object.fromEntries(
+      Object.entries(counts).map(([cat, c]) => [
+        cat,
+        c.f1 > c.f2 ? 'f1' : c.f2 > c.f1 ? 'f2' : null,
+      ])
+    );
+  }, [rows]);
+
   /** Copy shareable /compare/:f1id/:f2id URL to clipboard (user-initiated only). */
   const handleCopyLink = useCallback(() => {
     if (!f1 || !f2) return;
@@ -180,15 +199,11 @@ export const CompareScreen = ({ onBack, initialF1Id = '', initialF2Id = '' }) =>
       </div>
       <div className="compare-layout">
         <div className="compare-selector">
-          <select className="compare-select" value={fighter1Id} onChange={e => setFighter1Id(e.target.value)}>
-            <option value="">— Fighter 1 —</option>
-            {FIGHTERS.map(f => <option key={f.id} value={f.id}>{f.name} ({f.record})</option>)}
-          </select>
-          <span className="vs-text">VS</span>
-          <select className="compare-select" value={fighter2Id} onChange={e => setFighter2Id(e.target.value)}>
-            <option value="">— Fighter 2 —</option>
-            {FIGHTERS.map(f => <option key={f.id} value={f.id}>{f.name} ({f.record})</option>)}
-          </select>
+          <div className="compare-selector-search">
+            <FighterSearch fighters={FIGHTERS} selectedId={fighter1Id} onSelect={setFighter1Id} placeholder="— Fighter 1 —" />
+            <span className="vs-text">VS</span>
+            <FighterSearch fighters={FIGHTERS} selectedId={fighter2Id} onSelect={setFighter2Id} placeholder="— Fighter 2 —" />
+          </div>
         </div>
         <div className="compare-body">
           <div className="compare-table-wrap">
@@ -198,13 +213,25 @@ export const CompareScreen = ({ onBack, initialF1Id = '', initialF2Id = '' }) =>
                   <div className="compare-fighter-col">
                     <div className="compare-fighter-name">{f1.name}</div>
                     <div className="compare-fighter-record compare-fighter-record--f1">{f1.record} · {f1.rank}</div>
-                    <div className="compare-fighter-arch"><span className="arch-tag arch-tag--sm" style={{borderColor:ARCH_COLORS[f1.archetype],color:ARCH_COLORS[f1.archetype]}}>{f1.archetype}</span></div>
+                    <div className="compare-fighter-arch">
+                      <span className="arch-badge" style={{color:ARCH_COLORS[f1.archetype],borderColor:ARCH_COLORS[f1.archetype]}}>{f1.archetype}</span>
+                      {(f1.mods ?? []).slice(0,2).map(m => {
+                        const c = MOD_COLORS[m] ?? 'var(--text-dim)';
+                        return <span key={m} className="mod-badge" style={{color:c,borderColor:c}}>{m}</span>;
+                      })}
+                    </div>
                   </div>
                   <div className="compare-vs-col">VS</div>
                   <div className="compare-fighter-col compare-fighter-col--right">
                     <div className="compare-fighter-name">{f2.name}</div>
                     <div className="compare-fighter-record compare-fighter-record--f2">{f2.record} · {f2.rank}</div>
-                    <div className="compare-fighter-arch compare-fighter-arch--right"><span className="arch-tag arch-tag--sm" style={{borderColor:ARCH_COLORS[f2.archetype],color:ARCH_COLORS[f2.archetype]}}>{f2.archetype}</span></div>
+                    <div className="compare-fighter-arch compare-fighter-arch--right">
+                      {(f2.mods ?? []).slice(0,2).map(m => {
+                        const c = MOD_COLORS[m] ?? 'var(--text-dim)';
+                        return <span key={m} className="mod-badge" style={{color:c,borderColor:c}}>{m}</span>;
+                      })}
+                      <span className="arch-badge" style={{color:ARCH_COLORS[f2.archetype],borderColor:ARCH_COLORS[f2.archetype]}}>{f2.archetype}</span>
+                    </div>
                   </div>
                 </div>
                 <table className="ctable">
@@ -212,8 +239,9 @@ export const CompareScreen = ({ onBack, initialF1Id = '', initialF2Id = '' }) =>
                   <tbody>{rows.map((r, i) => {
                     const sc = i === 0 || rows[i-1].cat !== r.cat;
                     const tie = r.n1 === r.n2, f1w = r.higherIsBetter ? r.n1 > r.n2 : r.n1 < r.n2;
+                    const edgeCls = sc && categoryEdges[r.cat] ? ` cat-row--${categoryEdges[r.cat]}-edge` : '';
                     return <Fragment key={i}>
-                      {sc && <tr className="cat-row"><td colSpan={3}>{r.cat}</td></tr>}
+                      {sc && <tr className={`cat-row${edgeCls}`}><td colSpan={3}>{r.cat}</td></tr>}
                       <tr>
                         <td className={tie ? '' : f1w ? 'win' : 'lose'}>{r.v1}</td>
                         <td className="center">{r.l}</td>

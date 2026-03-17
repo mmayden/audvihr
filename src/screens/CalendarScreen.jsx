@@ -1,8 +1,11 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { EVENTS } from '../data/events';
+import { FIGHTERS } from '../data/fighters';
 import { ORG_COLOR } from '../constants/qualifiers';
 import { FighterName } from '../components/FighterName';
 import { daysUntil, isPast } from '../utils/date';
+import { findFighterByName } from '../utils/fighters';
 
 /** Format an ISO date string as a human-readable event date (e.g. 'Sat, Apr 12, 2026'). */
 function fmtDate(dateStr) {
@@ -29,7 +32,21 @@ function countdown(dateStr, today) {
  * @param {function} onBack - callback invoked when the back button is clicked
  * @param {function} onGoFighter - callback invoked with a fighter object to deep-navigate to their profile
  */
+/**
+ * Navigate to /compare/:f1id/:f2id if both fighters are in the roster.
+ * Returns null when either fighter cannot be matched.
+ */
+function useCompareNav() {
+  const navigate = useNavigate();
+  return (f1Name, f2Name) => {
+    const f1 = findFighterByName(f1Name, FIGHTERS);
+    const f2 = findFighterByName(f2Name, FIGHTERS);
+    if (f1 && f2) navigate(`/compare/${f1.id}/${f2.id}`);
+  };
+}
+
 export const CalendarScreen = ({onBack, onGoFighter}) => {
+  const goCompare = useCompareNav();
   const today = useMemo(()=>{ const d=new Date(); d.setHours(0,0,0,0); return d; },[]);
   const sorted = useMemo(()=>[...EVENTS].sort((a,b)=>new Date(a.date)-new Date(b.date)),[]);
   const firstUpcoming = sorted.find(e=>new Date(e.date)>=today);
@@ -104,7 +121,12 @@ export const CalendarScreen = ({onBack, onGoFighter}) => {
                     <div className="cmb-fighter-name"><FighterName name={sel.card.main.f1} onGoFighter={onGoFighter}/></div>
                     <div className="cmb-weight-tag">{sel.card.main.weight.toUpperCase()}</div>
                   </div>
-                  <div className="cmb-vs">VS</div>
+                  <div className="cmb-vs">
+                    VS
+                    {findFighterByName(sel.card.main.f1, FIGHTERS) && findFighterByName(sel.card.main.f2, FIGHTERS) && (
+                      <button className="cal-compare-btn" style={{marginTop:8}} onClick={() => goCompare(sel.card.main.f1, sel.card.main.f2)} aria-label={`Compare ${sel.card.main.f1} vs ${sel.card.main.f2}`}>COMPARE</button>
+                    )}
+                  </div>
                   <div className="cmb-side right">
                     <div className="cmb-fighter-name"><FighterName name={sel.card.main.f2} onGoFighter={onGoFighter}/></div>
                     <div className="cmb-weight-tag">{sel.card.main.weight.toUpperCase()}</div>
@@ -118,6 +140,9 @@ export const CalendarScreen = ({onBack, onGoFighter}) => {
                   <span className="cal-bout-vs">vs</span>
                   <span className="cal-bout-name"><FighterName name={sel.card.comain.f2} onGoFighter={onGoFighter}/></span>
                   <span className="cal-bout-weight">{sel.card.comain.weight.toUpperCase()}</span>
+                  {findFighterByName(sel.card.comain.f1, FIGHTERS) && findFighterByName(sel.card.comain.f2, FIGHTERS) && (
+                    <button className="cal-compare-btn" onClick={() => goCompare(sel.card.comain.f1, sel.card.comain.f2)} aria-label={`Compare ${sel.card.comain.f1} vs ${sel.card.comain.f2}`}>COMPARE</button>
+                  )}
                 </div>
                 {sel.card.comain.title && <div className="cal-title-banner cal-title-banner--comain">TITLE FIGHT — {sel.card.comain.weight.toUpperCase()} CHAMPIONSHIP</div>}
 
@@ -129,6 +154,9 @@ export const CalendarScreen = ({onBack, onGoFighter}) => {
                       <span className="cal-bout-vs">vs</span>
                       <span className="cal-bout-name"><FighterName name={b.f2} onGoFighter={onGoFighter}/></span>
                       <span className="cal-bout-weight">{b.weight.toUpperCase()}</span>
+                      {findFighterByName(b.f1, FIGHTERS) && findFighterByName(b.f2, FIGHTERS) && (
+                        <button className="cal-compare-btn" onClick={() => goCompare(b.f1, b.f2)} aria-label={`Compare ${b.f1} vs ${b.f2}`}>COMPARE</button>
+                      )}
                     </div>
                   ))}
                 </>}
@@ -141,6 +169,9 @@ export const CalendarScreen = ({onBack, onGoFighter}) => {
                       <span className="cal-bout-vs">vs</span>
                       <span className="cal-bout-name"><FighterName name={b.f2} onGoFighter={onGoFighter}/></span>
                       <span className="cal-bout-weight">{b.weight.toUpperCase()}</span>
+                      {findFighterByName(b.f1, FIGHTERS) && findFighterByName(b.f2, FIGHTERS) && (
+                        <button className="cal-compare-btn" onClick={() => goCompare(b.f1, b.f2)} aria-label={`Compare ${b.f1} vs ${b.f2}`}>COMPARE</button>
+                      )}
                     </div>
                   ))}
                 </>}

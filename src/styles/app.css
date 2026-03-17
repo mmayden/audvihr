@@ -437,6 +437,65 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
    RESPONSIVE — viewports < 768 px
    CSS media queries only; no JS resize listeners.
    ============================================================ */
+/* ── PHASE 14 — QoL + Visual ──────────────────────────────────────────────── */
+
+/* Pill badges — archetype and modifier tags */
+.arch-badge { display: inline-flex; align-items: center; font-size: 9px; font-family: var(--mono); font-weight: 700; letter-spacing: .07em; padding: 3px 8px; border-radius: 3px; border: 1px solid currentColor; white-space: nowrap; }
+.mod-badge  { display: inline-flex; align-items: center; font-size: 8px; font-family: var(--mono); font-weight: 600; letter-spacing: .05em; padding: 2px 6px; border-radius: 3px; border: 1px solid currentColor; white-space: nowrap; opacity: .85; }
+
+/* Percentile badge — shown next to key stats in TabOverview */
+.percentile-badge { display: inline-block; font-size: 8px; font-family: var(--mono); font-weight: 700; letter-spacing: .06em; padding: 1px 5px; border-radius: 2px; margin-left: 6px; vertical-align: middle; }
+.percentile-badge--elite    { color: var(--green);    background: rgba(76,175,130,.12);  border: 1px solid rgba(76,175,130,.3);  }
+.percentile-badge--top35    { color: var(--accent);   background: rgba(212,168,67,.1);   border: 1px solid rgba(212,168,67,.25); }
+
+/* Stat tier label — muted secondary text below compare cell values */
+.stat-tier-label { display: block; font-size: 8px; font-family: var(--mono); letter-spacing: .05em; color: var(--text-dim); margin-top: 2px; }
+
+/* Compare category edge stripe — 3px left border signals who has the edge */
+.cat-row--f1-edge td { border-left: 3px solid var(--accent); padding-left: 9px; }
+.cat-row--f2-edge td { border-left: 3px solid var(--blue);   padding-left: 9px; }
+
+/* VS button in FighterScreen hero card */
+.vs-btn { font-size: 10px; font-family: var(--mono); font-weight: 700; letter-spacing: .08em; padding: 4px 12px; background: transparent; border: 1px solid var(--border2); color: var(--text-dim); cursor: pointer; transition: all .15s; margin-top: 6px; }
+.vs-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Compare button in CalendarScreen bout rows */
+.cal-compare-btn { font-size: 9px; font-family: var(--mono); font-weight: 600; letter-spacing: .06em; padding: 2px 8px; background: transparent; border: 1px solid var(--border2); color: var(--text-dim); cursor: pointer; transition: all .12s; flex-shrink: 0; }
+.cal-compare-btn:hover { border-color: var(--blue); color: var(--blue); }
+.cal-bout { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* FighterCard component */
+.fighter-card { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--surface); border: 1px solid var(--border); cursor: pointer; transition: border-color .12s, background .12s; }
+.fighter-card:hover  { background: var(--surface2); border-color: var(--border2); }
+.fighter-card.selected { border-color: var(--accent); background: var(--surface2); }
+.fighter-card-portrait { width: 36px; height: 36px; border-radius: 2px; overflow: hidden; flex-shrink: 0; background: var(--surface2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; }
+.fighter-card-portrait img { width: 100%; height: 100%; object-fit: cover; }
+.fighter-card-initials { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--text-dim); }
+.fighter-card-body { flex: 1; min-width: 0; }
+.fighter-card-name { font-size: 13px; font-weight: 600; color: var(--text-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fighter-card-record { font-size: 10px; font-family: var(--mono); color: var(--text-dim); margin-top: 1px; }
+.fighter-card-badges { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
+
+/* FighterSearch component */
+.fighter-search { position: relative; flex: 1; }
+.fighter-search-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-family: var(--mono); font-size: 12px; padding: 7px 10px; outline: none; cursor: text; transition: border-color .12s; }
+.fighter-search-input:focus { border-color: var(--border2); }
+.fighter-search-input::placeholder { color: var(--text-dim); }
+.fighter-search-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: var(--surface); border: 1px solid var(--border2); border-top: none; z-index: 200; max-height: 240px; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+.fighter-search-option { display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; cursor: pointer; transition: background .1s; border-bottom: 1px solid var(--border); }
+.fighter-search-option:last-child { border-bottom: none; }
+.fighter-search-option:hover,
+.fighter-search-option.highlighted { background: var(--surface2); }
+.fighter-search-option.selected { background: rgba(212,168,67,.08); }
+.fighter-search-name { font-size: 12px; font-family: var(--mono); color: var(--text-bright); }
+.fighter-search-meta { font-size: 10px; font-family: var(--mono); color: var(--text-dim); margin-left: 8px; white-space: nowrap; }
+
+/* Updated compare-selector to use FighterSearch */
+.compare-selector-search { display: flex; align-items: stretch; gap: 12px; flex: 1; }
+
+/* TabOverview stat-cell with percentile badge */
+.stat-cell-val-row { display: flex; align-items: baseline; gap: 0; }
+
 @media (max-width: 767px) {
   /* Bottom nav bar */
   .bottom-nav {
