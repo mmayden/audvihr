@@ -21,7 +21,7 @@ export const TabStriking = ({ fighter }) => {
     <div className="sec-label">KNOCKDOWNS</div>
     <div className="stat-grid stat-grid--two-col">
       <div className="stat-cell"><div className="stat-cell-label">KD LANDED</div><div className="stat-cell-val stat-cell-val--win">{s.kd_landed}</div></div>
-      <div className="stat-cell"><div className="stat-cell-label">KD SUFFERED</div><div className="stat-cell-val" style={{color:s.kd_suffered>0?'var(--red)':'var(--green)'}}>{s.kd_suffered}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">KD SUFFERED</div><div className={`stat-cell-val ${s.kd_suffered>0?'val--loss':'val--clean'}`}>{s.kd_suffered}</div></div>
     </div>
     <div className="sec-label">STRIKE TARGET BREAKDOWN</div>
     <div className="stat-row-list">

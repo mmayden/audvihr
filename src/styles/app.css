@@ -394,6 +394,14 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
 .market-grid--single { grid-template-columns: 1fr; }
 .mc-implied--mt { margin-top: 6px; }
 .line-movement-bar { padding: 8px 12px; background: var(--surface); margin-bottom: 16px; font-family: var(--mono); font-size: 11px; }
+.line-movement-bar--up   { color: var(--green); }
+.line-movement-bar--down { color: var(--red); }
+.mc-public-warning { color: var(--orange); }
+.mc-public-ok      { color: var(--green); }
+/* Stat value colour modifiers */
+.val--loss     { color: var(--red); }
+.val--dec-loss { color: var(--orange); }
+.val--clean    { color: var(--green); }
 
 /* PRICE CHART */
 .price-chart-wrapper { width: 100%; }

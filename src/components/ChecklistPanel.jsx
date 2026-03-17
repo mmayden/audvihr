@@ -27,7 +27,7 @@ export const ChecklistPanel = ({storageKey}) => {
           return <Fragment key={cat}>
             <div className="cl-cat-label" style={{color:items[0].cc}}>{cat}</div>
             {items.map(item=>(
-              <div className="cl-item" key={item.id} onClick={()=>toggle(item.id)}>
+              <div className="cl-item" key={item.id} onClick={()=>toggle(item.id)} role="checkbox" aria-checked={!!checked[item.id]} aria-label={item.text}>
                 <div className={`cl-box ${checked[item.id]?'checked':''}`}>{checked[item.id]?'✓':''}</div>
                 <div>
                   <div className={`cl-text ${checked[item.id]?'checked':''}`}>{item.text}</div>

@@ -23,9 +23,9 @@ export const TabPhysical = ({ fighter }) => {
     </div>
     <div className="sec-label">LOSS METHOD BREAKDOWN</div>
     <div className="stat-grid stat-grid--three-col">
-      <div className="stat-cell"><div className="stat-cell-label">LOSSES BY KO</div><div className="stat-cell-val" style={{color:fighter.losses_by.ko>0?'var(--red)':'var(--green)'}}>{fighter.losses_by.ko}</div></div>
-      <div className="stat-cell"><div className="stat-cell-label">LOSSES BY SUB</div><div className="stat-cell-val" style={{color:fighter.losses_by.sub>0?'var(--red)':'var(--green)'}}>{fighter.losses_by.sub}</div></div>
-      <div className="stat-cell"><div className="stat-cell-label">LOSSES BY DEC</div><div className="stat-cell-val" style={{color:fighter.losses_by.dec>0?'var(--orange)':'var(--green)'}}>{fighter.losses_by.dec}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">LOSSES BY KO</div><div className={`stat-cell-val ${fighter.losses_by.ko>0?'val--loss':'val--clean'}`}>{fighter.losses_by.ko}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">LOSSES BY SUB</div><div className={`stat-cell-val ${fighter.losses_by.sub>0?'val--loss':'val--clean'}`}>{fighter.losses_by.sub}</div></div>
+      <div className="stat-cell"><div className="stat-cell-label">LOSSES BY DEC</div><div className={`stat-cell-val ${fighter.losses_by.dec>0?'val--dec-loss':'val--clean'}`}>{fighter.losses_by.dec}</div></div>
     </div>
   </div>;
 };

@@ -60,7 +60,7 @@ export const TabMarket = ({ fighter }) => {
       kalshiFetchHistory(kalshiMatch.kalshi.ticker)
         .then(setKalshiHistory);
     }
-  }, [hasLive]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [hasLive, chartLoaded, polyMatch, kalshiMatch, polyFetchHistory, kalshiFetchHistory]);
 
   // Current live prices from matched markets.
   const polyPct = polyMatch?.polymarket
@@ -155,7 +155,7 @@ export const TabMarket = ({ fighter }) => {
         ))}
       </div>
       {mv && (
-        <div className="line-movement-bar" style={{ color: mv.dir === 'up' ? 'var(--green)' : 'var(--red)' }}>
+        <div className={`line-movement-bar line-movement-bar--${mv.dir}`}>
           {mv.dir === 'up' ? '▲' : '▼'} LINE MOVEMENT: {mv.label}
         </div>
       )}
@@ -189,8 +189,8 @@ export const TabMarket = ({ fighter }) => {
           {data.public_pct && data.ml_current && (
             <div className="mc-implied mc-implied--mt">
               {!isNaN(parseInt(data.public_pct)) && parseInt(data.public_pct) > 70
-                ? <span style={{ color: 'var(--orange)' }}>⚠ Heavy public action — potential price inflation</span>
-                : <span style={{ color: 'var(--green)' }}>Public distribution within normal range</span>}
+                ? <span className="mc-public-warning">⚠ Heavy public action — potential price inflation</span>
+                : <span className="mc-public-ok">Public distribution within normal range</span>}
             </div>
           )}
         </div>
