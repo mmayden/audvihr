@@ -21,41 +21,70 @@ This document is the primary reference for Claude and the developer during long-
 
 ## Vision
 
-> **Audwihr is the research OS for serious MMA bettors.** It replaces 5 browser tabs with one interface: deep fighter analytics, live multi-source market intelligence (sportsbook + Polymarket + Kalshi), a structured pre-bet discipline framework, and long-term CLV-based edge tracking.
+> **Audwihr is a personal MMA research tool.** It consolidates deep fighter analytics, live multi-source market intelligence (sportsbook + Polymarket + Kalshi), a structured pre-fight discipline framework, and long-term CLV tracking into one fast, shareable interface — useful whether you're betting, picking, or just watching.
 
 ### What It Replaces
 
-| Tab Bettors Currently Open | What Audwihr Provides |
+| Tab People Currently Open | What Audwihr Provides |
 |---|---|
 | UFCStats (raw stats, unusable UI) | Fighter profiles with compare screen and archetype/editorial layer |
-| BestFightOdds (odds only, no alerts, no history) | Live sportsbook lines + opening line preservation + alert foundation |
+| BestFightOdds (odds only, no alerts, no history) | Live sportsbook lines + opening line preservation + line movement alerts |
 | Tapology (public picks, ads, shallow stats) | Public % fade signal, fight calendar, fighter deep-links |
 | Polymarket / Kalshi (prices with zero fighter context) | Unified 3-market view with arb detection + probability sparklines + CLV |
 | Personal spreadsheet (manual CLV log) | Automated CLV snapshots, history fetch, log with 500-entry cap |
-| Mental pre-bet checklist | 17-item structured trade checklist, per-matchup notes, persistent per-pairing |
+| Mental pre-fight checklist | 17-item structured trade checklist, per-matchup notes, persistent per-pairing |
 
-**The founding thesis — validated by community research:** A typical serious MMA bettor opens 5+ browser tabs for every fight they research. Audwihr's entire existence is justified by collapsing that into one interface.
+**The founding thesis:** A typical MMA fan or bettor opens 5+ browser tabs for every fight they research. Audwihr collapses that into one interface.
+
+---
+
+## User Personas
+
+Audwihr serves four distinct users. Every feature decision should be evaluated against at least one of them.
+
+### 1. The Sharp Bettor (original primary persona)
+Thinks in edges, CLV, RLM, and archetype matchups. Runs a 17-item pre-bet process, tracks closing line value, monitors Polymarket vs sportsbook divergence. Wants alerts when a line moves. Uses every screen. The tool was built for this person — they remain the north star.
+
+**Core needs:** Live odds, CLV tracking, line movement alerts, checklist discipline, arb detection, exportable research.
+
+### 2. The Recreational Bettor
+Bets 3–5 fights per card on DraftKings or FanDuel. Has opinions but doesn't run a formal process. Wants to quickly gut-check their instinct — "is my favorite actually the better fighter or am I fading public?" Doesn't know what CLV is. Currently finds the app too jargon-heavy.
+
+**Core needs:** Quick fighter comparison, clear stat context ("is this number good?"), archetype matchup at a glance, checklist as a friction-adder before betting, not as a research system.
+
+### 3. The DFS / Pick'em Player
+Enters UFC contests on DraftKings or ESPN. Picks 5 fights per card. Cares about finish rate, method props, and styles matchup. Doesn't care about opening lines or Kalshi. Wants to quickly compare two fighters and get a sense of who wins and how.
+
+**Core needs:** Fast fighter lookup, finish rate and method breakdown, styles/archetype comparison, fight calendar for upcoming card, quick compare from calendar.
+
+### 4. The MMA Content Creator / Casual Fan
+Does fight breakdowns for a podcast or Discord. Wants fast access to stats without opening 4 browser tabs. The shareable `/compare/:f1id/:f2id` link is the killer feature — paste a comparison into show notes. Cares about screenshots looking good. Doesn't use the market features at all.
+
+**Core needs:** Shareable compare link, clean visual output, archetype/modifier badges that read well in screenshots, fast fighter search.
+
+---
 
 ### North Star Feature Set
 
 1. ✅ **Full roster** — top 8–10 fighters per weight class, all 8 active divisions. 69 fighters live as of v0.9.0.
-2. **Line movement alerts** — push notifications when a line moves X points. The #1 most-requested feature in the MMA betting community. BestFightOdds has never built it.
-3. ✅ **Opening line preservation** — `opening_lines` localStorage key (never evicted) stores `{ f1ml, f2ml, ts }` per fightKey. Delivered in v0.9.0.
-4. ✅ **Tapology public % integration** — build-time scrape; `tapology_pct` embedded per fight in `events.js`; PUBLIC row + FADE badge (≥15pt divergence) in MarketsScreen. Delivered in v0.9.0.
-5. ✅ **Mobile layout** — responsive bottom nav + sidebar drawer overlay on viewports < 768 px; dark/light theme toggle; portrait initials fallback. Delivered in v0.10.0.
-6. ✅ **Live news integration** — `useNews` hook fetches MMA Fighting + MMA Junkie RSS; DOMParser text-only sanitization; fighter name matching; LIVE/MOCK badges in NewsScreen; RECENT NEWS in TabOverview. Delivered in v0.12.0. (CORS degrades to mock in production — CORS proxy is backlog item.)
-7. ✅ **Shareable research** — React Router URL routing; shareable `/compare/:f1id/:f2id` links; markdown export (checklist + edge signals); CLV log CSV export. Delivered in v0.13.0.
+2. ✅ **Line movement alerts** — push notifications when a line moves X points. Delivered in v0.11.0.
+3. ✅ **Opening line preservation** — `opening_lines` localStorage key (never evicted). Delivered in v0.9.0.
+4. ✅ **Tapology public % integration** — build-time scrape; PUBLIC row + FADE badge (≥15pt divergence). Delivered in v0.9.0.
+5. ✅ **Mobile layout** — responsive bottom nav + sidebar drawer; dark/light/system theme. Delivered in v0.10.0.
+6. ✅ **Live news integration** — `useNews` hook; DOMParser text-only sanitization; LIVE/MOCK badges. Delivered in v0.12.0. (CORS proxy is backlog.)
+7. ✅ **Shareable research** — React Router URL routing; `/compare/:f1id/:f2id` links; MD + CSV export. Delivered in v0.13.0.
+8. **QoL + visual overhaul** — type-to-search, percentile badges, pill badges, fighter cards, pick log. Phase 14.
 
 ### What This Is Not
 
 - **Not a pick service.** Every analysis output is explicitly labeled "RESEARCH PROMPT — NOT A PICK."
 - **Not a sportsbook or betting interface.** No bet placement, no real-money transactions.
-- **Not an AI picks tool.** No black-box models. All edge signals are auditable rules — archetype lookup tables, threshold comparisons, market spread calculations. A sharp needs to understand *why* a signal fired.
+- **Not an AI picks tool.** No black-box models. All edge signals are auditable rules — archetype lookup tables, threshold comparisons, market spread calculations.
 - **Not multi-user (yet).** Kalshi API key in browser bundle is an accepted constraint for personal/self-hosted use. Any path to multi-user requires server-side API proxying first.
 
 ---
 
-## Current File Structure (Vite + React — v0.13.0)
+## Current File Structure (Vite + React — v0.13.0 / Phase 14 in progress)
 
 The single-file prototype (`mma-trader.html`) was retired at Phase 3a. The project is now a Vite + React app with the following modular layout:
 
@@ -97,10 +126,21 @@ src/
 │   ├── clv.js                appendCLVEntries(), readCLVLog(), appendOpeningLine(), readOpeningLines(), CLV_LOG_KEY, CLV_OPENING_KEY, CLV_MAX_ENTRIES — CLV log + opening line localStorage helpers (Phase 7–9)
 │   ├── alerts.js             readAlertsEnabled(), writeAlertsEnabled(), readAlertRules(), writeAlertRules(), readPrevLines(), writePrevLines(), detectMovements() — alert rule pure functions; owns alerts_prev_lines sessionStorage key (Phase 11)
 │   ├── newsParser.js         stripHtml(), parseRssFeed(), classifyCategory(), classifyRelevance(), matchFighterName(), rssItemToNewsItem() — RSS sanitization + normalization; DOMParser textContent only, no DOM injection (Phase 12)
-│   └── export.js             sanitizeCsvCell(), checklistToMarkdown(), clvLogToCsv(), downloadBlob() — client-side Blob export; CSV formula injection guard (Phase 13)
+│   ├── export.js             sanitizeCsvCell(), checklistToMarkdown(), clvLogToCsv(), downloadBlob() — client-side Blob export; CSV formula injection guard (Phase 13)
+│   ├── fighters.js           findFighterByName(name, fighters) — pure name → ID lookup for calendar → compare navigation (Phase 14)
+│   ├── percentiles.js        computePercentiles(fighter, allFighters) — per-stat percentile rank vs full roster (Phase 14)
+│   └── pickLog.js            readPickLog(), appendPick(), updatePickOutcome() — pick log helpers; owns pick_log localStorage key (Phase 14)
+├── constants/
+│   ├── archetypes.js         ARCH_COLORS (8 archetypes), MOD_COLORS (10 modifiers) — CSS var refs
+│   ├── checklist.js          CHECKLIST array (17 items), TABS array (6 tab names)
+│   ├── compareRows.js        15 stat-row definitions — (f1, f2) → row functions for CompareScreen
+│   ├── qualifiers.js         CHIN_COLOR, CARDIO_COLOR, CUT_COLOR, ORG_COLOR, RELEVANCE_COLOR, CATEGORY_COLOR — CSS var refs
+│   └── statTiers.js          STAT_TIERS — per-stat thresholds for ELITE/ABOVE AVG/AVG/BELOW AVG tier labels (Phase 14)
 ├── components/
 │   ├── StatBar.jsx           Horizontal proportional fill bar
 │   ├── FighterName.jsx       Name → profile link resolver (calendar + news)
+│   ├── FighterCard.jsx       Compact card: portrait/initials + name + record + archetype + mod badges (Phase 14)
+│   ├── FighterSearch.jsx     Type-to-search input with filtered dropdown; replaces scroll selectors (Phase 14)
 │   ├── ChecklistPanel.jsx    17-item trade checklist with progress bar
 │   ├── ErrorBoundary.jsx     Class component error boundary wrapping all screens
 │   └── PriceChart.jsx        SVG sparkline for prediction-market probability-over-time (Phase 7)
@@ -154,7 +194,21 @@ Test files are co-located with source: `*.test.{js,jsx}` next to the file under 
 - Rule: mono for all numbers, stat labels, badges, tags
 
 ### Visual Direction
-Clean, functional, dark. Soft on the eyes. No animations beyond fade-in on tab switch. No particle effects, no animated backgrounds. The aesthetic is dense-data readability first — think military readout, not gaming UI. Reskin-ready: all colors are CSS variables, can theme in one pass later.
+
+**Guiding principle:** dense-data readability first. Think scouting report, not gaming UI. Clean, functional, dark. Soft on the eyes. No particle effects, no animated backgrounds. Animations only where they reduce cognitive load (fade-in on tab switch).
+
+**Phase 14 visual targets:**
+
+- **Pill badges for archetype + modifiers.** `WRESTLER`, `SOUTHPAW`, `CARDIO CONCERN` displayed as pill-shaped badges (rounded, monospace, uppercase). Color still from `ARCH_COLORS` / `MOD_COLORS` lookup via inline style (runtime data-keyed lookup — inline style is correct per CLAUDE.md). CSS classes `.arch-badge` and `.mod-badge` own the shape and spacing.
+- **Fighter cards over text rows.** Roster and compare selectors show compact cards: portrait/initials + name + record + archetype badge. The `FighterCard` component owns this shape.
+- **Percentile context on stats.** Key stats in TabOverview show a `TOP X%` badge computed against the 69-fighter roster. Tier thresholds in `src/constants/statTiers.js`.
+- **Compare screen hero header.** Two `FighterCard` components side by side with a `VS` + implied probability gap between them. Replaces the plain text fighter names at the top of the compare screen.
+- **Matchup edge stripe.** A 3px left-border stripe on compare row category groups signals who has the edge in that category (green/red/none) without requiring the user to scan every row.
+
+**Immovable rules:**
+- All colors from CSS variables — never hardcode hex values in JSX or CSS classes.
+- JetBrains Mono for all numbers, stat labels, badges, and codes.
+- Reskin-ready: all colors are CSS variables; a full theme can be swapped in one pass.
 
 ---
 
@@ -541,7 +595,7 @@ A simple client-side "edge score" per matchup — no ML, no backend. Weighted ru
 
 ---
 
-## Phase 9–13 Roadmap Outline
+## Phase 9–14 Roadmap Outline
 
 Ordered by value vs. effort. Full sprint tasks in TASKS.md.
 

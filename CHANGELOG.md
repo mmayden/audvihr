@@ -6,6 +6,15 @@ All notable changes to this project. Format: [version] — date — description.
 
 ## [Unreleased]
 
+### Phase 14 — QoL + Visual Overhaul (in planning)
+
+Navigation: `FighterSearch` component (type-to-search replacing scroll dropdowns), quick compare from fighter profile, one-click compare from calendar, recently viewed fighter strip.
+Data context: `computePercentiles` util + `TOP X%` badges in TabOverview, stat tier labels (ELITE/ABOVE AVG/AVG/BELOW AVG) in compare rows, color-coded matchup edge stripe on compare categories.
+Visual: archetype + modifier pill badges (`.arch-badge` / `.mod-badge`), `FighterCard` component, CompareScreen hero header with two cards + VS + implied probability gap, TabOverview card layout.
+Pick log: `src/utils/pickLog.js` (200-entry cap, localStorage `pick_log` key), pick UI in MarketsScreen, outcome tracking, W/L/P record display.
+
+---
+
 ### Code Quality & Modular Design Cleanup
 
 #### Fixed
