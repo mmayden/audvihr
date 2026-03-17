@@ -11,36 +11,33 @@
 ## Current Sprint
 
 **Branch:** `master`
-**Phase:** 13 — Sharing + Export
-**Status:** Not started.
+**Phase:** Post-13 Maintenance
+**Status:** Complete ✅
 
-### Phase 13 Active Tasks
+### Maintenance — Code Quality & Modular Design Cleanup
 
-- [ ] React Router integration (`react-router-dom`)
-  - Routes: `/` (menu), `/fighters/:id`, `/compare/:f1id/:f2id`, `/calendar`, `/markets`, `/news`
-  - URL params: fighter IDs only (numeric slugs) — no sensitive data, no localStorage state in URLs
-  - Preserve existing screen navigation; URL changes on screen transition
-  - `noindex` meta tag stays — shareable links are for personal use, not SEO
-  - **Security:** validate URL params as integers; reject non-numeric slugs before passing to FIGHTERS lookup
-- [ ] Shareable compare URL
-  - `/compare/12/7` → opens CompareScreen pre-loaded with those two fighters
-  - Copy-to-clipboard button in CompareScreen header (navigator.clipboard.writeText)
-  - **Security:** clipboard write is user-initiated only (button click); no auto-write on render
-- [ ] Export: checklist + notes as markdown
-  - Client-side markdown string from checklist state + notes + fighter names
-  - Download via `URL.createObjectURL(new Blob([md], { type: 'text/plain' }))` — no library
-  - Revoke object URL after download to avoid memory leak
-  - Output includes: fight date, fighters, checklist items (checked/unchecked), notes, edge signals
-  - **Security:** all values are text; no HTML generation; no external service receives data
-- [ ] Export: CLV log as CSV
-  - Client-side CSV string from `readCLVLog()` output
-  - Same Blob/createObjectURL download pattern; revoke after download
-  - **Security:** client-side only; CSV values must be sanitised against formula injection (prefix values starting with `=`, `+`, `-`, `@` with a single quote)
-- [ ] Tests + docs: URL routing smoke tests; export format tested; CHANGELOG updated; `npm audit` clean before merge
+- [x] Fix `TabMarket.jsx` useEffect dependency array — removed `eslint-disable-line react-hooks/exhaustive-deps`; explicit dep list (`hasLive`, `chartLoaded`, `polyMatch`, `kalshiMatch`, `polyFetchHistory`, `kalshiFetchHistory`). Safe because `if (!hasLive || chartLoaded) return` guard prevents re-execution.
+- [x] Replace inline ternary `style={{ color }}` blocks with CSS modifier classes across 3 tab files:
+  - `TabMarket.jsx`: `.line-movement-bar--up/down`, `.mc-public-warning`, `.mc-public-ok`
+  - `TabPhysical.jsx`: `.val--loss`, `.val--dec-loss`, `.val--clean` on loss method breakdown
+  - `TabStriking.jsx`: `.val--loss` / `.val--clean` on KD suffered stat
+- [x] `ChecklistPanel.jsx` — add `role="checkbox"`, `aria-checked`, `aria-label` to checklist item divs (accessibility compliance)
+- [x] `StatBar.jsx` — add explicit `max > 0` guard to prevent silent `Infinity` on zero-max input
+- [x] `app.css` — add 8 new semantic CSS modifier classes for all the above (CSS variables only, no hardcoded colors)
+- [x] All 333 tests passing; 0 lint errors
 
 ---
 
 ## ✅ Completed Sprints
+
+### ✅ Phase 13 — Sharing + Export (v0.13.0) — 2026-03-17
+
+- [x] React Router v7: BrowserRouter in App.jsx; routes for all 6 screens; FighterScreenRoute + CompareScreenRoute wrappers validate URL params as positive integers
+- [x] Shareable compare URL `/compare/:f1id/:f2id`; COPY LINK button in CompareScreen topbar (user-initiated clipboard write only)
+- [x] `src/utils/export.js` — `sanitizeCsvCell`, `checklistToMarkdown`, `clvLogToCsv`, `downloadBlob`; Blob/object-URL revoke pattern
+- [x] CompareScreen ↓ MD export button; MarketsScreen CLV panel ↓ CSV export button
+- [x] SPA fallback: `netlify.toml` redirects, `vercel.json` rewrites, `vite.config.js` historyApiFallback
+- [x] 333 tests all passing (up from 308); 0 lint errors; `Blob` + `URL` added to ESLint globals
 
 ### ✅ Phase 12 — Live News Layer (v0.12.0) — 2026-03-16
 
@@ -215,7 +212,7 @@
 
 ---
 
-### Phase 13 — Sharing + Export
+### ✅ Phase 13 — Sharing + Export (v0.13.0) — merged to master
 
 **Theme:** Make research shareable and exportable. The tool becomes more useful when a breakdown can be sent to someone or archived.
 

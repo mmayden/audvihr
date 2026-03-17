@@ -10,6 +10,7 @@ import { mlToImplied } from '../utils/odds';
 import { fightKey } from '../utils/normalizeOdds';
 import { daysUntil } from '../utils/date';
 import { readCLVLog, readOpeningLines } from '../utils/clv';
+import { clvLogToCsv, downloadBlob } from '../utils/export';
 import { PriceChart } from '../components/PriceChart';
 
 // Build a static fightKey → tapology_pct lookup from generated events data.
@@ -248,8 +249,18 @@ export const MarketsScreen = ({ onBack }) => {
       {/* CLV Log panel */}
       {showCLV && (
         <div className="markets-clv-panel">
-          <div className="sec-label sec-label--mb-8">
-            PERSONAL CLV LOG — {clvLog.length} SNAPSHOTS
+          <div className="sec-label sec-label--mb-8" style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+            <span>PERSONAL CLV LOG — {clvLog.length} SNAPSHOTS</span>
+            {clvLog.length > 0 && (
+              <button
+                className="topbar-back"
+                onClick={() => {
+                  const csv = clvLogToCsv(clvLog);
+                  const date = new Date().toISOString().slice(0, 10);
+                  downloadBlob(csv, `audwihr_clv_${date}.csv`, 'text/csv');
+                }}
+              >↓ CSV</button>
+            )}
           </div>
           {clvLog.length === 0 ? (
             <div className="mono-status-dim">

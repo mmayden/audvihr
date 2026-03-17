@@ -25,7 +25,7 @@ These are non-negotiable. Do not skip them to save time or complexity.
 - **Alert notifications use plain text only.** The Notification API body must be constructed with string concatenation of validated values only. No HTML template literals, no `innerHTML`, no `dangerouslySetInnerHTML`. Browsers do not render HTML in notification bodies — never attempt to inject markup.
 - **CSV export must guard against formula injection.** Any value exported as CSV that begins with `=`, `+`, `-`, or `@` must be prefixed with a single quote `'` to prevent spreadsheet formula execution.
 - **`noindex, nofollow` robots meta tag.** This is a personal trading tool — it must not be indexed by search engines. The tag is already present in `index.html`; do not remove it.
-- **URL params carry fighter IDs only.** When React Router is introduced (Phase 13), URL parameters must contain only numeric fighter IDs and screen slugs. No API keys, no localStorage state, no session tokens in URLs.
+- **URL params carry fighter IDs only.** React Router (Phase 13) is live. URL parameters must contain only numeric fighter IDs and screen slugs. Validated with `/^\d+$/` + `parseInt` in `FighterScreenRoute` / `CompareScreenRoute` in `App.jsx` before any FIGHTERS lookup. No API keys, no localStorage state, no session tokens in URLs.
 - **Dependency hygiene.** Run `npm audit` before every merge to `master`. Fix all critical/high severity issues before merging. Document any accepted moderate issues in PLANNING.md.
 
 ### Storage Key Ownership
@@ -56,6 +56,9 @@ Each storage key is owned by exactly one module. No other module reads or writes
 - **Hooks follow the Rules of Hooks.** No conditional hook calls. No hooks inside loops. Custom hooks must start with `use`.
 - **Side effects only in `useEffect`.** Never mutate state directly or trigger side effects in render bodies.
 - **Prefer `const` arrow functions for components.** `const MyComponent = ({ prop }) => { ... }`. Not `function MyComponent`. Exception: top-level utility functions may use `function` declarations.
+- **Never suppress `react-hooks/exhaustive-deps` with `eslint-disable`.** If a `useEffect` needs to run only once after a condition becomes true, use an early-return guard (`if (!ready || alreadyDone) return`) inside the effect and list all true dependencies in the array. Suppression hides real dependency bugs; a guard makes the once-only intent explicit and keeps ESLint enforceable.
+- **CSS modifier classes for boolean-toggled colors; inline style for data-keyed lookups.** If a CSS value is one of two (or a few) fixed design-system colors toggled by a boolean expression, use a BEM modifier class (e.g. `.line-movement-bar--up`). If the CSS value comes from a runtime lookup map keyed by data (`ARCH_COLORS[fighter.archetype]`, `CHIN_COLOR[fighter.chin]`), inline style is correct — the value cannot be encoded in a finite class list. Never hardcode hex values in either form; always reference CSS variables.
+- **Interactive non-semantic elements need ARIA attributes.** `<div>` and `<span>` elements that behave like controls (checkbox, button, tab) must have `role`, `aria-checked`/`aria-selected`/`aria-expanded` as appropriate, and `aria-label` when the visible text is insufficient. This applies to any clickable div added in the future.
 
 ### Documentation
 
@@ -98,7 +101,7 @@ public/
 │   └── assets/portraits/     Self-hosted fighter portrait images (*.jpg); no CDN, no CSP change
 src/
 ├── main.jsx                  Entry point — ReactDOM.createRoot + StrictMode; SW registration
-├── App.jsx                   Screen router — useState only, no business logic
+├── App.jsx                   URL router — BrowserRouter + Routes; FighterScreenRoute + CompareScreenRoute at module scope; bottom nav; theme toggle
 ├── styles/
 │   └── app.css               All global styles, CSS variables, component classes
 ├── constants/
@@ -130,7 +133,8 @@ src/
 │   ├── cache.js              readCache(), writeCache(), evictCache() — sessionStorage helpers
 │   ├── clv.js                appendCLVEntries(), readCLVLog(), appendOpeningLine(), readOpeningLines() — CLV + opening line localStorage helpers; owns clv_log + opening_lines keys
 │   ├── alerts.js             readAlertsEnabled/writeAlertsEnabled, readAlertRules/writeAlertRules, readPrevLines/writePrevLines, detectMovements() — alert pure functions; owns alerts_prev_lines key
-│   └── newsParser.js         stripHtml(), parseRssFeed(), classifyCategory(), classifyRelevance(), matchFighterName(), rssItemToNewsItem() — RSS sanitization + normalization; text-only, no DOM injection
+│   ├── newsParser.js         stripHtml(), parseRssFeed(), classifyCategory(), classifyRelevance(), matchFighterName(), rssItemToNewsItem() — RSS sanitization + normalization; text-only, no DOM injection
+│   └── export.js             sanitizeCsvCell(), checklistToMarkdown(), clvLogToCsv(), downloadBlob() — client-side Blob export; CSV formula injection guard
 ├── components/
 │   ├── StatBar.jsx           Horizontal proportional fill bar
 │   ├── FighterName.jsx       Name → profile link resolver
@@ -147,9 +151,9 @@ src/
 ├── screens/
 │   ├── MenuScreen.jsx        Main navigation (5 ACTIVE items) + ⚙ ALERTS settings panel
 │   ├── FighterScreen.jsx     Sidebar + hero card + 6-tab profile; calls useNews(); passes fighterNews to TabOverview
-│   ├── CompareScreen.jsx     Two-fighter selector + stat table + checklist + edge signal panel
+│   ├── CompareScreen.jsx     Two-fighter selector + stat table + checklist + edge signal panel + COPY LINK + ↓ MD export
 │   ├── CalendarScreen.jsx    Event sidebar + card detail + fighter deep-links
-│   ├── MarketsScreen.jsx     Unified live market dashboard (sportsbook + Polymarket + Kalshi + opening line + Tapology %) + alert bell per fight
+│   ├── MarketsScreen.jsx     Unified live market dashboard (sportsbook + Polymarket + Kalshi + opening line + Tapology %) + alert bell per fight + CLV ↓ CSV export
 │   └── NewsScreen.jsx        Fighter news feed with filters; LIVE/MOCK source badge; per-item LIVE/MOCK badge
 └── test/
     └── setup.js              Vitest setup — jest-dom + in-memory localStorage mock
@@ -163,7 +167,7 @@ src/
 
 ## Key Constraints
 
-- **Vite + React, web-deployed.** The single-file prototype (`mma-trader.html`) is retired. All work goes into the Vite project. `babel-standalone` is gone permanently.
+- **Vite + React + React Router, web-deployed.** The single-file prototype (`mma-trader.html`) is retired. All work goes into the Vite project. `babel-standalone` is gone permanently. React Router v7 (`BrowserRouter`) is live in `App.jsx`; SPA fallback configured in `netlify.toml` + `vercel.json` + `vite.config.js`.
 - **Fighter and event data is live (build-time scraped).** `fighters.js` and `events.js` are generated by `scripts/fetch-data.js` at `npm run build`. Do not hand-edit them. `markets.js` is static mock. `news.js` is the static fallback seed for `useNews` — do not hand-edit it either (it's loaded when RSS sources are unavailable).
 - **Three live market hooks (Phase 7+).** `useOdds`, `usePolymarket`, and `useKalshi` make runtime API calls. All three degrade silently when their key is absent or the API is unreachable. `VITE_ODDS_API_KEY` (The Odds API) and `VITE_KALSHI_API_KEY` (Kalshi) go in `.env`. Polymarket is unauthenticated. Do not move API calls into `useEffect`-free code paths.
 - **Live news hook (Phase 12+).** `useNews` fetches MMA Fighting + MMA Junkie RSS, parses via `newsParser.js`, caches 30 min in sessionStorage. Degrades silently to `news.js` mock when CORS blocks. All feed content is text-only — no HTML reaches the DOM.
@@ -176,7 +180,7 @@ src/
 - **Alert storage keys owned exclusively by `alerts.js`.** `alerts_enabled` and `alert_rules` (localStorage) and `alerts_prev_lines` (sessionStorage) may only be read/written by `src/utils/alerts.js` and `src/hooks/useAlerts.js`. No other module touches these keys.
 - **Service Worker is minimal and static.** `public/sw.js` contains only install/activate handlers. It makes no fetch calls. Do not add caching logic or background sync to it without a deliberate architecture decision. SW registration lives in `main.jsx` only.
 - **`worker-src 'self'` in CSP.** The SW is registered from the same origin. Both `netlify.toml` and `vercel.json` include `worker-src 'self'` in the Content-Security-Policy header. Do not remove it.
-- **Current test count: 308 passing.** Do not merge changes that reduce this number without a documented reason.
+- **Current test count: 333 passing.** Do not merge changes that reduce this number without a documented reason.
 
 ---
 

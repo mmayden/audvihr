@@ -6,6 +6,49 @@ All notable changes to this project. Format: [version] — date — description.
 
 ## [Unreleased]
 
+### Code Quality & Modular Design Cleanup
+
+#### Fixed
+- `TabMarket.jsx` — removed `eslint-disable-line react-hooks/exhaustive-deps` on the lazy-history `useEffect`. Explicit dependency array now lists all true dependencies (`hasLive`, `chartLoaded`, `polyMatch`, `kalshiMatch`, `polyFetchHistory`, `kalshiFetchHistory`). The existing `if (!hasLive || chartLoaded) return` guard makes the expanded deps safe — subsequent fires bail immediately once history is loaded.
+- `TabMarket.jsx` — replaced two inline ternary `style={{ color: ... }}` blocks with named CSS modifier classes: `.line-movement-bar--up` / `.line-movement-bar--down` (line movement direction arrow) and `.mc-public-warning` / `.mc-public-ok` (public bet % distribution signal).
+- `TabPhysical.jsx` — replaced three inline ternary `style={{ color: ... }}` blocks in the loss method breakdown with `.val--loss`, `.val--dec-loss`, `.val--clean` modifier classes.
+- `TabStriking.jsx` — replaced inline ternary `style={{ color: ... }}` on KD suffered stat with `.val--loss` / `.val--clean` modifier classes.
+- `ChecklistPanel.jsx` — added `role="checkbox"`, `aria-checked={!!checked[item.id]}`, and `aria-label={item.text}` to each checklist item `<div>` for screen reader and keyboard-navigation accessibility compliance.
+- `StatBar.jsx` — added explicit `max > 0` guard: `const pct = max > 0 ? Math.min(100, Math.round((val / max) * 100)) : 0`. Prevents `Infinity` from propagating silently when `max` is `0`.
+
+#### Added
+- `app.css` — 8 new semantic CSS modifier classes in the MARKET section: `.line-movement-bar--up`, `.line-movement-bar--down`, `.mc-public-warning`, `.mc-public-ok`, `.val--loss`, `.val--dec-loss`, `.val--clean`. All reference CSS variables only — no hardcoded colors.
+
+#### Testing
+- 333 tests, all passing. 0 lint errors.
+
+---
+
+## [0.13.0] — 2026-03-17
+
+### Phase 13 — Sharing + Export
+
+#### Added
+- `react-router-dom` v7 dependency. `BrowserRouter` lives in `App.jsx`; all screens are now URL-addressable.
+- Routes: `/` (MenuScreen), `/fighters` (FighterScreen), `/fighters/:id` (fighter by numeric ID), `/compare` (CompareScreen), `/compare/:f1id/:f2id` (pre-loaded matchup), `/calendar`, `/markets`, `/news`.
+- `FighterScreenRoute` and `CompareScreenRoute` — module-scope route wrappers in `App.jsx` that validate URL params as positive integers before looking up fighters in `FIGHTERS`. Non-numeric slugs are rejected; screen handles null gracefully.
+- Shareable compare URL: `/compare/12/7` opens CompareScreen with both fighters pre-selected. **COPY LINK** button in CompareScreen topbar writes `window.location.origin + /compare/:f1id/:f2id` to clipboard (user-initiated only). Button label changes to COPIED! for 2 s.
+- `src/utils/export.js` — `sanitizeCsvCell(val)` (formula injection guard), `checklistToMarkdown(f1, f2, checked, checklistItems, signals, notes)` (Markdown string), `clvLogToCsv(log)` (CSV string from CLV log), `downloadBlob(content, filename, mimeType)` (Blob download; URL revoked immediately after click).
+- CompareScreen **↓ MD** button: downloads checklist state + edge signals as `audwihr_<slug>.md`. Only shown when both fighters are selected.
+- MarketsScreen CLV panel **↓ CSV** button: downloads full CLV log as `audwihr_clv_<date>.csv`. Only shown when log is non-empty.
+- SPA fallback: `netlify.toml` `[[redirects]]` 200 rewrite; `vercel.json` `"rewrites"` rule; `vite.config.js` `server.historyApiFallback: true`.
+- `eslint.config.js`: added `Blob` and `URL` to browser globals.
+
+#### Security
+- URL params validated as positive integers (`/^\d+$/` + `parseInt`) before any FIGHTERS lookup.
+- Clipboard write is user-initiated only (button click); no auto-write on render.
+- CSV cells sanitised against formula injection — `=`, `+`, `-`, `@` prefixed with `'`.
+- Blob object URL revoked synchronously after `.click()` to avoid memory leak.
+
+#### Testing
+- `src/utils/export.test.js` — 25 tests covering all branches of all 4 exported functions including formula injection vectors.
+- Total: 333 tests, all passing. 0 lint errors.
+
 ---
 
 ## [0.12.0] — 2026-03-16

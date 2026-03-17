@@ -1,9 +1,12 @@
-import { useState, useMemo, Fragment } from 'react';
+import { useState, useMemo, useCallback, Fragment } from 'react';
 import { FIGHTERS } from '../data/fighters';
 import { ARCH_COLORS } from '../constants/archetypes';
 import { COMPARE_ROW_DEFS } from '../constants/compareRows';
+import { CHECKLIST } from '../constants/checklist';
 import { ChecklistPanel } from '../components/ChecklistPanel';
 import { mlToImplied } from '../utils/odds';
+import { checklistToMarkdown, downloadBlob } from '../utils/export';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 
 // ── Edge signal helpers ──────────────────────────────────────────────────────
 
@@ -109,38 +112,87 @@ function computeEdgeSignals(f1, f2, rows) {
  * Allows selecting two fighters from dropdowns, renders a stat comparison
  * table with win/lose highlights, an edge-signal research panel, and the
  * trade checklist.
- * @param {function} onBack - callback invoked when the back button is clicked
+ *
+ * When opened via a shareable URL (/compare/:f1id/:f2id), App passes
+ * initialF1Id and initialF2Id so the fighters are pre-selected.
+ *
+ * @param {function} onBack       - callback invoked when the back button is clicked
+ * @param {string}   [initialF1Id] - pre-select fighter 1 by ID string (from URL param)
+ * @param {string}   [initialF2Id] - pre-select fighter 2 by ID string (from URL param)
  */
-export const CompareScreen = ({onBack}) => {
-  const [fighter1Id, setFighter1Id] = useState('');
-  const [fighter2Id, setFighter2Id] = useState('');
+export const CompareScreen = ({ onBack, initialF1Id = '', initialF2Id = '' }) => {
+  const [fighter1Id, setFighter1Id] = useState(initialF1Id);
+  const [fighter2Id, setFighter2Id] = useState(initialF2Id);
+  const [copyLabel, setCopyLabel]   = useState('COPY LINK');
+
   const f1 = FIGHTERS.find(f => f.id === parseInt(fighter1Id));
   const f2 = FIGHTERS.find(f => f.id === parseInt(fighter2Id));
-  const clKey=f1&&f2?`${Math.min(f1.id,f2.id)}_${Math.max(f1.id,f2.id)}`:'default';
-  const rows    = useMemo(()=>f1&&f2?COMPARE_ROW_DEFS.map(def=>def(f1,f2)):[], [f1, f2]);
-  const signals = useMemo(()=>f1&&f2?computeEdgeSignals(f1,f2,rows):[], [f1, f2, rows]);
+
+  const clKey = f1 && f2
+    ? `cl_${Math.min(f1.id, f2.id)}_${Math.max(f1.id, f2.id)}`
+    : 'cl_default';
+
+  // Read checklist state for the current matchup (needed for MD export)
+  const initChecked = useMemo(
+    () => Object.fromEntries(CHECKLIST.map(i => [i.id, false])),
+    []
+  );
+  const [checked] = useLocalStorage(clKey, initChecked);
+
+  const rows    = useMemo(() => f1 && f2 ? COMPARE_ROW_DEFS.map(def => def(f1, f2)) : [], [f1, f2]);
+  const signals = useMemo(() => f1 && f2 ? computeEdgeSignals(f1, f2, rows) : [], [f1, f2, rows]);
+
+  /** Copy shareable /compare/:f1id/:f2id URL to clipboard (user-initiated only). */
+  const handleCopyLink = useCallback(() => {
+    if (!f1 || !f2) return;
+    const url = window.location.origin + '/compare/' + f1.id + '/' + f2.id;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopyLabel('COPIED!');
+      setTimeout(() => setCopyLabel('COPY LINK'), 2000);
+    }).catch(() => {
+      setCopyLabel('FAILED');
+      setTimeout(() => setCopyLabel('COPY LINK'), 2000);
+    });
+  }, [f1, f2]);
+
+  /** Download checklist + edge signals as a Markdown file. */
+  const handleExportMd = useCallback(() => {
+    if (!f1 || !f2) return;
+    const md = checklistToMarkdown(f1, f2, checked, CHECKLIST, signals);
+    const slug = `${f1.name.split(' ').pop()}_vs_${f2.name.split(' ').pop()}`.toLowerCase();
+    downloadBlob(md, `audwihr_${slug}.md`, 'text/plain');
+  }, [f1, f2, checked, signals]);
+
   return (
     <div className="app">
       <div className="topbar">
         <span className="topbar-logo">AUDWIHR</span><span className="topbar-sep">/</span>
         <span className="topbar-section">COMPARE</span>
-        <div className="topbar-right"><button className="topbar-back" onClick={onBack}>← MENU</button></div>
+        <div className="topbar-right">
+          {f1 && f2 && (
+            <>
+              <button className="topbar-back topbar-back--mr" onClick={handleExportMd}>↓ MD</button>
+              <button className="topbar-back topbar-back--mr" onClick={handleCopyLink}>{copyLabel}</button>
+            </>
+          )}
+          <button className="topbar-back" onClick={onBack}>← MENU</button>
+        </div>
       </div>
       <div className="compare-layout">
         <div className="compare-selector">
-          <select className="compare-select" value={fighter1Id} onChange={e=>setFighter1Id(e.target.value)}>
+          <select className="compare-select" value={fighter1Id} onChange={e => setFighter1Id(e.target.value)}>
             <option value="">— Fighter 1 —</option>
-            {FIGHTERS.map(f=><option key={f.id} value={f.id}>{f.name} ({f.record})</option>)}
+            {FIGHTERS.map(f => <option key={f.id} value={f.id}>{f.name} ({f.record})</option>)}
           </select>
           <span className="vs-text">VS</span>
-          <select className="compare-select" value={fighter2Id} onChange={e=>setFighter2Id(e.target.value)}>
+          <select className="compare-select" value={fighter2Id} onChange={e => setFighter2Id(e.target.value)}>
             <option value="">— Fighter 2 —</option>
-            {FIGHTERS.map(f=><option key={f.id} value={f.id}>{f.name} ({f.record})</option>)}
+            {FIGHTERS.map(f => <option key={f.id} value={f.id}>{f.name} ({f.record})</option>)}
           </select>
         </div>
         <div className="compare-body">
           <div className="compare-table-wrap">
-            {f1&&f2 ? (
+            {f1 && f2 ? (
               <div className="anim-fade">
                 <div className="compare-fighter-header">
                   <div className="compare-fighter-col">
@@ -157,15 +209,15 @@ export const CompareScreen = ({onBack}) => {
                 </div>
                 <table className="ctable">
                   <thead><tr><th className="ctable-col--wide" style={{textAlign:'left'}}>F1</th><th className="center ctable-col--center">STAT</th><th className="ctable-col--wide" style={{textAlign:'right'}}>F2</th></tr></thead>
-                  <tbody>{rows.map((r,i)=>{
-                    const sc=i===0||rows[i-1].cat!==r.cat;
-                    const tie=r.n1===r.n2, f1w=r.higherIsBetter?r.n1>r.n2:r.n1<r.n2;
+                  <tbody>{rows.map((r, i) => {
+                    const sc = i === 0 || rows[i-1].cat !== r.cat;
+                    const tie = r.n1 === r.n2, f1w = r.higherIsBetter ? r.n1 > r.n2 : r.n1 < r.n2;
                     return <Fragment key={i}>
-                      {sc&&<tr className="cat-row"><td colSpan={3}>{r.cat}</td></tr>}
+                      {sc && <tr className="cat-row"><td colSpan={3}>{r.cat}</td></tr>}
                       <tr>
-                        <td className={tie?'':f1w?'win':'lose'}>{r.v1}</td>
+                        <td className={tie ? '' : f1w ? 'win' : 'lose'}>{r.v1}</td>
                         <td className="center">{r.l}</td>
-                        <td className={`r ${tie?'':!f1w?'win':'lose'}`}>{r.v2}</td>
+                        <td className={`r ${tie ? '' : !f1w ? 'win' : 'lose'}`}>{r.v2}</td>
                       </tr>
                     </Fragment>;
                   })}</tbody>
@@ -184,9 +236,9 @@ export const CompareScreen = ({onBack}) => {
               </div>
             ) : <div className="empty-state empty-state--fill"><div className="empty-state-icon">⚔️</div><span>SELECT TWO FIGHTERS TO COMPARE</span></div>}
           </div>
-          <div className="checklist-wrap"><ChecklistPanel storageKey={clKey}/></div>
+          <div className="checklist-wrap"><ChecklistPanel storageKey={f1 && f2 ? `${Math.min(f1.id,f2.id)}_${Math.max(f1.id,f2.id)}` : 'default'}/></div>
         </div>
       </div>
     </div>
   );
-}
+};

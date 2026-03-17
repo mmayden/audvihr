@@ -37,6 +37,8 @@ export default [
         navigator:       'readonly',
         Notification:    'readonly',
         DOMParser:       'readonly',
+        Blob:            'readonly',
+        URL:             'readonly',
       },
       parserOptions: {
         ecmaFeatures: { jsx: true },
