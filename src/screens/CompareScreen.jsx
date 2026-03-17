@@ -1,10 +1,12 @@
 import { useState, useMemo, useCallback, Fragment } from 'react';
 import { FIGHTERS } from '../data/fighters';
-import { ARCH_COLORS } from '../constants/archetypes';
 import { COMPARE_ROW_DEFS } from '../constants/compareRows';
 import { CHECKLIST } from '../constants/checklist';
 import { ChecklistPanel } from '../components/ChecklistPanel';
+import { FighterCard } from '../components/FighterCard';
+import { FighterSearch } from '../components/FighterSearch';
 import { mlToImplied } from '../utils/odds';
+import { getStatTier } from '../constants/statTiers';
 import { checklistToMarkdown, downloadBlob } from '../utils/export';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
@@ -142,6 +144,34 @@ export const CompareScreen = ({ onBack, initialF1Id = '', initialF2Id = '' }) =>
   const rows    = useMemo(() => f1 && f2 ? COMPARE_ROW_DEFS.map(def => def(f1, f2)) : [], [f1, f2]);
   const signals = useMemo(() => f1 && f2 ? computeEdgeSignals(f1, f2, rows) : [], [f1, f2, rows]);
 
+  /** Normalized implied probability from fighter market.ml_current (if available). */
+  const impliedProb = useMemo(() => {
+    if (!f1 || !f2) return null;
+    const i1 = parseFloat(mlToImplied(f1.market?.ml_current));
+    const i2 = parseFloat(mlToImplied(f2.market?.ml_current));
+    if (isNaN(i1) || isNaN(i2) || i1 + i2 === 0) return null;
+    const n1 = Math.round(i1 / (i1 + i2) * 100);
+    return { f1: n1, f2: 100 - n1 };
+  }, [f1, f2]);
+
+  /** Per-category edge: 'f1' | 'f2' | null based on majority of contested rows. */
+  const categoryEdges = useMemo(() => {
+    if (!rows.length) return {};
+    const counts = {};
+    for (const r of rows) {
+      if (!counts[r.cat]) counts[r.cat] = { f1: 0, f2: 0 };
+      if (r.n1 === r.n2) continue;
+      if (r.higherIsBetter ? r.n1 > r.n2 : r.n1 < r.n2) counts[r.cat].f1++;
+      else counts[r.cat].f2++;
+    }
+    return Object.fromEntries(
+      Object.entries(counts).map(([cat, c]) => [
+        cat,
+        c.f1 > c.f2 ? 'f1' : c.f2 > c.f1 ? 'f2' : null,
+      ])
+    );
+  }, [rows]);
+
   /** Copy shareable /compare/:f1id/:f2id URL to clipboard (user-initiated only). */
   const handleCopyLink = useCallback(() => {
     if (!f1 || !f2) return;
@@ -180,15 +210,11 @@ export const CompareScreen = ({ onBack, initialF1Id = '', initialF2Id = '' }) =>
       </div>
       <div className="compare-layout">
         <div className="compare-selector">
-          <select className="compare-select" value={fighter1Id} onChange={e => setFighter1Id(e.target.value)}>
-            <option value="">— Fighter 1 —</option>
-            {FIGHTERS.map(f => <option key={f.id} value={f.id}>{f.name} ({f.record})</option>)}
-          </select>
-          <span className="vs-text">VS</span>
-          <select className="compare-select" value={fighter2Id} onChange={e => setFighter2Id(e.target.value)}>
-            <option value="">— Fighter 2 —</option>
-            {FIGHTERS.map(f => <option key={f.id} value={f.id}>{f.name} ({f.record})</option>)}
-          </select>
+          <div className="compare-selector-search">
+            <FighterSearch fighters={FIGHTERS} selectedId={fighter1Id} onSelect={setFighter1Id} placeholder="— Fighter 1 —" />
+            <span className="vs-text">VS</span>
+            <FighterSearch fighters={FIGHTERS} selectedId={fighter2Id} onSelect={setFighter2Id} placeholder="— Fighter 2 —" />
+          </div>
         </div>
         <div className="compare-body">
           <div className="compare-table-wrap">
@@ -196,15 +222,20 @@ export const CompareScreen = ({ onBack, initialF1Id = '', initialF2Id = '' }) =>
               <div className="anim-fade">
                 <div className="compare-fighter-header">
                   <div className="compare-fighter-col">
-                    <div className="compare-fighter-name">{f1.name}</div>
-                    <div className="compare-fighter-record compare-fighter-record--f1">{f1.record} · {f1.rank}</div>
-                    <div className="compare-fighter-arch"><span className="arch-tag arch-tag--sm" style={{borderColor:ARCH_COLORS[f1.archetype],color:ARCH_COLORS[f1.archetype]}}>{f1.archetype}</span></div>
+                    <FighterCard fighter={f1} />
                   </div>
-                  <div className="compare-vs-col">VS</div>
+                  <div className="compare-vs-col">
+                    VS
+                    {impliedProb && (
+                      <div className="compare-implied-gap">
+                        <span style={{color:'var(--accent)'}}>{impliedProb.f1}%</span>
+                        <span className="compare-implied-sep">·</span>
+                        <span style={{color:'var(--blue)'}}>{impliedProb.f2}%</span>
+                      </div>
+                    )}
+                  </div>
                   <div className="compare-fighter-col compare-fighter-col--right">
-                    <div className="compare-fighter-name">{f2.name}</div>
-                    <div className="compare-fighter-record compare-fighter-record--f2">{f2.record} · {f2.rank}</div>
-                    <div className="compare-fighter-arch compare-fighter-arch--right"><span className="arch-tag arch-tag--sm" style={{borderColor:ARCH_COLORS[f2.archetype],color:ARCH_COLORS[f2.archetype]}}>{f2.archetype}</span></div>
+                    <FighterCard fighter={f2} />
                   </div>
                 </div>
                 <table className="ctable">
@@ -212,12 +243,19 @@ export const CompareScreen = ({ onBack, initialF1Id = '', initialF2Id = '' }) =>
                   <tbody>{rows.map((r, i) => {
                     const sc = i === 0 || rows[i-1].cat !== r.cat;
                     const tie = r.n1 === r.n2, f1w = r.higherIsBetter ? r.n1 > r.n2 : r.n1 < r.n2;
+                    const edgeCls = sc && categoryEdges[r.cat] ? ` cat-row--${categoryEdges[r.cat]}-edge` : '';
                     return <Fragment key={i}>
-                      {sc && <tr className="cat-row"><td colSpan={3}>{r.cat}</td></tr>}
+                      {sc && <tr className={`cat-row${edgeCls}`}><td colSpan={3}>{r.cat}</td></tr>}
                       <tr>
-                        <td className={tie ? '' : f1w ? 'win' : 'lose'}>{r.v1}</td>
+                        <td className={tie ? '' : f1w ? 'win' : 'lose'}>
+                          {r.v1}
+                          {r.statKey && <span className="stat-tier-label">{getStatTier(r.statKey, r.n1)}</span>}
+                        </td>
                         <td className="center">{r.l}</td>
-                        <td className={`r ${tie ? '' : !f1w ? 'win' : 'lose'}`}>{r.v2}</td>
+                        <td className={`r ${tie ? '' : !f1w ? 'win' : 'lose'}`}>
+                          {r.statKey && <span className="stat-tier-label">{getStatTier(r.statKey, r.n2)}</span>}
+                          {r.v2}
+                        </td>
                       </tr>
                     </Fragment>;
                   })}</tbody>

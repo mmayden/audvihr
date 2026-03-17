@@ -11,6 +11,7 @@ import { fightKey } from '../utils/normalizeOdds';
 import { daysUntil } from '../utils/date';
 import { readCLVLog, readOpeningLines } from '../utils/clv';
 import { clvLogToCsv, downloadBlob } from '../utils/export';
+import { readPickLog, appendPick, updatePickOutcome } from '../utils/pickLog';
 import { PriceChart } from '../components/PriceChart';
 
 // Build a static fightKey → tapology_pct lookup from generated events data.
@@ -109,6 +110,10 @@ export const MarketsScreen = ({ onBack }) => {
   const [showCLV, setShowCLV]                    = useState(false);
   const [clvLog, setCLVLog]                      = useState([]);
   const [openingLines]                           = useState(() => readOpeningLines());
+  const [pickerOpen, setPickerOpen]              = useState(null);  // _fightKey of open pick form
+  const [pickForm, setPickForm]                  = useState({ fighter: '', method: 'Any', confidence: 3, notes: '' });
+  const [showPickLog, setShowPickLog]            = useState(false);
+  const [pickLog, setPickLog]                    = useState([]);
 
   const { data: oddsData }                       = useOdds();
   const { data: polyData, fetchHistory: polyFetchHistory } = usePolymarket();
@@ -229,6 +234,33 @@ export const MarketsScreen = ({ onBack }) => {
     if (showCLV) setCLVLog(readCLVLog());
   }, [showCLV]);
 
+  /** Load pick log when panel is opened. */
+  useEffect(() => {
+    if (showPickLog) setPickLog(readPickLog());
+  }, [showPickLog]);
+
+  /** Save a pick and close the inline form. */
+  const handleSavePick = useCallback((market) => {
+    if (!pickForm.fighter) return;
+    appendPick({
+      fightKey:   market._fightKey,
+      fighter:    pickForm.fighter,
+      method:     pickForm.method,
+      confidence: pickForm.confidence,
+      notes:      pickForm.notes.trim(),
+      ts:         new Date().toISOString(),
+    });
+    setPickerOpen(null);
+    setPickForm({ fighter: '', method: 'Any', confidence: 3, notes: '' });
+    if (showPickLog) setPickLog(readPickLog());
+  }, [pickForm, showPickLog]);
+
+  /** Mark an existing pick W or L and refresh the log. */
+  const handlePickOutcome = useCallback((fightKey, outcome) => {
+    updatePickOutcome(fightKey, outcome);
+    setPickLog(readPickLog());
+  }, []);
+
   return (
     <div className="app">
       <div className="topbar">
@@ -236,6 +268,12 @@ export const MarketsScreen = ({ onBack }) => {
         <span className="topbar-sep">/</span>
         <span className="topbar-section">MARKETS</span>
         <div className="topbar-right">
+          <button
+            className={`topbar-back topbar-back--mr${showPickLog ? ' active' : ''}`}
+            onClick={() => setShowPickLog((v) => !v)}
+          >
+            PICKS
+          </button>
           <button
             className={`topbar-back topbar-back--mr${showCLV ? ' active' : ''}`}
             onClick={() => setShowCLV((v) => !v)}
@@ -298,6 +336,42 @@ export const MarketsScreen = ({ onBack }) => {
           )}
         </div>
       )}
+
+      {/* Pick Log panel */}
+      {showPickLog && (() => {
+        const wins    = pickLog.filter(e => e.outcome === 'W').length;
+        const losses  = pickLog.filter(e => e.outcome === 'L').length;
+        const pending = pickLog.filter(e => !e.outcome).length;
+        return (
+          <div className="markets-pick-panel">
+            <div className="sec-label sec-label--mb-8" style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+              <span>PICK LOG — {wins}W {losses}L {pending}P</span>
+            </div>
+            {pickLog.length === 0 ? (
+              <div className="mono-status-dim">No picks logged yet. Use + PICK on any fight.</div>
+            ) : (
+              <div className="pick-log-table">
+                {[...pickLog].reverse().slice(0, 20).map((entry, i) => (
+                  <div key={i} className="pick-log-row">
+                    <span className="pick-log-fight">{entry.fightKey.replace(/_/g, ' ')}</span>
+                    <span className="pick-log-fighter">{entry.fighter.split(' ').pop()}</span>
+                    <span className="pick-log-method">{entry.method}</span>
+                    <span className="pick-log-conf">{'★'.repeat(Math.max(1, Math.min(5, entry.confidence)))}</span>
+                    {entry.outcome === 'W' && <span className="pick-log-outcome--w">W</span>}
+                    {entry.outcome === 'L' && <span className="pick-log-outcome--l">L</span>}
+                    {!entry.outcome && (
+                      <>
+                        <button className="pick-log-result-btn" onClick={() => handlePickOutcome(entry.fightKey, 'W')}>W</button>
+                        <button className="pick-log-result-btn" onClick={() => handlePickOutcome(entry.fightKey, 'L')}>L</button>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       <div className="compare-layout">
         {/* Filter + sort bar */}
@@ -415,6 +489,20 @@ export const MarketsScreen = ({ onBack }) => {
                       }}
                     />
                   )}
+                  <button
+                    className={`mkt-pick-btn${pickerOpen === market._fightKey ? ' on' : ''}`}
+                    onClick={() => {
+                      if (pickerOpen === market._fightKey) {
+                        setPickerOpen(null);
+                      } else {
+                        setPickerOpen(market._fightKey);
+                        setPickForm({ fighter: '', method: 'Any', confidence: 3, notes: '' });
+                      }
+                    }}
+                    aria-label="Log a pick for this fight"
+                  >
+                    + PICK
+                  </button>
                   <div className="mkt-card-header-body">
                     <div className="mkt-fight-name">
                       {market.fighter1} <span className="mkt-fight-name-vs">vs</span> {market.fighter2}
@@ -433,6 +521,71 @@ export const MarketsScreen = ({ onBack }) => {
                     {vol > 0 && <span className="mkt-vol-total">{fmtVolume(vol)} VOL</span>}
                   </div>
                 </div>
+
+                {/* Inline pick form */}
+                {pickerOpen === market._fightKey && (
+                  <div className="mkt-pick-form">
+                    <div className="mkt-pick-form-row">
+                      <span className="mkt-pick-label">PICK</span>
+                      {[market.fighter1, market.fighter2].map(name => (
+                        <button
+                          key={name}
+                          className={`mkt-pick-chip${pickForm.fighter === name ? ' on' : ''}`}
+                          onClick={() => setPickForm(f => ({ ...f, fighter: name }))}
+                        >
+                          {name.split(' ').pop()}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="mkt-pick-form-row">
+                      <span className="mkt-pick-label">METHOD</span>
+                      {['KO/TKO', 'Submission', 'Decision', 'Any'].map(m => (
+                        <button
+                          key={m}
+                          className={`mkt-pick-chip${pickForm.method === m ? ' on' : ''}`}
+                          onClick={() => setPickForm(f => ({ ...f, method: m }))}
+                        >
+                          {m}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="mkt-pick-form-row">
+                      <span className="mkt-pick-label">CONF</span>
+                      {[1,2,3,4,5].map(n => (
+                        <button
+                          key={n}
+                          className={`mkt-pick-chip${pickForm.confidence === n ? ' on' : ''}`}
+                          onClick={() => setPickForm(f => ({ ...f, confidence: n }))}
+                        >
+                          {n}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="mkt-pick-form-row">
+                      <span className="mkt-pick-label">NOTES</span>
+                      <textarea
+                        className="mkt-pick-notes"
+                        rows={2}
+                        maxLength={200}
+                        placeholder="optional notes..."
+                        value={pickForm.notes}
+                        onChange={e => setPickForm(f => ({ ...f, notes: e.target.value }))}
+                      />
+                    </div>
+                    <div className="mkt-pick-form-actions">
+                      <button
+                        className="mkt-pick-save"
+                        disabled={!pickForm.fighter}
+                        onClick={() => handleSavePick(market)}
+                      >
+                        SAVE PICK
+                      </button>
+                      <button className="mkt-pick-cancel" onClick={() => setPickerOpen(null)}>
+                        CANCEL
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {/* Unified live price row (shown when any live data is available) */}
                 {live && (
