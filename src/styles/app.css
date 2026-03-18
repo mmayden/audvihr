@@ -8,7 +8,7 @@
   --border:     #1e2536;
   --border2:    #283248;
   --text:       #b8c4d8;
-  --text-dim:   #3e4a62;
+  --text-dim:   #7890b0;
   --text-bright:#dce6f8;
   --accent:     #00c8ff;
   --accent-dim: #006888;
@@ -37,6 +37,12 @@
   /* ── Accent tint backgrounds (theme-adaptive) ── */
   --accent-bg:     rgba(0,200,255,.07);
   --accent-bg-mid: rgba(0,200,255,.12);
+  /* ── Sphere background tokens ── */
+  --sphere-base:        #020510;
+  --sphere-mid:         #06091c;
+  --sphere-glow:        rgba(0,60,140,.45);
+  --sphere-pulse-color: rgba(0,180,255,.04);
+  --surface-glass:      rgba(6,8,18,.78);
 }
 
 /* ---- ARENA — warm ember dark (applied via [data-theme="light"] on <html>) ---- */
@@ -48,7 +54,7 @@
   --border:     #3a3028;
   --border2:    #4a3e32;
   --text:       #cec0a8;
-  --text-dim:   #6a5840;
+  --text-dim:   #a08870;
   --text-bright:#f0e2cc;
   --accent:     #e06828;
   --accent-dim: #904020;
@@ -67,6 +73,12 @@
   /* ── Accent tint backgrounds (theme-adaptive) ── */
   --accent-bg:     rgba(224,104,40,.07);
   --accent-bg-mid: rgba(224,104,40,.12);
+  /* ── Sphere background tokens ── */
+  --sphere-base:        #060200;
+  --sphere-mid:         #120700;
+  --sphere-glow:        rgba(120,40,5,.45);
+  --sphere-pulse-color: rgba(224,104,40,.04);
+  --surface-glass:      rgba(14,10,6,.78);
 }
 
 /* ---- System-preference: map light OS preference to ARENA ---- */
@@ -79,7 +91,7 @@
     --border:     #3a3028;
     --border2:    #4a3e32;
     --text:       #cec0a8;
-    --text-dim:   #6a5840;
+    --text-dim:   #a08870;
     --text-bright:#f0e2cc;
     --accent:     #e06828;
     --accent-dim: #904020;
@@ -97,11 +109,57 @@
     --touch-target-sm: 36px;
     --accent-bg:     rgba(224,104,40,.07);
     --accent-bg-mid: rgba(224,104,40,.12);
+    --sphere-base:        #060200;
+    --sphere-mid:         #120700;
+    --sphere-glow:        rgba(120,40,5,.45);
+    --sphere-pulse-color: rgba(224,104,40,.04);
+    --surface-glass:      rgba(14,10,6,.78);
   }
 }
 
 html, body, #root { height: 100%; }
-body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.5; }
+
+/* ── Sphere background — layered radial depth, mimicking the LED interior of the Las Vegas Sphere ── */
+body {
+  background:
+    /* Layer 1 — vignette: heavy corner/edge darkening simulates sphere curvature */
+    radial-gradient(ellipse 130% 105% at 50% 50%, transparent 32%, rgba(0,0,0,.82) 100%),
+    /* Layer 2 — horizon LED glow band (bottom-center, where the stage would be) */
+    radial-gradient(ellipse 200% 45% at 50% 72%, var(--sphere-glow) 0%, transparent 55%),
+    /* Layer 3 — base sphere depth gradient */
+    radial-gradient(ellipse 120% 90% at 50% 38%, var(--sphere-mid) 0%, var(--sphere-base) 100%);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* LED panel grid — the Sphere's actual panel seams, whisper-faint */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.016) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.016) 1px, transparent 1px);
+  background-size: 44px 44px;
+  /* Fade grid toward edges — only visible in the central "screen" zone */
+  mask-image: radial-gradient(ellipse 80% 75% at 50% 52%, rgba(0,0,0,.8) 0%, transparent 85%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 75% at 50% 52%, rgba(0,0,0,.8) 0%, transparent 85%);
+}
+
+/* Ambient sphere pulse — slow LED breath effect */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 75% 55% at 50% 68%, var(--sphere-pulse-color) 0%, transparent 65%);
+  animation: spherePulse 9s ease-in-out infinite;
+}
 /* Global keyboard focus ring — aligns with the design system accent color */
 button:focus-visible,
 a:focus-visible,
@@ -111,7 +169,7 @@ a:focus-visible,
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 .app { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 /* TOPBAR */
-.topbar { height: 48px; min-height: 48px; display: flex; align-items: center; gap: 16px; padding: 0 80px 0 20px; background: var(--surface); border-bottom: 1px solid var(--border); z-index: 50; box-shadow: 0 1px 6px rgba(0,0,0,.18); }
+.topbar { height: 48px; min-height: 48px; display: flex; align-items: center; gap: 16px; padding: 0 80px 0 20px; background: var(--surface-glass); backdrop-filter: blur(14px) saturate(150%); -webkit-backdrop-filter: blur(14px) saturate(150%); border-bottom: 1px solid rgba(255,255,255,.06); z-index: 50; box-shadow: 0 1px 16px rgba(0,0,0,.4); }
 .topbar-logo { font-size: 13px; font-weight: 700; letter-spacing: .12em; color: var(--accent); font-family: var(--mono); }
 .topbar-sep { color: var(--border2); }
 .topbar-section { font-size: 12px; font-weight: 500; color: var(--text-dim); letter-spacing: .06em; }
@@ -120,11 +178,11 @@ a:focus-visible,
 .topbar-back:hover { background: var(--accent); color: var(--bg); }
 /* MENU */
 .menu-screen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; }
-.menu-wordmark { font-family: var(--mono); font-size: clamp(28px,5vw,48px); font-weight: 700; letter-spacing: .2em; color: var(--text-bright); margin-bottom: 4px; }
+.menu-wordmark { font-family: var(--mono); font-size: clamp(28px,5vw,48px); font-weight: 700; letter-spacing: .2em; color: var(--text-bright); margin-bottom: 4px; text-shadow: 0 0 40px var(--accent), 0 0 80px var(--sphere-glow); }
 .menu-sub { font-size: 11px; font-family: var(--mono); letter-spacing: .2em; color: var(--text-dim); margin-bottom: 48px; text-transform: uppercase; }
 .menu-list { display: flex; flex-direction: column; gap: 4px; width: 100%; max-width: 420px; }
-.menu-item { display: flex; align-items: center; gap: 14px; padding: 13px 18px; background: var(--surface); border: 1px solid var(--border); cursor: pointer; transition: all .15s; user-select: none; }
-.menu-item:hover { background: var(--surface2); border-color: var(--border2); color: var(--text-bright); }
+.menu-item { display: flex; align-items: center; gap: 14px; padding: 13px 18px; background: var(--surface-glass); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.06); cursor: pointer; transition: all .15s; user-select: none; }
+.menu-item:hover { background: var(--surface2); border-color: var(--accent-dim); color: var(--text-bright); }
 .menu-item-num { font-family: var(--mono); font-size: 10px; color: var(--accent); min-width: 20px; }
 .menu-item-label { font-size: 13px; font-weight: 600; letter-spacing: .05em; flex: 1; }
 .menu-item-badge { font-family: var(--mono); font-size: 9px; color: var(--text-dim); border: 1px solid var(--border2); padding: 2px 7px; letter-spacing: .08em; }
@@ -629,14 +687,16 @@ a:focus-visible,
 .pick-log-result-btn:hover { border-color: var(--accent); color: var(--accent); }
 
 @media (max-width: 767px) {
-  /* Bottom nav bar */
+  /* Bottom nav bar — frosted glass so sphere shows through */
   .bottom-nav {
     display: flex;
     position: fixed;
     bottom: 0; left: 0; right: 0;
     height: 56px;
-    background: var(--surface);
-    border-top: 1px solid var(--border);
+    background: var(--surface-glass);
+    backdrop-filter: blur(14px) saturate(150%);
+    -webkit-backdrop-filter: blur(14px) saturate(150%);
+    border-top: 1px solid rgba(255,255,255,.06);
     z-index: 100;
   }
   .bottom-nav-item {
@@ -686,7 +746,10 @@ a:focus-visible,
     bottom: 56px; /* above bottom nav */
     width: 280px;
     z-index: 90;
-    box-shadow: 4px 0 20px rgba(0,0,0,.5);
+    background: var(--surface-glass);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    box-shadow: 4px 0 32px rgba(0,0,0,.6);
   }
   .sidebar--open { display: flex; animation: sidebarSlideIn .22s ease forwards; }
 
@@ -939,6 +1002,12 @@ a:focus-visible,
   margin-top: 4px;
 }
 
+/* ── Sphere ambient pulse keyframe ── */
+@keyframes spherePulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .45; }
+}
+
 /* ============================================================
    Accessibility — reduce motion for users who prefer it
    ============================================================ */
@@ -948,6 +1017,8 @@ a:focus-visible,
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+  /* Kill sphere pulse animation */
+  body::after { animation: none !important; }
   /* Keep progress-bar/stat-bar fills instant */
   .srl-fill,
   .cl-prog-fill { transition: none !important; }
