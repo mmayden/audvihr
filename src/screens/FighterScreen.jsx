@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FIGHTERS } from '../data/fighters';
 import { ARCH_COLORS, MOD_COLORS } from '../constants/archetypes';
 import { TABS } from '../constants/checklist';
+import { STAT_FILTERS, FILTER_CATEGORIES } from '../constants/statFilters';
 import { TabOverview } from '../tabs/TabOverview';
 import { TabStriking } from '../tabs/TabStriking';
 import { TabGrappling } from '../tabs/TabGrappling';
@@ -27,17 +28,30 @@ export const FighterScreen = ({onBack, initialFighter}) => {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [weightFilter, setWeightFilter] = useState('ALL');
+  const [activeFilters, setActiveFilters] = useState(new Set());
+  const [statFiltersOpen, setStatFiltersOpen] = useState(false);
   const [sel, setSel] = useState(initialFighter || FIGHTERS[0]);
   const [tab, setTab] = useState('OVERVIEW');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { items: allNews } = useNews();
+
+  const toggleStatFilter = (id) => {
+    setActiveFilters(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) { next.delete(id); } else { next.add(id); }
+      return next;
+    });
+  };
+
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
+    const activePredicates = STAT_FILTERS.filter(sf => activeFilters.has(sf.id)).map(sf => sf.predicate);
     return FIGHTERS.filter(f =>
       (f.name.toLowerCase().includes(q) || f.nickname.toLowerCase().includes(q)) &&
-      (weightFilter === 'ALL' || f.weight === weightFilter)
+      (weightFilter === 'ALL' || f.weight === weightFilter) &&
+      activePredicates.every(pred => pred(f))
     );
-  }, [search, weightFilter]);
+  }, [search, weightFilter, activeFilters]);
   const pick = (f) => { setSel(f); setTab('OVERVIEW'); setSidebarOpen(false); };
   const ac = sel ? ARCH_COLORS[sel.archetype] : null;
   const fighterNews = useMemo(
@@ -62,6 +76,44 @@ export const FighterScreen = ({onBack, initialFighter}) => {
           <div className="sidebar-header">ROSTER — {filtered.length}</div>
           <div className="sidebar-search"><input className="sidebar-input" placeholder="Search..." value={search} onChange={e=>setSearch(e.target.value)}/></div>
           <div className="sidebar-filters">{WEIGHT_FILTERS.map(w=><button key={w} className={`filter-chip ${weightFilter===w?'on':''}`} onClick={()=>setWeightFilter(w)}>{w==='ALL'?'ALL':w.split(' ')[0].toUpperCase()}</button>)}</div>
+          <div className="stat-filters-panel">
+            <button
+              className={`stat-filters-toggle${activeFilters.size > 0 ? ' stat-filters-toggle--active' : ''}`}
+              onClick={() => setStatFiltersOpen(o => !o)}
+              aria-expanded={statFiltersOpen}
+              aria-label="Toggle stat filters"
+            >
+              <span>STAT FILTERS</span>
+              {activeFilters.size > 0 && <span className="stat-filters-count">{activeFilters.size}</span>}
+              <span className="stat-filters-caret">{statFiltersOpen ? '▴' : '▾'}</span>
+            </button>
+            {statFiltersOpen && (
+              <div className="stat-filters-body">
+                {FILTER_CATEGORIES.map(cat => (
+                  <div key={cat} className="stat-filters-group">
+                    <div className="stat-filters-cat">{cat}</div>
+                    <div className="stat-filters-chips">
+                      {STAT_FILTERS.filter(sf => sf.category === cat).map(sf => (
+                        <button
+                          key={sf.id}
+                          className={`stat-filter-chip${activeFilters.has(sf.id) ? ' on' : ''}`}
+                          onClick={() => toggleStatFilter(sf.id)}
+                          aria-pressed={activeFilters.has(sf.id)}
+                        >
+                          {sf.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                {activeFilters.size > 0 && (
+                  <button className="stat-filters-clear" onClick={() => setActiveFilters(new Set())}>
+                    CLEAR ALL
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
           <div className="sidebar-list">{filtered.map(f=>(
             <div key={f.id} className={`sidebar-fighter ${sel?.id===f.id?'active':''}`} onClick={()=>pick(f)}>
               <div className="sf-name">{f.name}</div>

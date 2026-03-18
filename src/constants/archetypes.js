@@ -1,7 +1,7 @@
 /**
  * archetypes.js — color maps for fighter archetypes and modifier tags.
  * All values are CSS variable references matching the design system in app.css.
- * ARCH_COLORS: maps primary archetype labels to CSS color strings.
+ * ARCH_COLORS: maps primary archetype labels (10) to CSS color strings.
  * MOD_COLORS: maps modifier tag labels to CSS color strings.
  */
 
@@ -14,6 +14,8 @@ export const ARCH_COLORS = {
   'BOXER-PUNCHER':    'var(--red)',
   'BRAWLER':          'var(--dark-red)',
   'COMPLETE FIGHTER': 'var(--text)',
+  'MUAY THAI':        'var(--teal)',
+  'CLINCH FIGHTER':   'var(--gold)',
 };
 
 export const MOD_COLORS = {

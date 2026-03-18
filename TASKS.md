@@ -10,13 +10,24 @@
 
 ## Current Sprint
 
-**Branch:** `master` (Phase 15 complete — no active sprint)
-**Last completed:** Phase 15 — Matchup Context Engine (v0.15.0, 2026-03-17)
-**Next:** See Backlog below. Cut a `feature/phase-16-*` branch when the next phase is scoped.
+**Branch:** `master` (Phase 16 complete — no active sprint)
+**Last completed:** Phase 16 — Stat Range Search (v0.16.0, 2026-03-18)
+**Next:** See Backlog below. Cut a `feature/phase-17-*` branch when the next phase is scoped.
 
 ---
 
 ## ✅ Completed Sprints
+
+### ✅ Phase 16 — Stat Range Search (v0.16.0) — 2026-03-18
+
+- [x] `src/constants/statFilters.js` — `STAT_FILTERS` (11 presets, 4 categories) + `FILTER_CATEGORIES`; each entry has `id`, `label`, `category`, `predicate(fighter) → boolean`
+- [x] `FighterScreen` — collapsible STAT FILTERS panel; toggle with active-count badge; chips grouped by category; AND logic with existing search + weight filter; CLEAR ALL
+- [x] `app.css` — `--teal` + `--gold` CSS vars; stat filter panel CSS classes (toggle, body, category label, chip, chip.on, clear)
+- [x] `archetypes.js` — MUAY THAI + CLINCH FIGHTER added to ARCH_COLORS (10 archetypes total)
+- [x] `statFilters.test.js` — 35 tests; total 454 passing; 0 lint errors
+- [x] CHANGELOG v0.16.0; TASKS.md, PLANNING.md, CLAUDE.md updated
+
+---
 
 ### ✅ Phase 15 — Matchup Context Engine (v0.15.0) — 2026-03-17
 
@@ -151,10 +162,10 @@
 
 #### High value
 - [ ] **CORS proxy for live RSS** — one Netlify/Vercel edge function; `useNews` hook is fully ready, this is pure infra
-- [ ] **Fighter stat range search** — filter roster by stat thresholds ("TD def > 80%", "SLpM > 5"); new FilterScreen or panel in FighterScreen sidebar
+- [x] ~~**Fighter stat range search**~~ — shipped in Phase 16 (11-preset STAT FILTERS panel in FighterScreen sidebar)
+- [x] ~~**MUAY THAI + CLINCH FIGHTER in ARCH_COLORS**~~ — shipped in Phase 16 (teal/gold)
 - [ ] **Stat trend lines** — per-fight stat trajectory over last N fights; requires scraper enhancement to store per-fight stats alongside career averages
 - [ ] **Historical opening line database** — searchable archive of opening lines per fighter across all past fights
-- [ ] **MUAY THAI + CLINCH FIGHTER in ARCH_COLORS** — both archetypes have rules in `matchupWarnings.js` but no entry in `src/constants/archetypes.js`. Add before assigning either archetype to any fighter in `fighter-seed.json`. Suggested: MUAY THAI → `var(--orange)`; CLINCH FIGHTER → `var(--purple)`. Zero security surface — pure visual fix.
 
 #### Medium value
 - [ ] **Women's divisions** — Strawweight, Flyweight, Bantamweight rosters (same seed + scrape pattern, ~30 fighters)
