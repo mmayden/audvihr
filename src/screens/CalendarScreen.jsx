@@ -64,12 +64,17 @@ export const CalendarScreen = ({onBack, onGoFighter}) => {
         <span className="topbar-logo">AUDWIHR</span><span className="topbar-sep">/</span>
         <span className="topbar-section">CALENDAR</span>
         <div className="topbar-right">
-          <button className="topbar-roster-btn" onClick={() => setSidebarOpen(o => !o)}>EVENTS</button>
+          <button
+            className="topbar-roster-btn"
+            onClick={() => setSidebarOpen(o => !o)}
+            aria-expanded={sidebarOpen}
+            aria-label={sidebarOpen ? 'Close events list' : 'Open events list'}
+          >EVENTS</button>
           <button className="topbar-back" onClick={onBack}>← MENU</button>
         </div>
       </div>
       <div className="main-layout">
-        {sidebarOpen && <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />}
+        {sidebarOpen && <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} role="button" aria-label="Close events list" tabIndex={-1} />}
         <div className={`sidebar${sidebarOpen ? ' sidebar--open' : ''}`}>
           <div className="sidebar-header">EVENTS — {filtered.length}</div>
           <div className="sidebar-filters">

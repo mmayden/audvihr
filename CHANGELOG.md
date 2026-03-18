@@ -4,6 +4,26 @@ All notable changes to this project. Format: [version] — date — description.
 
 ---
 
+## [Unreleased] — Visual & QoL Polish
+
+### Changed
+- **app.css** — Added `--bg-elevated`, `--bg-card` CSS variables (aliases to `--surface2`/`--surface`) to fix undefined-variable references in Phase 11 alert styles
+- **app.css** — Added design tokens: `--radius-sm`, `--radius`, `--radius-pill`, `--transition`, `--shadow-sm`, `--shadow-md`
+- **app.css** — Global `:focus-visible` ring for `button`, `a`, `[tabindex]` elements using `var(--accent)`
+- **app.css** — Input focus colors upgraded from `--border2` to `--accent` on: `.sidebar-input`, `.fighter-search-input`, `.notes-area`, `.mkt-pick-notes`, `.news-fighter-select`
+- **app.css** — `.tabs-bar` scrollbar hidden globally (`scrollbar-width: none` + webkit) — no scrollbar artifact on any viewport
+- **app.css** — Added `@keyframes sidebarSlideIn`; mobile sidebar overlay now slides in from the left instead of appearing instantly
+- **app.css** — `vs-btn` default state upgraded: now uses `var(--accent)` border/color (was muted `--border2`/`--text-dim`), hover fills with accent background — clearer CTA
+- **app.css** — `.stat-cell-label` from 9px → 10px; `.fin-l` from 8px → 9px; `.stat-tier-label` from 8px → 9px — improved readability across tabs
+- **app.css** — Mobile touch targets: `.filter-chip` min-height 36px; `.sidebar-fighter` padding increased to 11px 14px; portrait reduced to 88×88px with tighter card identity padding
+- **app.css** — Topbar subtle drop shadow (`box-shadow: 0 1px 6px`) for visual separation
+- **app.css** — `.mkt-card` and `.news-card` hover state gains `box-shadow: var(--shadow-sm)` for depth
+- **app.css** — `@media (prefers-reduced-motion: reduce)` — all animations/transitions set to 0.01ms; `.srl-fill` and `.cl-prog-fill` transitions suppressed
+- **FighterScreen.jsx** — ROSTER toggle button: `aria-expanded` + `aria-label` state attributes added; sidebar backdrop has `role="button"` + `aria-label`
+- **CalendarScreen.jsx** — EVENTS toggle button: same `aria-expanded`/`aria-label` treatment as FighterScreen
+
+---
+
 ## [0.16.0] — 2026-03-18
 
 ### Phase 16 — Stat Range Search

@@ -11,12 +11,30 @@
 ## Current Sprint
 
 **Branch:** `master` (Phase 16 complete — no active sprint)
-**Last completed:** Phase 16 — Stat Range Search (v0.16.0, 2026-03-18)
-**Next:** See Backlog below. Cut a `feature/phase-17-*` branch when the next phase is scoped.
+**Last completed:** Post-Phase-16 Visual & QoL Polish — 2026-03-18
+**Next:** Phase 17 scope TBD. Mobile-first development begins soon — see Backlog. Cut a `feature/phase-17-*` branch when scoped.
 
 ---
 
 ## ✅ Completed Sprints
+
+### ✅ Post-Phase-16 Visual & QoL Polish — 2026-03-18
+
+- [x] **CSS variables** — `--bg-elevated` and `--bg-card` defined (fix broken Phase 11 alert style references); `--radius-sm`, `--radius`, `--radius-pill`, `--transition`, `--shadow-sm`, `--shadow-md` added as forward-looking design tokens in all three theme blocks (`:root`, `[data-theme="light"]`, `@media prefers-color-scheme: light`)
+- [x] **Focus ring** — Global `button:focus-visible`, `a:focus-visible`, `[tabindex]:focus-visible` rule using `var(--accent)`; keyboard navigation now visible
+- [x] **Input focus colors** — `.sidebar-input`, `.fighter-search-input`, `.notes-area`, `.mkt-pick-notes`, `.news-fighter-select` upgraded from `--border2` to `--accent` on focus
+- [x] **Tab bar scrollbar** — Hidden globally via `scrollbar-width: none` + `::-webkit-scrollbar { display: none }`; scrollbar artifact gone on all viewports
+- [x] **Sidebar slide animation** — `@keyframes sidebarSlideIn`; mobile overlay slides in from left instead of snapping
+- [x] **`vs-btn` CTA** — Default state now uses `--accent` border/color; hover fills accent background; more action-oriented
+- [x] **Label readability** — `.stat-cell-label` 9px→10px; `.fin-l` 8px→9px; `.stat-tier-label` 8px→9px
+- [x] **Mobile touch targets** — `.filter-chip` min-height 36px; `.sidebar-fighter` padding 11px 14px; portrait 88×88px; tighter `card-identity` padding; `vs-btn` full-width on mobile
+- [x] **Card depth** — `.mkt-card` and `.news-card` gain `box-shadow: var(--shadow-sm)` on hover; topbar subtle drop shadow
+- [x] **`prefers-reduced-motion`** — All animations/transitions 0.01ms; `.srl-fill` and `.cl-prog-fill` suppressed
+- [x] **ARIA** — FighterScreen ROSTER button: `aria-expanded` + `aria-label`; CalendarScreen EVENTS button: same; sidebar backdrops: `role="button"` + `aria-label`
+- [x] CHANGELOG.md `[Unreleased]` section written; TASKS.md, PLANNING.md, CLAUDE.md updated
+- [x] 454 tests passing; 0 lint errors; 0 CVEs
+
+---
 
 ### ✅ Phase 16 — Stat Range Search (v0.16.0) — 2026-03-18
 
@@ -174,7 +192,8 @@
 - [ ] **Manual data refresh button** — in-app button triggers `fetch-data.js` equivalent for same-day stat updates without full rebuild; requires a build API endpoint
 
 #### Low / nice-to-have
-- [ ] **Visual reskin pass** — final art direction once card components + badge system are in place
+- [x] ~~**Visual reskin pass**~~ — partial: Post-Phase-16 polish pass delivered focus rings, input focus colors, label readability improvements, mobile touch targets, card depth, reduced-motion support, sidebar slide animation, and CTA improvements. Final art direction still possible but core polish is done.
+- [ ] **Mobile-first development phase** — Begin dedicated mobile UX pass (Phase 17 candidate): optimize layouts for <768px, improve bottom nav, enhance touch interactions beyond the initial responsive work
 - [ ] **Sound design** — optional click feedback, opt-in only; deliberate decision required before adding audio
 
 ---

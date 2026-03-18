@@ -66,12 +66,17 @@ export const FighterScreen = ({onBack, initialFighter}) => {
         <span className="topbar-logo">AUDWIHR</span><span className="topbar-sep">/</span>
         <span className="topbar-section">FIGHTERS</span>
         <div className="topbar-right">
-          <button className="topbar-roster-btn" onClick={() => setSidebarOpen(o => !o)}>ROSTER</button>
+          <button
+            className="topbar-roster-btn"
+            onClick={() => setSidebarOpen(o => !o)}
+            aria-expanded={sidebarOpen}
+            aria-label={sidebarOpen ? 'Close roster' : 'Open roster'}
+          >ROSTER</button>
           <button className="topbar-back" onClick={onBack}>← MENU</button>
         </div>
       </div>
       <div className="main-layout">
-        {sidebarOpen && <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />}
+        {sidebarOpen && <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} role="button" aria-label="Close roster" tabIndex={-1} />}
         <div className={`sidebar${sidebarOpen ? ' sidebar--open' : ''}`}>
           <div className="sidebar-header">ROSTER — {filtered.length}</div>
           <div className="sidebar-search"><input className="sidebar-input" placeholder="Search..." value={search} onChange={e=>setSearch(e.target.value)}/></div>
