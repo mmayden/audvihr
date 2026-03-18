@@ -9,6 +9,7 @@ import { mlToImplied } from '../utils/odds';
 import { getStatTier } from '../constants/statTiers';
 import { checklistToMarkdown, downloadBlob } from '../utils/export';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { computeMatchupWarnings } from '../constants/matchupWarnings';
 
 // ── Edge signal helpers ──────────────────────────────────────────────────────
 
@@ -141,8 +142,9 @@ export const CompareScreen = ({ onBack, initialF1Id = '', initialF2Id = '' }) =>
   );
   const [checked] = useLocalStorage(clKey, initChecked);
 
-  const rows    = useMemo(() => f1 && f2 ? COMPARE_ROW_DEFS.map(def => def(f1, f2)) : [], [f1, f2]);
-  const signals = useMemo(() => f1 && f2 ? computeEdgeSignals(f1, f2, rows) : [], [f1, f2, rows]);
+  const rows     = useMemo(() => f1 && f2 ? COMPARE_ROW_DEFS.map(def => def(f1, f2)) : [], [f1, f2]);
+  const signals  = useMemo(() => f1 && f2 ? computeEdgeSignals(f1, f2, rows) : [], [f1, f2, rows]);
+  const warnings = useMemo(() => computeMatchupWarnings(f1, f2), [f1, f2]);
 
   /** Normalized implied probability from fighter market.ml_current (if available). */
   const impliedProb = useMemo(() => {
@@ -238,6 +240,27 @@ export const CompareScreen = ({ onBack, initialF1Id = '', initialF2Id = '' }) =>
                     <FighterCard fighter={f2} />
                   </div>
                 </div>
+                {warnings.length > 0 && (
+                  <div className="matchup-notes">
+                    <div className="matchup-notes-header">MATCHUP NOTES</div>
+                    {warnings.map((w, i) => {
+                      const subjectLabel = w.subject === 'f1'
+                        ? f1.name.split(' ').pop().toUpperCase() + ' EDGE'
+                        : w.subject === 'f2'
+                        ? f2.name.split(' ').pop().toUpperCase() + ' EDGE'
+                        : null;
+                      return (
+                        <div key={i} className={`matchup-note matchup-note--${w.type}`}>
+                          <div className="matchup-note-meta">
+                            <span className="matchup-note-headline">{w.headline}</span>
+                            {subjectLabel && <span className="matchup-note-subject">{subjectLabel}</span>}
+                          </div>
+                          <div className="matchup-note-body">{w.body}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
                 <table className="ctable">
                   <thead><tr><th className="ctable-col--wide" style={{textAlign:'left'}}>F1</th><th className="center ctable-col--center">STAT</th><th className="ctable-col--wide" style={{textAlign:'right'}}>F2</th></tr></thead>
                   <tbody>{rows.map((r, i) => {

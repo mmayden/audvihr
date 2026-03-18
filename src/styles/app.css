@@ -510,6 +510,24 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
 .flag-pill { display: inline-flex; align-items: center; gap: 5px; border: 1px solid currentColor; border-radius: 10px; padding: 3px 10px; font-size: 10px; font-family: var(--mono); letter-spacing: .04em; }
 .flag-pill-key { opacity: .5; font-size: 9px; }
 
+/* CompareScreen — MATCHUP NOTES section */
+.matchup-notes { border: 1px solid var(--border); background: var(--surface); padding: 12px 16px; margin-bottom: 20px; }
+.matchup-notes-header { font-size: 10px; font-family: var(--mono); letter-spacing: .12em; color: var(--text-dim); margin-bottom: 10px; }
+.matchup-note { padding: 8px 0; border-bottom: 1px solid rgba(46,51,64,.4); }
+.matchup-note:last-child { border-bottom: none; }
+.matchup-note-meta { display: flex; align-items: center; gap: 7px; margin-bottom: 3px; }
+.matchup-note-headline { font-size: 11px; font-family: var(--mono); font-weight: 700; letter-spacing: .05em; }
+.matchup-note--style   .matchup-note-headline { color: var(--accent); }
+.matchup-note--risk    .matchup-note-headline { color: var(--red); }
+.matchup-note--fade    .matchup-note-headline { color: var(--green); }
+.matchup-note--clash   .matchup-note-headline { color: var(--blue); }
+.matchup-note-subject { font-size: 8px; font-family: var(--mono); font-weight: 700; letter-spacing: .09em; padding: 1px 5px; border-radius: 2px; flex-shrink: 0; }
+.matchup-note--style  .matchup-note-subject,
+.matchup-note--clash  .matchup-note-subject { background: rgba(212,168,67,.12); color: var(--accent); }
+.matchup-note--risk   .matchup-note-subject { background: rgba(217,95,95,.12); color: var(--red); }
+.matchup-note--fade   .matchup-note-subject { background: rgba(76,175,130,.12); color: var(--green); }
+.matchup-note-body { font-size: 10px; font-family: var(--font); color: var(--text-dim); line-height: 1.55; }
+
 /* MarketsScreen — Pick log UI */
 .markets-pick-panel { border-bottom: 1px solid var(--border); padding: 12px 16px; background: var(--surface); }
 .mkt-pick-btn { font-size: 9px; font-family: var(--mono); font-weight: 700; letter-spacing: .06em; padding: 2px 7px; background: transparent; border: 1px solid var(--border2); color: var(--text-dim); cursor: pointer; transition: all .12s; flex-shrink: 0; }
