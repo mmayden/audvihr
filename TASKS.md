@@ -11,7 +11,39 @@
 ## Current Sprint
 
 **Branch:** —
-**Status:** No active sprint. v0.18.0 shipped. See Backlog for next candidates.
+**Status:** No active sprint. v0.18.0 shipped.
+
+---
+
+## Proposed Next Sprint — Phase 18: Women's Divisions + Keyboard Nav (v0.19.0)
+
+> Cut `feature/phase-18` from `master`. Two independently shippable workstreams — women's roster is data-heavy, keyboard nav is code-only. Sequence: keyboard nav first (immediate value, zero data dependency), then women's divisions.
+
+**Branch:** `feature/phase-18` (not yet cut)
+
+### Workstream A — Keyboard Navigation
+
+- [ ] `FighterScreen` sidebar: arrow keys move focus through `.sidebar-fighter` rows; `Enter` selects; `Escape` closes; `aria-activedescendant` on the container; test coverage
+- [ ] `CalendarScreen` sidebar: same pattern
+- [ ] `CompareScreen` `FighterSearch` dropdowns: already uses `role=combobox`; verify `aria-activedescendant` is wired to the highlighted option; add keyboard navigation tests
+- [ ] Global `Tab` audit: confirm all interactive elements are reachable in logical DOM order on all 5 screens; fix any focus traps or skipped elements
+- [ ] `App.jsx` bottom nav: confirm `Tab` cycles through all 5 nav items; `Enter`/`Space` activates; already has `aria-label`
+
+### Workstream B — Women's Divisions
+
+- [ ] `fighter-seed.json`: add ~30 Strawweight / Flyweight / Bantamweight fighters (archetype, mods, chin, cardio, weight_cut, notes, ufcstats_url)
+- [ ] `scripts/fetch-data.js`: verify scraper handles women's division weight class strings from UFCStats (`Women's Strawweight` etc.)
+- [ ] Run `npm run build` to confirm all new fighters scrape cleanly (0 errors in scrape log)
+- [ ] `FighterScreen` weight filter: add women's division options (currently shows only men's divisions)
+- [ ] `statFilters.js` physical predicates: verify `height` / `reach` thresholds are sensible for women's roster (may need separate tier calibration)
+- [ ] Smoke test: open FighterScreen, select a women's division fighter, confirm all 6 tabs render, percentile badges work, compare works
+
+### Quality Gate (before merge)
+- [ ] `npm run test:run` — all existing 481 tests still pass; new keyboard nav tests added (target: ≥ 15 new tests)
+- [ ] `npm run lint` — 0 errors
+- [ ] `npm audit` — 0 critical/high CVEs
+- [ ] CHANGELOG.md `[Unreleased]` → `[0.19.0]`
+- [ ] TASKS.md, PLANNING.md, CLAUDE.md updated
 
 ---
 
@@ -242,25 +274,26 @@
 
 ---
 
-## Backlog (Unscheduled — Post Phase 16)
+## Backlog (Unscheduled — Post v0.18.0)
 
 #### High value
-- [x] ~~**CORS proxy for live RSS**~~ — shipped 2026-03-18: `netlify/functions/rss-proxy.js` + `api/rss-proxy.js`; strict allowlist; `useNews` routes through `/api/rss-proxy`
-- [x] ~~**Fighter stat range search**~~ — shipped in Phase 16 (11-preset STAT FILTERS panel in FighterScreen sidebar)
-- [x] ~~**MUAY THAI + CLINCH FIGHTER in ARCH_COLORS**~~ — shipped in Phase 16 (teal/gold)
-- [ ] **Stat trend lines** — per-fight stat trajectory over last N fights; requires scraper enhancement to store per-fight stats alongside career averages
-- [ ] **Historical opening line database** — searchable archive of opening lines per fighter across all past fights
+- [x] ~~**CORS proxy for live RSS**~~ — shipped v0.17.0
+- [x] ~~**Fighter stat range search**~~ — shipped v0.16.0 (11-preset STAT FILTERS)
+- [x] ~~**MUAY THAI + CLINCH FIGHTER in ARCH_COLORS**~~ — shipped v0.16.0
+- [x] ~~**Mobile-first development phase**~~ — shipped v0.18.0
+- [ ] **Women's divisions** — Strawweight, Flyweight, Bantamweight (~30 fighters); same seed + scrape pipeline; in Proposed Phase 18 sprint
+- [ ] **Keyboard navigation** — arrow keys in sidebar, Tab across screens, keyboard-accessible compare selectors; in Proposed Phase 18 sprint
+- [ ] **Stat trend lines** — per-fight trajectory over last N fights; requires scraper to store per-fight stats alongside career averages; needs Chart.js/Recharts decision first
 
 #### Medium value
-- [ ] **Women's divisions** — Strawweight, Flyweight, Bantamweight rosters (same seed + scrape pattern, ~30 fighters)
-- [ ] **Chart.js / Recharts for trend charts** — stat bars are functional but trend charts would unlock trajectory analysis; deliberate dependency decision required before adding
-- [ ] **Keyboard navigation** — arrow keys in sidebar, Tab across screens, keyboard-accessible compare selectors
-- [ ] **Manual data refresh button** — in-app button triggers `fetch-data.js` equivalent for same-day stat updates without full rebuild; requires a build API endpoint
+- [ ] **Historical opening line database** — searchable archive of opening lines per fighter across all past fights; needs a scrape source or manual-entry flow
+- [ ] **Chart.js / Recharts for trend charts** — stat bars are functional but trend charts unlock trajectory analysis; deliberate dependency + `npm audit` decision required before adding
+- [ ] **Manual data refresh button** — in-app trigger for same-day stat update without full rebuild; requires a new serverless endpoint with origin check + response validation; add to `connect-src` in both deploy configs
+- [ ] **Recently viewed fighter strip** — last 3 viewed fighters; `recent_fighters` sessionStorage key already reserved; low effort
 
 #### Low / nice-to-have
-- [x] ~~**Visual reskin pass**~~ — partial: Post-Phase-16 polish pass delivered focus rings, input focus colors, label readability improvements, mobile touch targets, card depth, reduced-motion support, sidebar slide animation, and CTA improvements. Final art direction still possible but core polish is done.
-- [x] ~~**Mobile-first development phase**~~ — shipped in v0.18.0: touch tokens, 480px breakpoint, swipe-to-close, headline expand/collapse, iOS auto-zoom fix, screen-level tests.
-- [ ] **Sound design** — optional click feedback, opt-in only; deliberate decision required before adding audio
+- [x] ~~**Visual reskin pass**~~ — delivered Post-Phase-16 polish
+- [ ] **Sound design** — optional click feedback, opt-in only; deliberate decision required before adding audio (new browser API surface)
 
 ---
 

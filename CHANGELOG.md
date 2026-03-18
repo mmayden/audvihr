@@ -4,6 +4,21 @@ All notable changes to this project. Format: [version] — date — description.
 
 ---
 
+## [Unreleased]
+
+> Work in progress on `feature/phase-18`. Promote to `[0.19.0]` at merge.
+
+### Added
+_(nothing yet)_
+
+### Changed
+_(nothing yet)_
+
+### Security
+_(nothing yet)_
+
+---
+
 ## [0.18.0] — 2026-03-18
 
 ### Phase 17 — Mobile-First UX
