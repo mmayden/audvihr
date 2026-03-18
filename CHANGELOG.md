@@ -4,18 +4,31 @@ All notable changes to this project. Format: [version] — date — description.
 
 ---
 
-## [Unreleased]
+## [0.18.1] — 2026-03-18
 
-> Work in progress on `feature/phase-18`. Promote to `[0.19.0]` at merge.
+### Visual Identity — MONOLITH + ARENA themes; button overlay fix
 
-### Added
-_(nothing yet)_
+#### Added
+- **`app.css`** — `--accent-bg` and `--accent-bg-mid` CSS variables added to all three theme blocks (`:root`, `[data-theme="light"]`, `@media prefers-color-scheme: light`). Theme-adaptive accent tint backgrounds. MONOLITH: `rgba(0,200,255,.07)` / `rgba(0,200,255,.12)`. ARENA: `rgba(224,104,40,.07)` / `rgba(224,104,40,.12)`.
 
-### Changed
-_(nothing yet)_
+#### Changed
+- **`app.css` `:root` — MONOLITH theme** replaces old dark palette. Near-void cold blue-blacks (`#07080f` bg, `#0d0f1a` surface, `#121520` surface2, `#171b28` surface3). Electric cyan accent `#00c8ff`. Cold blue-white text `#dce6f8`. Deeper box-shadows. A data-terminal, premium analytics aesthetic.
+- **`app.css` `[data-theme="light"]` — ARENA theme** replaces old white/bright light theme. Deep charcoal-amber darks (`#0f0c08` bg, `#181410` surface, `#221e18` surface2, `#2c2620` surface3). Ember orange accent `#e06828`. Warm cream text `#f0e2cc`. Tobacco-brown borders. Neither theme is white — ARENA is a warm dark experience.
+- **`app.css` `@media (prefers-color-scheme: light)`** — OS light preference now maps to ARENA palette rather than the old white theme.
+- **`app.css` `.topbar`** — padding changed from `0 20px` to `0 80px 0 20px` (desktop). The 80px right clearance prevents the fixed floating theme toggle from overlapping topbar-right action buttons (↓ MD, COPY LINK, etc.). Mobile `@media (max-width: 767px)` override restores symmetric `0 14px` (toggle is hidden on mobile).
+- **`app.css`** — all 10 hardcoded `rgba(212,168,67,...)` gold tint values replaced with `var(--accent-bg)` or `var(--accent-bg-mid)`. Affected rules: `.filter-chip.on`, `.id-pill.champ`, `.cal-title-banner`, `.mkt-arb-alert`, `.mkt-public-fade-badge`, `.fighter-search-option.selected`, `.matchup-note--style/clash .matchup-note-subject`, `.mkt-pick-chip.on`, `.mkt-pick-save:not(:disabled):hover`, `.percentile-badge--top35`.
+- **`useTheme.js`** — toggle label changed from `'LIGHT'` / `'DARK'` to `'ARENA'` / `'MONOLITH'`. The toggle now cycles between the two named theme palettes.
+- **`useTheme.test.js`** — two label test assertions updated to `'ARENA'` and `'MONOLITH'`.
+- **`MenuScreen.jsx`** — version badge updated to `v0.18.1`.
 
-### Security
-_(nothing yet)_
+#### Security
+- Button overlay fix is pure CSS (`padding` value) — no new code paths, no storage, no network.
+- Theme palette changes are CSS variable substitutions only — no new external domains, no CDN resources, no CSP changes, no new npm dependencies.
+- `--accent-bg` / `--accent-bg-mid` are CSS variables over static `rgba()` literals — no user input surface, no injection risk.
+- **0 new CSP entries. 0 new npm runtime dependencies. 0 new external domains.**
+
+#### Testing
+- **481 tests, all passing. 0 lint errors. 0 CVEs.**
 
 ---
 

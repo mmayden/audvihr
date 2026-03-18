@@ -20,7 +20,7 @@ export const useTheme = () => {
   }, [theme]);
 
   const toggle = () => setTheme(t => (t === 'light' ? 'dark' : 'light'));
-  const label  = theme === 'light' ? 'DARK' : 'LIGHT';
+  const label  = theme === 'light' ? 'MONOLITH' : 'ARENA';
 
   return { theme, toggle, label };
 };

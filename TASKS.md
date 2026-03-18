@@ -11,7 +11,7 @@
 ## Current Sprint
 
 **Branch:** —
-**Status:** No active sprint. v0.18.0 shipped.
+**Status:** No active sprint. v0.18.1 shipped.
 
 ---
 
@@ -48,6 +48,23 @@
 ---
 
 ## ✅ Completed Sprints
+
+### ✅ v0.18.1 — Visual Identity + Bug Fix — 2026-03-18
+
+**Branch:** `feature/phase-17-mobile`
+
+- [x] **MONOLITH theme** (`:root`): near-void cold blue-blacks; electric cyan `#00c8ff` accent; cold text `#dce6f8`; deeper shadows
+- [x] **ARENA theme** (`[data-theme="light"]`): deep charcoal-amber darks; ember orange `#e06828` accent; warm cream text `#f0e2cc`; tobacco borders — not white
+- [x] OS `prefers-color-scheme: light` mapped to ARENA palette
+- [x] `--accent-bg` / `--accent-bg-mid` CSS tokens added to all three theme blocks; all 10 hardcoded `rgba(212,168,67,...)` gold tints replaced
+- [x] `.topbar` padding `0 80px 0 20px` on desktop (button overlay fix); mobile override `0 14px`
+- [x] `useTheme.js` — toggle label changed to `'ARENA'` / `'MONOLITH'`
+- [x] `useTheme.test.js` — 2 label assertions updated
+- [x] `package.json` + `MenuScreen.jsx` version badge → `v0.18.1`
+- [x] CHANGELOG, TASKS, PLANNING, CLAUDE.md updated
+- [x] 481 tests passing; 0 lint errors; 0 CVEs
+
+---
 
 ### ✅ v0.18.0 — Phase 17 Mobile-First UX — 2026-03-18
 

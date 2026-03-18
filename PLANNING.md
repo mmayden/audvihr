@@ -175,36 +175,78 @@ Test files are co-located with source: `*.test.{js,jsx}` next to the file under 
 ## Design System
 
 ### Color Palette (CSS Variables)
+
+Two named theme palettes. Neither is white. Toggle via `data-theme` on `<html>`.
+
+#### MONOLITH — cold electric dark (`:root`, default)
 ```css
 /* Surface / structure */
---bg:           #12141a   /* page background */
---surface:      #1a1d26   /* card/panel background */
---surface2:     #21252f   /* elevated surface */
---surface3:     #272c38   /* active/selected state */
---border:       #2e3340   /* default border */
---border2:      #3a4055   /* hover/active border */
+--bg:           #07080f   /* near-void dark */
+--surface:      #0d0f1a   /* deep blue-black */
+--surface2:     #121520   /* elevated surface */
+--surface3:     #171b28   /* active/selected state */
+--border:       #1e2536   /* dark navy border */
+--border2:      #283248   /* hover/active border */
 
 /* Text */
---text:         #c8cdd8   /* body text */
---text-dim:     #6b7285   /* labels, metadata */
---text-bright:  #eef0f5   /* headings, primary values */
+--text:         #b8c4d8   /* cold blue-white body text */
+--text-dim:     #3e4a62   /* muted labels, metadata */
+--text-bright:  #dce6f8   /* headings, primary values */
 
 /* Accent */
---accent:       #d4a843   /* primary accent: amber — pressure fighter arch, checklist, active states */
---accent-dim:   #8a6e2a   /* muted accent */
+--accent:       #00c8ff   /* electric cyan — active states, interactive elements */
+--accent-dim:   #006888   /* muted cyan */
 
 /* Semantic colors */
---green:        #4caf82   /* positive, wins, BJJ/sub hunter arch */
---red:          #d95f5f   /* negative, losses, danger, boxer-puncher arch */
---dark-red:     #c0392b   /* brawler arch, front-runner modifier */
---blue:         #5b8dd9   /* wrestler arch, stat filter chips on, F2 compare edge */
---purple:       #8b6fd4   /* counter striker arch */
---orange:       #d4804a   /* kickboxer arch, warnings, edge signal flags */
---teal:         #3aafa9   /* muay thai arch */
---gold:         #c9a84c   /* clinch fighter arch */
+--green:        #22d686   /* positive, wins, BJJ/sub hunter arch */
+--red:          #f04050   /* negative, losses, danger, boxer-puncher arch */
+--dark-red:     #c83040   /* brawler arch, front-runner modifier */
+--blue:         #4a90f0   /* wrestler arch, stat filter chips, F2 compare edge */
+--purple:       #9070f0   /* counter striker arch */
+--orange:       #f07840   /* kickboxer arch, warnings, edge signal flags */
+--teal:         #00b8c0   /* muay thai arch */
+--gold:         #c8a040   /* clinch fighter arch */
+
+/* Accent tint backgrounds */
+--accent-bg:     rgba(0,200,255,.07)   /* subtle accent fill (chips, banners) */
+--accent-bg-mid: rgba(0,200,255,.12)   /* medium accent fill (hover states, badges) */
 ```
 
-Light theme overrides only `--bg`, `--surface*`, `--border*`, `--text*`, `--accent`, `--accent-dim`. All archetype/semantic color primitives remain constant across themes.
+#### ARENA — warm ember dark (`[data-theme="light"]` + system light preference)
+```css
+/* Surface / structure */
+--bg:           #0f0c08   /* deep charcoal-amber */
+--surface:      #181410   /* warm dark surface */
+--surface2:     #221e18   /* elevated surface */
+--surface3:     #2c2620   /* active/selected state */
+--border:       #3a3028   /* tobacco-brown border */
+--border2:      #4a3e32   /* hover/active border */
+
+/* Text */
+--text:         #cec0a8   /* warm medium text */
+--text-dim:     #6a5840   /* warm dim labels */
+--text-bright:  #f0e2cc   /* warm cream headings */
+
+/* Accent */
+--accent:       #e06828   /* ember orange — fight-night energy */
+--accent-dim:   #904020   /* dark ember */
+
+/* Semantic colors */
+--green:        #50c878   /* positive, wins */
+--red:          #d03028   /* blood red — losses, danger */
+--dark-red:     #b02020   /* brawler arch, front-runner modifier */
+--blue:         #5888d0   /* wrestler arch, stat filter chips, F2 compare edge */
+--purple:       #9068c8   /* counter striker arch */
+--orange:       #e08840   /* kickboxer arch, warnings */
+--teal:         #38a890   /* muay thai arch */
+--gold:         #c89038   /* clinch fighter arch */
+
+/* Accent tint backgrounds */
+--accent-bg:     rgba(224,104,40,.07)   /* subtle ember fill */
+--accent-bg-mid: rgba(224,104,40,.12)   /* medium ember fill */
+```
+
+Archetype/semantic color primitives differ between themes. All values are still CSS variables — no hardcoded hex in component code.
 
 ### Touch Target Tokens
 ```css
@@ -220,7 +262,11 @@ Declared in all three theme blocks. Use `min-height: var(--touch-target, 44px)` 
 
 ### Visual Direction
 
-**Guiding principle:** dense-data readability first. Think scouting report, not gaming UI. Clean, functional, dark. Soft on the eyes. No particle effects, no animated backgrounds. Animations only where they reduce cognitive load (fade-in on tab switch).
+**Guiding principle:** dense-data readability first. Think scouting report, not gaming UI. Neither theme is white. No particle effects, no animated backgrounds. Animations only where they reduce cognitive load (fade-in on tab switch, sidebar slide-in).
+
+**Theme identity (v0.18.1):**
+- **MONOLITH** — cold, electric, data-terminal. Near-void dark blues with cyan highlights. Premium analytics feel. Default.
+- **ARENA** — warm, amber-lit, fight-night energy. Deep charcoal-amber with ember orange. The lights are down and the cage is lit.
 
 **Phase 14 visual targets — all delivered in v0.14.0:**
 
@@ -690,6 +736,7 @@ Ordered by value vs. effort. Full sprint tasks in TASKS.md.
 | **Phase 15** ✅ | Matchup Context Engine | `src/constants/matchupWarnings.js` — `computeMatchupWarnings(f1, f2)` pure function; returns `Warning[]`. Three rule sets: `ARCHETYPE_RULES` (14 directional matchup edges), `STYLE_CLASHES` (8 symmetric interactions), `MOD_RULES` (10 modifier-triggered notes, optionally conditioned on opponent archetype). All rule strings static — fighter names substituted by CompareScreen at render. MATCHUP NOTES section in CompareScreen between hero header and stat table; four visual variants: style (amber), risk (red), fade (green), clash (blue). 27 tests (27 new); 419 total. | Pure function with no DOM access, no side effects, no external calls. All rule strings are hardcoded static literals — no user input interpolated. `computeMatchupWarnings` called in `useMemo` in CompareScreen; result rendered via JSX text nodes only. No new external domains; no CSP changes; no new runtime dependencies. |
 | **Phase 16** ✅ | Stat Range Search | `src/constants/statFilters.js` — 11 preset filter definitions (4 categories: STRIKING, GRAPPLING, FINISHING, PHYSICAL); each: `{ id, label, category, predicate(fighter) → boolean }`. FighterScreen collapsible STAT FILTERS panel: toggle button with active-count badge, chips grouped by category, AND logic with existing name search + weight class filter, CLEAR ALL. MUAY THAI + CLINCH FIGHTER added to ARCH_COLORS (`--teal` #3aafa9, `--gold` #c9a84c). 35 tests (35 new); 454 total. | Predicate functions are pure closures over static thresholds — no I/O, no side effects. Input to predicates is the in-memory FIGHTERS array (build-time scraped, validated at fetch time). No new external domains; no CSP changes; no new runtime dependencies. Active filter set stored as React state (`Set<string>`) — no localStorage, no URL params. |
 | **v0.17.0** ✅ | CORS Proxy + Visual & QoL Polish | `netlify/functions/rss-proxy.js` + `api/rss-proxy.js` — same-origin serverless RSS proxy. `useNews` routes all fetches through `/api/rss-proxy?url=...`. MMA Fighting + MMA Junkie removed from CSP `connect-src`. Visual polish: broken CSS variable fix (`--bg-elevated`, `--bg-card`), design tokens, global focus rings, sidebar slide animation, VS button CTA, label readability, mobile touch targets, card depth, `prefers-reduced-motion` support, ARIA on sidebar toggles. 2 tests (proxy routing); 456 total. | SSRF prevention: `ALLOWED_URLS.has(url)` — exact Set equality only, 2-entry allowlist, no patterns. 403 on any unlisted URL. 512 KB response cap, 10s timeout, GET only, no auth header forwarding. RSS origins removed from browser-reachable `connect-src`. Proxy runs server-side only — zero CORS exposure. No new runtime npm dependencies; no new external domains beyond the proxy itself. |
+| **v0.18.1** ✅ | Visual Identity + Bug Fix | **Delivered v0.18.1.** MONOLITH theme (cold electric dark, cyan `#00c8ff` accent) + ARENA theme (warm ember dark, orange `#e06828` accent) replace the old light/dark palette. `--accent-bg` / `--accent-bg-mid` CSS tokens; 10 hardcoded gold rgba values removed. `.topbar` padding fix (button overlay). `useTheme` labels → ARENA / MONOLITH. No new external surfaces. | No new CSP entries; no new npm deps; no new external domains. CSS variable substitution only. |
 | **Phase 17** ✅ | Mobile-First UX | **Delivered v0.18.0.** Bottom nav: emoji icon + label stack, `min-height: var(--touch-target, 44px)`. `--touch-target: 44px` / `--touch-target-sm: 36px` tokens in all theme blocks. `@media (max-width: 480px)`: compare hero stacks (F1/VS/F2); headline line-clamped 3 lines; `.card-portrait` 64×64px; `.compare-table-wrap { overflow-x: auto }` + `.ctable { min-width: 400px }` for horizontal scroll. Swipe-to-close sidebars (`useRef` + `onTouchStart`/`onTouchEnd`; velocity ≥ 80 px/s OR drag ≥ 112px). Stat filter chips 36px; filters body scrollable. News cat chips horizontal-scroll. Markets live-row 1fr; threshold input 16px (iOS fix); PICKS scrollable. Calendar COMPARE btn 36px. `CalendarScreen.test.jsx` (7 tests) + `NewsScreen.test.jsx` (9 tests). 481 tests total. | No new CSP surfaces (touch events are internal DOM). No new npm dependencies. `font-size ≥ 16px` enforced on `.mkt-alert-threshold` — iOS auto-zoom rule codified in CLAUDE.md. `card-portrait` at 64px is self-hosted, no CSP change. |
 
 ---
@@ -827,3 +874,4 @@ Before beginning a new phase, verify:
 | 2026-03-18 | Phase 17: stat table horizontal scroll on ≤480px | The `.ctable` (3-column compare table: F1 value / stat label / F2 value) becomes illegible when squished onto a 375px viewport — the F1/F2 value columns truncate or wrap. Rather than hide columns (which loses information), the table now scrolls horizontally at ≤480px: `.compare-table-wrap { overflow-x: auto }` + `.ctable { min-width: 400px }`. 400px ensures each column has enough width for a value + tier label without wrapping. The wrapper already has `overflow-y: auto` — adding `overflow-x` does not affect vertical scroll. |
 | 2026-03-18 | Phase 17: CalendarScreen + NewsScreen — screen-level tests added | FighterScreen already had sidebar-toggle tests. CalendarScreen and NewsScreen both have JS-conditional render paths (sidebar open/close; headline expand/collapse) that differ from the default state and are not CSS-only. TASKS.md Phase 17 item: "Add responsive smoke tests if any screen has a conditional render path that differs on mobile." `CalendarScreen.test.jsx` (7 tests: sidebar EVENTS button, backdrop, sidebar--open class, aria-expanded both states). `NewsScreen.test.jsx` (9 tests: headline click/double-click/Enter/Space, aria-expanded, role=button). vi.hoisted() pattern required for CalendarScreen because vi.mock factories are hoisted before const declarations — matches the existing FighterScreen.test.jsx pattern. 481 tests total; 0 lint errors. |
 | 2026-03-18 | v0.18.0 — Phase 17 complete; merged to master | All Phase 17 tasks checked off: touch tokens, 480px breakpoint, swipe-to-close sidebars, headline expand/collapse, iOS auto-zoom fix, bottom nav icon+label, date.js consolidation, CalendarScreen.test.jsx + NewsScreen.test.jsx (481 tests, 0 lint errors, 0 CVEs). Documentation updated: CLAUDE.md phase reference cleaned up; PLANNING.md file structure phase annotations stripped, CSP example updated to match actual deployed policy (added worker-src, actual connect-src domains, HSTS header); TASKS.md Phase 17 sprint moved to Completed. North Star feature set: all 11 items delivered. No new external domains; no new runtime npm dependencies; no CSP changes. |
+| 2026-03-18 | v0.18.1 — MONOLITH + ARENA theme system; button overlay fix | Replaced old generic light/dark palette with two named, intentional themes: MONOLITH (cold electric dark — near-void blue-black, cyan accent `#00c8ff`) and ARENA (warm ember dark — charcoal-amber, ember orange `#e06828`). Neither theme is white. The old light theme (pure white `#ffffff` surfaces) was replaced after user feedback that it was too bright. Both themes are dark-base with distinct personality. `--accent-bg` + `--accent-bg-mid` CSS tokens replace 10 hardcoded `rgba(212,168,67,...)` values throughout `app.css` — theme-adaptive accent tints now resolve correctly in both themes. `.topbar` desktop padding `0 20px → 0 80px 0 20px` fixes the fixed-position theme toggle button overlapping topbar-right action buttons (↓ MD, COPY LINK). Mobile override `0 14px` restores symmetric padding when toggle is hidden. `useTheme.js` labels changed from `'LIGHT'/'DARK'` to `'ARENA'/'MONOLITH'`. 481 tests, 0 lint errors, 0 CVEs. No new external domains; no new npm dependencies; no CSP changes. |
