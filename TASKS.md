@@ -158,7 +158,7 @@
 
 ---
 
-## Backlog (Unscheduled — Post Phase 15)
+## Backlog (Unscheduled — Post Phase 16)
 
 #### High value
 - [ ] **CORS proxy for live RSS** — one Netlify/Vercel edge function; `useNews` hook is fully ready, this is pure infra
