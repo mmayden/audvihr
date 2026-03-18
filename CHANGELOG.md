@@ -4,6 +4,21 @@ All notable changes to this project. Format: [version] — date — description.
 
 ---
 
+## [0.15.0] — 2026-03-17
+
+### Phase 15 — Matchup Context Engine
+
+#### Added
+- `src/constants/matchupWarnings.js` — `computeMatchupWarnings(f1, f2)` pure function; returns `Warning[]` (`{ type, headline, body, subject }`). Three rule sets: `ARCHETYPE_RULES` (14 directional matchup edges), `STYLE_CLASHES` (8 symmetric style interactions), `MOD_RULES` (10 modifier-triggered notes, optionally conditioned on opponent archetype). All strings static — fighter last names substituted by CompareScreen at render time.
+- **CompareScreen** — MATCHUP NOTES section between hero header and stat table; renders rich warning cards with headline, subject badge (fighter last name + "EDGE"), and body text; four visual variants by type: style (accent), risk (red), fade (green), clash (blue). Computed via `computeMatchupWarnings` useMemo.
+- Phase 15 CSS additions in `app.css`: `.matchup-notes`, `.matchup-notes-header`, `.matchup-note`, `.matchup-note--style/risk/fade/clash`, `.matchup-note-meta`, `.matchup-note-headline`, `.matchup-note-subject`, `.matchup-note-body`.
+
+#### Testing
+- `matchupWarnings.test.js` — 27 tests: guard (null input), warning shape, directional archetype rules (both directions), symmetric clashes (bidirectional), modifier rules (generic + archetype-conditioned), combined scenarios, determinism.
+- Total: **419 tests, all passing. 0 lint errors.**
+
+---
+
 ## [0.14.0] — 2026-03-17
 
 ### Phase 14 — QoL + Visual Overhaul

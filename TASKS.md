@@ -10,13 +10,23 @@
 
 ## Current Sprint
 
-**Branch:** `master` (Phase 14 complete — no active sprint)
-**Last completed:** Phase 14 — QoL + Visual Overhaul (v0.14.0, 2026-03-17)
-**Next:** See Backlog below. Cut a `feature/phase-15-*` branch when the next phase is scoped.
+**Branch:** `master` (Phase 15 complete — no active sprint)
+**Last completed:** Phase 15 — Matchup Context Engine (v0.15.0, 2026-03-17)
+**Next:** See Backlog below. Cut a `feature/phase-16-*` branch when the next phase is scoped.
 
 ---
 
 ## ✅ Completed Sprints
+
+### ✅ Phase 15 — Matchup Context Engine (v0.15.0) — 2026-03-17
+
+- [x] `src/constants/matchupWarnings.js` — `computeMatchupWarnings(f1, f2)`; ARCHETYPE_RULES (14), STYLE_CLASHES (8), MOD_RULES (10); pure function, no side effects, no fighter names interpolated
+- [x] CompareScreen — MATCHUP NOTES section between hero header and stat table; fighter last name + "EDGE" subject badge; four type variants (style/risk/fade/clash)
+- [x] Phase 15 CSS — `.matchup-notes`, `.matchup-note`, `.matchup-note--style/risk/fade/clash`, `.matchup-note-meta`, `.matchup-note-headline`, `.matchup-note-subject`, `.matchup-note-body`
+- [x] `matchupWarnings.test.js` — 27 tests: guard, shape, directional rules (both directions), symmetric clashes (bidirectional), modifier rules (generic + conditioned), combined, determinism
+- [x] CHANGELOG.md [Unreleased] → v0.15.0; TASKS.md, PLANNING.md, CLAUDE.md updated
+
+---
 
 ### ✅ Phase 14 — QoL + Visual Overhaul (v0.14.0) — 2026-03-17
 
@@ -137,19 +147,14 @@
 
 ---
 
-## Roadmap
-
-### Phase 14 — QoL + Visual Overhaul (current sprint)
-See Current Sprint above.
-
-### Backlog (Unscheduled — Post Phase 14)
+## Backlog (Unscheduled — Post Phase 15)
 
 #### High value
 - [ ] **CORS proxy for live RSS** — one Netlify/Vercel edge function; `useNews` hook is fully ready, this is pure infra
-- [ ] **Matchup context engine** — archetype-aware auto-warnings in compare view ("WRESTLER vs COUNTER STRIKER — takedown threat flagged + judge venue bias noted"). Rules table in `src/constants/matchupWarnings.js`
 - [ ] **Fighter stat range search** — filter roster by stat thresholds ("TD def > 80%", "SLpM > 5"); new FilterScreen or panel in FighterScreen sidebar
 - [ ] **Stat trend lines** — per-fight stat trajectory over last N fights; requires scraper enhancement to store per-fight stats alongside career averages
 - [ ] **Historical opening line database** — searchable archive of opening lines per fighter across all past fights
+- [ ] **MUAY THAI + CLINCH FIGHTER in ARCH_COLORS** — both archetypes have rules in `matchupWarnings.js` but no entry in `src/constants/archetypes.js`. Add before assigning either archetype to any fighter in `fighter-seed.json`. Suggested: MUAY THAI → `var(--orange)`; CLINCH FIGHTER → `var(--purple)`. Zero security surface — pure visual fix.
 
 #### Medium value
 - [ ] **Women's divisions** — Strawweight, Flyweight, Bantamweight rosters (same seed + scrape pattern, ~30 fighters)
