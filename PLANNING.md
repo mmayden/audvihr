@@ -76,7 +76,7 @@ Does fight breakdowns for a podcast or Discord. Wants fast access to stats witho
 8. ✅ **QoL + visual overhaul** — type-to-search, percentile badges, pill badges, fighter cards, pick log, flags pills, compare hero header. Delivered in v0.14.0.
 9. ✅ **Matchup Context Engine** — `computeMatchupWarnings` pure function; MATCHUP NOTES section in CompareScreen with 14 archetype rules, 8 style clashes, 10 modifier warnings. Delivered in v0.15.0.
 10. ✅ **Stat Range Search** — 11-preset STAT FILTERS panel in FighterScreen sidebar; AND logic with name search + weight class; MUAY THAI + CLINCH FIGHTER colors filled in. Delivered in v0.16.0.
-11. 🔜 **Mobile-first development** — Dedicated mobile UX pass beginning next. Sidebar experience, bottom nav enhancements, touch-optimized layouts, gesture support. Post-Phase-16 polish pass already addressed touch targets, sidebar animation, and reduced-motion support.
+11. 🔄 **Mobile-first development (Phase 17 — in progress)** — `feature/phase-17-mobile` branch. Bottom nav now icon + label (emoji + monospace text). `--touch-target: 44px` / `--touch-target-sm: 36px` CSS tokens in all theme blocks. `@media (max-width: 480px)` block for small-phone specifics (compare hero stacks, headline line-clamp). Swipe-to-close on FighterScreen + CalendarScreen sidebars. News headline expand/collapse. Market live-row collapses. iOS font-size ≥ 16px fix. Remaining: portrait sizing at 375px, stat table horizontal scroll, manual smoke test.
 
 ### What This Is Not
 
@@ -87,7 +87,7 @@ Does fight breakdowns for a podcast or Discord. Wants fast access to stats witho
 
 ---
 
-## Current File Structure (Vite + React — v0.17.0)
+## Current File Structure (Vite + React — v0.17.0 / Phase 17 in progress)
 
 The single-file prototype (`mma-trader.html`) was retired at Phase 3a. The project is now a Vite + React app with the following modular layout:
 
@@ -158,11 +158,11 @@ src/
 │   └── TabMarket.jsx         Moneyline entry, implied %, line movement, notes
 ├── screens/
 │   ├── MenuScreen.jsx        Main navigation (5 ACTIVE items) + ⚙ ALERTS settings panel
-│   ├── FighterScreen.jsx     Sidebar + hero card + 6-tab profile
-│   ├── CompareScreen.jsx     FighterCard hero header + implied probability gap; type-to-search selectors; MATCHUP NOTES section (computeMatchupWarnings); stat table with tier labels + edge stripe; edge signal panel; checklist; COPY LINK + ↓ MD export
-│   ├── CalendarScreen.jsx    Event sidebar + card detail + fighter deep-links + COMPARE button per in-roster bout
-│   ├── MarketsScreen.jsx     Unified live market dashboard (sportsbook + Polymarket + Kalshi + opening line + Tapology %) + alert bell per fight + + PICK per fight + CLV ↓ CSV export + PICKS log panel
-│   └── NewsScreen.jsx        Fighter news feed with filters; LIVE/MOCK source badge; per-item badge (Phase 5 + 12)
+│   ├── FighterScreen.jsx     Sidebar + hero card + 6-tab profile; useRef swipe-to-close on sidebar drawer (Phase 17)
+│   ├── CompareScreen.jsx     FighterCard hero header + implied probability gap; type-to-search selectors; MATCHUP NOTES section (computeMatchupWarnings); stat table with tier labels + edge stripe; edge signal panel; checklist; COPY LINK + ↓ MD export; hero stacks vertically at ≤480px (Phase 17)
+│   ├── CalendarScreen.jsx    Event sidebar + card detail + fighter deep-links + COMPARE button per in-roster bout; useRef swipe-to-close on sidebar drawer (Phase 17)
+│   ├── MarketsScreen.jsx     Unified live market dashboard (sportsbook + Polymarket + Kalshi + opening line + Tapology %) + alert bell per fight + PICK per fight + CLV ↓ CSV export + PICKS log panel; mkt-live-row collapses to single column on mobile (Phase 17)
+│   └── NewsScreen.jsx        Fighter news feed with filters; LIVE/MOCK source badge; per-item badge; headline expand/collapse on tap (expandedIds state; -webkit-line-clamp at ≤480px) (Phase 5 + 12 + 17)
 └── test/
     └── setup.js              Vitest setup — jest-dom + in-memory localStorage mock
 ```
@@ -204,6 +204,13 @@ Test files are co-located with source: `*.test.{js,jsx}` next to the file under 
 ```
 
 Light theme overrides only `--bg`, `--surface*`, `--border*`, `--text*`, `--accent`, `--accent-dim`. All archetype/semantic color primitives remain constant across themes.
+
+### Touch Target Tokens (Phase 17)
+```css
+--touch-target:    44px   /* primary interactive elements: nav items, primary buttons */
+--touch-target-sm: 36px   /* secondary chips, compact controls */
+```
+Declared in all three theme blocks. Use `min-height: var(--touch-target, 44px)` — never magic pixel values. iOS minimum is 44px; WCAG 2.5.8 (Level AA) recommends 24px minimum with adequate spacing; 44px exceeds both standards.
 
 ### Typography
 - Body: `Inter` (weights 300–700)
@@ -472,7 +479,7 @@ Checklist persists per matchup via localStorage. Key = `cl_{f1id}_{f2id}`.
 
 ## Security Model
 
-### Current State (Vite + React — v0.17.0)
+### Current State (Vite + React — v0.17.0 / Phase 17 in progress)
 
 | Surface | Risk | Status |
 |---------|------|--------|
@@ -528,6 +535,12 @@ Permissions-Policy: geolocation=(), camera=(), microphone=()
 - **Service Worker + Notification API (Phase 11)** ✅ — SW scope `/`, no fetch handler. Alert body: string concatenation only (`textContent` semantics). `worker-src 'self'` added to CSP.
 - **External news feeds (Phase 12)** ✅ — All feed content text-extracted via DOMParser — no HTML reaches the DOM. XSS coverage in `newsParser.test.js`.
 - **CORS proxy for live RSS (2026-03-18)** ✅ — `netlify/functions/rss-proxy.js` (Netlify Functions v2) + `api/rss-proxy.js` (Vercel). Strict `ALLOWED_URLS` Set — exact-match only, 2 entries. 403 on any unlisted url. 512 KB cap, 10s timeout, GET only, no auth header forwarding. `useNews` updated to route all fetches through `/api/rss-proxy?url=...`. `mmafighting.com` + `mmajunkie.usatoday.com` removed from CSP `connect-src` — browser can no longer directly contact these origins.
+
+**Phase 17 mobile surfaces (all resolved):**
+- **Touch event handlers (Phase 17)** ✅ — `onTouchStart`/`onTouchEnd` on `.sidebar--open` divs (FighterScreen, CalendarScreen). These are internal DOM events — no new external surfaces, no CSP changes required.
+- **iOS auto-zoom prevention (Phase 17)** ✅ — `.mkt-alert-threshold` upgraded to `font-size: 16px` on mobile. Security-neutral but UX-critical; prevents involuntary viewport zoom that could disorient users and make the interface unusable.
+- **Bottom nav icons (Phase 17)** ✅ — Emoji characters rendered via JSX text nodes in `aria-hidden` spans. No new external resources, no CSP change. Emoji are static strings — no user input, no injection surface.
+- **News headline expand/collapse (Phase 17)** ✅ — State is a `Set<string>` of item IDs (internal), toggled onClick. No user content rendered as HTML — all via JSX text nodes as before. No new storage keys, no new network requests.
 
 **Completed phase surfaces (continued):**
 - **React Router + shareable URLs (Phase 13)** ✅ — `BrowserRouter` in `App.jsx`. URL params contain only numeric fighter IDs. `FighterScreenRoute` and `CompareScreenRoute` validate params with `/^\d+$/` before FIGHTERS lookup. History API navigation requires no CSP change. SPA fallback added to `netlify.toml` (200 redirect) and `vercel.json` (rewrites). `noindex` tag preserved.
@@ -664,7 +677,7 @@ Ordered by value vs. effort. Full sprint tasks in TASKS.md.
 | **Phase 15** ✅ | Matchup Context Engine | `src/constants/matchupWarnings.js` — `computeMatchupWarnings(f1, f2)` pure function; returns `Warning[]`. Three rule sets: `ARCHETYPE_RULES` (14 directional matchup edges), `STYLE_CLASHES` (8 symmetric interactions), `MOD_RULES` (10 modifier-triggered notes, optionally conditioned on opponent archetype). All rule strings static — fighter names substituted by CompareScreen at render. MATCHUP NOTES section in CompareScreen between hero header and stat table; four visual variants: style (amber), risk (red), fade (green), clash (blue). 27 tests (27 new); 419 total. | Pure function with no DOM access, no side effects, no external calls. All rule strings are hardcoded static literals — no user input interpolated. `computeMatchupWarnings` called in `useMemo` in CompareScreen; result rendered via JSX text nodes only. No new external domains; no CSP changes; no new runtime dependencies. |
 | **Phase 16** ✅ | Stat Range Search | `src/constants/statFilters.js` — 11 preset filter definitions (4 categories: STRIKING, GRAPPLING, FINISHING, PHYSICAL); each: `{ id, label, category, predicate(fighter) → boolean }`. FighterScreen collapsible STAT FILTERS panel: toggle button with active-count badge, chips grouped by category, AND logic with existing name search + weight class filter, CLEAR ALL. MUAY THAI + CLINCH FIGHTER added to ARCH_COLORS (`--teal` #3aafa9, `--gold` #c9a84c). 35 tests (35 new); 454 total. | Predicate functions are pure closures over static thresholds — no I/O, no side effects. Input to predicates is the in-memory FIGHTERS array (build-time scraped, validated at fetch time). No new external domains; no CSP changes; no new runtime dependencies. Active filter set stored as React state (`Set<string>`) — no localStorage, no URL params. |
 | **v0.17.0** ✅ | CORS Proxy + Visual & QoL Polish | `netlify/functions/rss-proxy.js` + `api/rss-proxy.js` — same-origin serverless RSS proxy. `useNews` routes all fetches through `/api/rss-proxy?url=...`. MMA Fighting + MMA Junkie removed from CSP `connect-src`. Visual polish: broken CSS variable fix (`--bg-elevated`, `--bg-card`), design tokens, global focus rings, sidebar slide animation, VS button CTA, label readability, mobile touch targets, card depth, `prefers-reduced-motion` support, ARIA on sidebar toggles. 2 tests (proxy routing); 456 total. | SSRF prevention: `ALLOWED_URLS.has(url)` — exact Set equality only, 2-entry allowlist, no patterns. 403 on any unlisted URL. 512 KB response cap, 10s timeout, GET only, no auth header forwarding. RSS origins removed from browser-reachable `connect-src`. Proxy runs server-side only — zero CORS exposure. No new runtime npm dependencies; no new external domains beyond the proxy itself. |
-| **Phase 17** 🔜 | Mobile-First UX | Dedicated mobile UX pass. Bottom nav labels, touch targets audit, sidebar swipe-to-close, mobile layouts for Compare/Markets/News/Calendar, `--touch-target` CSS token, responsive smoke tests. Target: first-class experience at 375px. | Touch event handlers are internal DOM events — no new CSP surfaces. `font-size ≥ 16px` on inputs prevents iOS auto-zoom. No new external domains. Run `npm audit` if any swipe library is evaluated. |
+| **Phase 17** 🔄 | Mobile-First UX | `feature/phase-17-mobile` — in progress. Bottom nav: emoji icon + label stack, `min-height: 44px`. `--touch-target: 44px` / `--touch-target-sm: 36px` CSS tokens in all theme blocks. `@media (max-width: 480px)` small-phone block (compare hero stacks, news headline clamped 3 lines). Swipe-to-close sidebars (FighterScreen + CalendarScreen; `useRef` + `onTouchStart`/`onTouchEnd`; velocity ≥ 80px/s OR drag ≥ 112px). Stat filter chips 36px; filters body scrollable. News cat chips horizontal-scroll; filterbar stacks. Markets live-row 1fr; threshold input 16px; PICKS scrollable. Calendar COMPARE btn 36px. 465 tests. Remaining: portrait sizing at 375px, stat table horizontal scroll, manual smoke test. | No new CSP surfaces (touch events are internal DOM). No new npm dependencies. `font-size ≥ 16px` applied to `.mkt-alert-threshold` to prevent iOS auto-zoom — rule now documented in CLAUDE.md. Any future swipe library addition requires `npm audit` before merge. |
 
 ---
 
@@ -766,3 +779,9 @@ Ordered by value vs. effort. Full sprint tasks in TASKS.md.
 | 2026-03-18 | Post-Phase-16: mobile begins — touch target baseline established | Filter chips and sidebar fighter rows brought to 36px minimum tap height. Portrait size reduced (160px → 88px) to recover vertical space on small viewports without sacrificing the identity section. These changes are preparatory for the upcoming mobile-first development phase. No layout architecture changes yet — that is Phase 17 scope. |
 | 2026-03-18 | CORS proxy for live RSS: same-origin serverless function, strict allowlist | Direct browser fetches to MMA Fighting and MMA Junkie RSS feeds fail in production because neither site sends `Access-Control-Allow-Origin` headers. Added `netlify/functions/rss-proxy.js` (Netlify Functions v2, served at `/api/rss-proxy` via `config.path`) and `api/rss-proxy.js` (Vercel, auto-routed from `api/` directory). Both validate the `url` query param against a two-entry Set allowlist — any unlisted URL returns 403, preventing SSRF abuse. Response size is capped at 512 KB. `useNews` hook updated to route all RSS fetches through `/api/rss-proxy?url=...` (same-origin, no browser CORS restriction). MMA Fighting and MMA Junkie removed from CSP `connect-src` in both `netlify.toml` and `vercel.json` — the browser no longer connects to these origins directly. Vercel SPA rewrite exclusion updated to also exclude `api/`. |
 | 2026-03-18 | Codebase reassessment — 0 critical/high issues found | Full audit against CLAUDE.md standards: security (all 15 checks pass), React practices, modular structure, test coverage, accessibility, performance, documentation. One medium gap confirmed: `aria-pressed` on stat filter chips — already present (audit false positive). Three low-priority fixes applied: (1) `fmtDate` function duplicated verbatim in `NewsScreen`, `TabOverview`, and `CalendarScreen` → consolidated into `date.js` as `formatDate` + `formatEventDate`; (2) `countdown` function duplicated in `CalendarScreen` and `MarketsScreen` (differing only in past label) → consolidated into `date.js` as `countdown(dateStr, today, pastLabel='PAST')`; (3) MenuScreen version badge stale at v0.11.0 → updated to v0.17.0. 9 new tests added; 465 total. |
+| 2026-03-18 | Phase 17: touch target tokens as CSS variables, not magic numbers | Hard-coded `36px` and `44px` were scattered in the mobile block. Extracted to `--touch-target: 44px` and `--touch-target-sm: 36px` declared in all three theme blocks. `min-height: var(--touch-target, 44px)` pattern adopted everywhere. Rationale: a single source of truth for touch target sizing; easier global adjustment; design token is self-documenting. WCAG 2.5.8 (AA, WCAG 2.2) recommends 24px with spacing — 44px exceeds this and matches Apple HIG / Material Design guidance. |
+| 2026-03-18 | Phase 17: `@media (max-width: 480px)` small-phone breakpoint added | A second breakpoint below 767px was needed for layout changes that are appropriate at 375px but would be wrong at 600px (e.g. stacking FighterCard columns, headline line-clamping). 480px was chosen as the boundary: covers iPhone SE / 5c (320–375px), standard Android phones (360–412px), while leaving standard tablet-portrait (768px) and small laptop (1024px) untouched. The existing 767px block handles general mobile; the 480px block handles small-phone-specific overrides. |
+| 2026-03-18 | Phase 17: swipe-to-close sidebar — `useRef` + touch events, no library | Swipe gesture implemented with `onTouchStart`/`onTouchEnd` React props on the `.sidebar--open` div. State tracked in refs (`useRef`) to avoid stale closure and unnecessary re-renders. `onTouchMove` intentionally omitted — attaching it blocks the browser's native scroll on the sidebar list. Trigger threshold: `dx > 112px` (40% of 280px sidebar width) OR `velocity > 80 px/s`. Matches the task requirements. No swipe library added: the implementation is 8 lines and covers 100% of the use case. `useCallback` wraps both handlers to prevent recreation on every render. |
+| 2026-03-18 | Phase 17: `font-size ≥ 16px` on mobile inputs prevents iOS auto-zoom | iOS Safari zooms the viewport when a focused `<input>` has `font-size < 16px`. This breaks the fixed bottom-nav layout and disrupts the sidebar overlay. Fixed on `.mkt-alert-threshold` (was 10px; upgraded to 16px in the `@media (max-width: 767px)` block). This is now a documented constraint in CLAUDE.md — every new `<input>` on mobile must meet this rule. No layout changes required; width widened from 38px to 56px to accommodate the larger font size. |
+| 2026-03-18 | Phase 17: emoji icons in bottom nav — no icon library | Bottom nav items now render an emoji icon (`🥊⚖️🗓📊📰`) above the text label. Decision rationale: (1) No new npm dependency; (2) emoji render consistently on all modern mobile OS platforms (iOS/Android/Chrome); (3) they match the dense-data, functional aesthetic better than SVG icon libraries would given there are only 5 icons total; (4) fast to iterate. The icon is in a `<span className="bottom-nav-icon" aria-hidden="true">` so it is invisible to screen readers. The `<button>` carries `aria-label` with the full screen name. If the icon set needs to change in the future, the NAV_ITEMS array is the single source of truth. |
+| 2026-03-18 | Phase 17: news headline expand/collapse — React state only, no localStorage | The `expandedIds` Set in NewsScreen is React state only — it resets when the user navigates away. Rationale: expanded headlines are ephemeral reading state, not a persistent preference. Persisting this would add a storage key with zero research value. CSS uses `-webkit-line-clamp: 3` (well-supported on all modern browsers; no polyfill needed) inside `@media (max-width: 480px)`. The `.news-headline--expanded` modifier class switches `display: block; overflow: visible` to remove the clamp. `role="button"` + `aria-expanded` + `onKeyDown` (Enter/Space) makes the headline keyboard-accessible per WCAG 2.1.1 (Level A). |

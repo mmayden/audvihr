@@ -172,11 +172,11 @@ src/
 │   └── TabMarket.jsx         Manual odds entry + live Polymarket/Kalshi prices when matched
 ├── screens/
 │   ├── MenuScreen.jsx        Main navigation (5 ACTIVE items) + ⚙ ALERTS settings panel
-│   ├── FighterScreen.jsx     Sidebar + hero card (arch/mod pill badges + VS./COMPARE button) + 6-tab profile; calls useNews(); passes fighterNews to TabOverview
+│   ├── FighterScreen.jsx     Sidebar + hero card (arch/mod pill badges + VS./COMPARE button) + 6-tab profile; calls useNews(); passes fighterNews to TabOverview; onTouchStart/onTouchEnd swipe-to-close on sidebar
 │   ├── CompareScreen.jsx     FighterCard hero header + implied probability gap; FighterSearch selectors; MATCHUP NOTES section (computeMatchupWarnings — style/risk/fade/clash cards); stat table with tier labels + category edge stripe; edge signal panel; checklist; COPY LINK + ↓ MD export
-│   ├── CalendarScreen.jsx    Event sidebar + card detail + fighter deep-links + COMPARE button per in-roster bout
-│   ├── MarketsScreen.jsx     Unified live market dashboard (sportsbook + Polymarket + Kalshi + opening line + Tapology %) + alert bell + + PICK form per fight + PICKS log panel + CLV ↓ CSV export
-│   └── NewsScreen.jsx        Fighter news feed with filters; LIVE/MOCK source badge; per-item LIVE/MOCK badge
+│   ├── CalendarScreen.jsx    Event sidebar + card detail + fighter deep-links + COMPARE button per in-roster bout; onTouchStart/onTouchEnd swipe-to-close on sidebar
+│   ├── MarketsScreen.jsx     Unified live market dashboard (sportsbook + Polymarket + Kalshi + opening line + Tapology %) + alert bell + PICK form per fight + PICKS log panel + CLV ↓ CSV export
+│   └── NewsScreen.jsx        Fighter news feed with filters; LIVE/MOCK source badge; per-item badge; headline expand/collapse on tap (expandedIds Set state; news-headline--expanded modifier)
 └── test/
     └── setup.js              Vitest setup — jest-dom + in-memory localStorage mock
 ```
@@ -210,7 +210,12 @@ src/
 - **Stat filter active state is React-only — no localStorage persistence.** `activeFilters` in `FighterScreen` is a `Set<string>` held in `useState`. It resets on navigation. Do not persist filter state to localStorage or URL params — active filters are session-local UI state only. Filter predicates in `statFilters.js` receive in-memory FIGHTERS objects (build-time-scraped, trusted data) — they are pure functions with no I/O and no user input surface.
 - **`aria-pressed` on stat filter chips.** Each `.stat-filter-chip` must carry `aria-pressed={activeFilters.has(sf.id)}` — this is the correct ARIA pattern for toggle buttons (not `aria-checked`, which is for checkboxes). Do not remove or swap the attribute type.
 - **Sidebar toggle buttons require `aria-expanded`.** The ROSTER button in FighterScreen and EVENTS button in CalendarScreen must carry `aria-expanded={sidebarOpen}` and a contextual `aria-label` reflecting the open/closed state. Sidebar backdrops (the tap-to-dismiss overlay) must carry `role="button"` and `aria-label`.
-- **Mobile development begins soon.** The responsive foundation (bottom nav, sidebar drawer, `@media (max-width: 767px)` block) is established. Upcoming work will deepen mobile UX. Keep touch target minimums at 36px for chips and 44px for primary buttons. Portrait images: 88×88px on mobile.
+- **Phase 17 — Mobile-First UX is underway (`feature/phase-17-mobile`).** The `@media (max-width: 480px)` breakpoint handles small-phone specifics (compare hero stacks vertically; news headline line-clamped). The `@media (max-width: 767px)` block governs general mobile layout. The `@media (prefers-reduced-motion: reduce)` block is always last in `app.css`.
+- **Touch target sizing uses CSS tokens — never magic pixel values.** `--touch-target: 44px` for primary interactive elements (nav items, primary buttons); `--touch-target-sm: 36px` for secondary chips and compact controls. Both tokens are declared in all three theme blocks (`:root`, `[data-theme="light"]`, `@media prefers-color-scheme: light`). Use `min-height: var(--touch-target, 44px)` — do not hardcode `44px`.
+- **`font-size: 16px` minimum on any `<input>` rendered on mobile.** iOS Safari auto-zooms the page when an input with `font-size < 16px` receives focus. Apply the override inside the `@media (max-width: 767px)` block. Currently enforced on `.mkt-alert-threshold`. Any new input added to a mobile layout must respect this rule.
+- **Swipe-to-close sidebar — `useRef` + `onTouchStart`/`onTouchEnd` pattern.** Both FighterScreen and CalendarScreen sidebar drawers support swipe-left-to-close. Record `touchStartX` and `touchStartTime` in refs on `touchstart`; compute `dx = startX - endX` and `velocity = dx / dt * 1000` (px/s) on `touchend`; call `setSidebarOpen(false)` when `dx > 112` (40% of 280px sidebar) OR `velocity > 80` px/s. Do NOT use `onTouchMove` — it causes scroll conflicts. Handlers must be `useCallback`-wrapped.
+- **Bottom nav icon + label structure.** Each `.bottom-nav-item` renders a `<span className="bottom-nav-icon" aria-hidden="true">` (emoji icon) above a `<span>` (text label). The button itself carries `aria-label` with the full label text. The icon span is purely decorative (`aria-hidden="true"`). Do not render text-only nav items — the icon-above-label pattern is now the standard.
+- **News headline expand/collapse pattern.** `expandedIds` is a `Set` in `useState`. The `.news-headline` div carries `role="button"`, `tabIndex={0}`, `aria-expanded`, and an `onKeyDown` handler for Enter/Space. On `@media (max-width: 480px)` the headline is clamped to 3 lines via `-webkit-line-clamp: 3`; the `.news-headline--expanded` modifier class removes the clamp. The expand state is React-only — never persisted.
 - **Current test count: 465 passing.** Do not merge changes that reduce this number without a documented reason.
 
 ---

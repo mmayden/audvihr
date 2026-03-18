@@ -30,8 +30,15 @@ All notable changes to this project. Format: [version] — date — description.
 - **`NewsScreen.jsx`** — News headline truncated to 3 lines on ≤480px viewports via `.news-headline--expanded` toggle; tapping the headline expands/collapses; `role="button"`, `tabIndex={0}`, `aria-expanded` for accessibility.
 - **`App.test.jsx`** — Updated `textContent` assertion to `toContain('FIGHTERS')` to account for the icon+label DOM structure.
 
+#### Security
+- Touch event handlers (`onTouchStart`/`onTouchEnd`) are internal DOM events — no new CSP surfaces, no new external domains, no new network requests.
+- Emoji icons in bottom nav are static JSX text in `aria-hidden` spans — not user input, not rendered as HTML, no injection surface.
+- News headline expand/collapse state (`expandedIds`) is a `Set<string>` of internal item IDs — no user content involved, no new storage keys.
+- `.mkt-alert-threshold` `font-size: 16px` fix prevents iOS auto-zoom — security-neutral but prevents layout disruption.
+- **0 new CSP entries. 0 new npm runtime dependencies. 0 new external domains.**
+
 #### Testing
-- **465 tests, all passing. 0 lint errors.**
+- **465 tests, all passing. 0 lint errors. 0 CVEs.**
 
 ---
 
