@@ -2,13 +2,7 @@ import { useMemo } from 'react';
 import { FIGHTERS } from '../data/fighters';
 import { CHIN_COLOR, CARDIO_COLOR, CUT_COLOR, CATEGORY_COLOR } from '../constants/qualifiers';
 import { computePercentiles } from '../utils/percentiles';
-
-/** Format ISO date string as 'Mar 14 2026'. */
-function fmtDate(iso) {
-  return new Date(iso + 'T12:00:00Z').toLocaleDateString('en-US', {
-    month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC',
-  });
-}
+import { formatDate } from '../utils/date';
 
 /**
  * Render a TOP X% percentile badge for a given rank.
@@ -85,7 +79,7 @@ export const TabOverview = ({ fighter, newsItems = [] }) => {
               <span className={`news-item-badge ${item.isLive ? 'news-item-badge--live' : 'news-item-badge--mock'}`}>
                 {item.isLive ? 'LIVE' : 'MOCK'}
               </span>
-              <span className="overview-news-date">{fmtDate(item.date)}</span>
+              <span className="overview-news-date">{formatDate(item.date)}</span>
             </div>
             <div className="overview-news-headline">{item.headline}</div>
           </div>

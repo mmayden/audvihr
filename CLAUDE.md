@@ -145,7 +145,7 @@ src/
 │   └── useNews.js            useNews — fetches MMA Fighting + MMA Junkie RSS; 30-min cache; fallback to news.js mock; returns { items, loading, isLive }
 ├── utils/
 │   ├── odds.js               mlToImplied(), lineMovement()
-│   ├── date.js               daysUntil(), isPast() — shared date helpers
+│   ├── date.js               daysUntil(), isPast(), formatDate(), formatEventDate(), countdown() — shared date helpers
 │   ├── normalizeOdds.js      fightKey(), probToML(), normalize*() — API response transforms
 │   ├── cache.js              readCache(), writeCache(), evictCache() — sessionStorage helpers
 │   ├── clv.js                appendCLVEntries(), readCLVLog(), appendOpeningLine(), readOpeningLines() — CLV + opening line localStorage helpers; owns clv_log + opening_lines keys
@@ -211,7 +211,7 @@ src/
 - **`aria-pressed` on stat filter chips.** Each `.stat-filter-chip` must carry `aria-pressed={activeFilters.has(sf.id)}` — this is the correct ARIA pattern for toggle buttons (not `aria-checked`, which is for checkboxes). Do not remove or swap the attribute type.
 - **Sidebar toggle buttons require `aria-expanded`.** The ROSTER button in FighterScreen and EVENTS button in CalendarScreen must carry `aria-expanded={sidebarOpen}` and a contextual `aria-label` reflecting the open/closed state. Sidebar backdrops (the tap-to-dismiss overlay) must carry `role="button"` and `aria-label`.
 - **Mobile development begins soon.** The responsive foundation (bottom nav, sidebar drawer, `@media (max-width: 767px)` block) is established. Upcoming work will deepen mobile UX. Keep touch target minimums at 36px for chips and 44px for primary buttons. Portrait images: 88×88px on mobile.
-- **Current test count: 456 passing.** Do not merge changes that reduce this number without a documented reason.
+- **Current test count: 465 passing.** Do not merge changes that reduce this number without a documented reason.
 
 ---
 

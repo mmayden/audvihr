@@ -8,7 +8,7 @@ import { useKalshi } from '../hooks/useKalshi';
 import { useAlerts } from '../hooks/useAlerts';
 import { mlToImplied } from '../utils/odds';
 import { fightKey } from '../utils/normalizeOdds';
-import { daysUntil } from '../utils/date';
+import { daysUntil, countdown } from '../utils/date';
 import { readCLVLog, readOpeningLines } from '../utils/clv';
 import { clvLogToCsv, downloadBlob } from '../utils/export';
 import { readPickLog, appendPick, updatePickOutcome } from '../utils/pickLog';
@@ -60,14 +60,6 @@ function impliedNum(ml) {
   return s ? parseFloat(s) : null;
 }
 
-/** Returns a countdown label for a closing date. */
-function countdown(dateStr, today) {
-  const d = daysUntil(dateStr, today);
-  if (d < 0) return 'CLOSED';
-  if (d === 0) return 'TODAY';
-  if (d === 1) return '1D';
-  return `${d}D`;
-}
 
 /** Returns a CSS color for closing urgency. */
 function countdownColor(dateStr, today) {
@@ -515,7 +507,7 @@ export const MarketsScreen = ({ onBack }) => {
                   <div className="mkt-header-right">
                     {market.closing && (
                       <span className="mkt-countdown" style={{ color: countdownColor(market.closing, today) }}>
-                        {countdown(market.closing, today)}
+                        {countdown(market.closing, today, 'CLOSED')}
                       </span>
                     )}
                     {vol > 0 && <span className="mkt-vol-total">{fmtVolume(vol)} VOL</span>}

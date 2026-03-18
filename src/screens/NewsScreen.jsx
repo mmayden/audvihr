@@ -3,15 +3,9 @@ import { FIGHTERS } from '../data/fighters';
 import { FighterName } from '../components/FighterName';
 import { RELEVANCE_COLOR, CATEGORY_COLOR } from '../constants/qualifiers';
 import { useNews } from '../hooks/useNews';
+import { formatDate } from '../utils/date';
 
 const CATEGORIES = ['ALL', 'FIGHT', 'INJURY', 'CAMP', 'WEIGH-IN', 'RESULT'];
-
-/** Format ISO date string as 'Mar 14 2026'. */
-function fmtDate(iso) {
-  return new Date(iso + 'T12:00:00Z').toLocaleDateString('en-US', {
-    month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC',
-  });
-}
 
 /**
  * NewsScreen — fighter news feed with category and fighter filters.
@@ -113,7 +107,7 @@ export const NewsScreen = ({ onBack, onGoFighter }) => {
               <span className={`news-item-badge ${item.isLive ? 'news-item-badge--live' : 'news-item-badge--mock'}`}>
                 {item.isLive ? 'LIVE' : 'MOCK'}
               </span>
-              <span className="news-date">{fmtDate(item.date)}</span>
+              <span className="news-date">{formatDate(item.date)}</span>
             </div>
             <div className="news-headline">{item.headline}</div>
             <div className="news-body">{item.body}</div>

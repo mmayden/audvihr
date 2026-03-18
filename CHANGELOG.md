@@ -4,6 +4,27 @@ All notable changes to this project. Format: [version] — date — description.
 
 ---
 
+## [Unreleased]
+
+### Code Quality & Cleanup
+
+#### Changed
+- **`src/utils/date.js`** — two new exported utilities added to consolidate duplicated code:
+  - `formatDate(iso)` — UTC-safe short date formatting ("Mar 14, 2026"); was duplicated verbatim in `NewsScreen.jsx` and `TabOverview.jsx`.
+  - `formatEventDate(dateStr)` — long event date with weekday ("Sat, Apr 12, 2026"); was duplicated in `CalendarScreen.jsx`.
+  - `countdown(dateStr, today, pastLabel='PAST')` — compact countdown label ("7D", "1D", "TODAY", "PAST"); was duplicated in `CalendarScreen.jsx` and `MarketsScreen.jsx`. The two callers differed only in their past label — unified via the optional `pastLabel` parameter (`'CLOSED'` for MarketsScreen).
+- **`NewsScreen.jsx`**, **`TabOverview.jsx`** — replaced local `fmtDate()` with imported `formatDate` from `utils/date`.
+- **`CalendarScreen.jsx`** — replaced local `fmtDate()` / `countdown()` with imported `formatEventDate` / `countdown` from `utils/date`.
+- **`MarketsScreen.jsx`** — replaced local `countdown()` with imported `countdown(dateStr, today, 'CLOSED')` from `utils/date`.
+- **`MenuScreen.jsx`** — version badge updated from `v0.11.0` to `v0.17.0`.
+- **`package.json`** — `version` field updated from `0.8.0` to `0.17.0` to match the git tag.
+
+#### Testing
+- **`src/utils/date.test.js`** — 9 new tests covering `formatDate` (UTC noon stability, output format), `formatEventDate` (weekday + month/day/year), and `countdown` (TODAY, 1D, 7D, default PAST label, custom CLOSED label).
+- Total: **465 tests, all passing. 0 lint errors. 0 CVEs.**
+
+---
+
 ## [0.17.0] — 2026-03-18
 
 ### CORS Proxy for Live RSS
