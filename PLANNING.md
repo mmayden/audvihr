@@ -71,7 +71,7 @@ Does fight breakdowns for a podcast or Discord. Wants fast access to stats witho
 3. ✅ **Opening line preservation** — `opening_lines` localStorage key (never evicted). Delivered in v0.9.0.
 4. ✅ **Tapology public % integration** — build-time scrape; PUBLIC row + FADE badge (≥15pt divergence). Delivered in v0.9.0.
 5. ✅ **Mobile layout** — responsive bottom nav + sidebar drawer; dark/light/system theme. Delivered in v0.10.0.
-6. ✅ **Live news integration** — `useNews` hook; DOMParser text-only sanitization; LIVE/MOCK badges. Delivered in v0.12.0. CORS proxy shipped 2026-03-18 — live RSS now functional in production.
+6. ✅ **Live news integration** — `useNews` hook; DOMParser text-only sanitization; LIVE/MOCK badges. Delivered in v0.12.0. CORS proxy (same-origin `/api/rss-proxy`) delivered in v0.17.0 — live RSS fully functional in production; RSS origins removed from CSP `connect-src`.
 7. ✅ **Shareable research** — React Router URL routing; `/compare/:f1id/:f2id` links; MD + CSV export. Delivered in v0.13.0.
 8. ✅ **QoL + visual overhaul** — type-to-search, percentile badges, pill badges, fighter cards, pick log, flags pills, compare hero header. Delivered in v0.14.0.
 9. ✅ **Matchup Context Engine** — `computeMatchupWarnings` pure function; MATCHUP NOTES section in CompareScreen with 14 archetype rules, 8 style clashes, 10 modifier warnings. Delivered in v0.15.0.
@@ -87,11 +87,16 @@ Does fight breakdowns for a podcast or Discord. Wants fast access to stats witho
 
 ---
 
-## Current File Structure (Vite + React — v0.16.0)
+## Current File Structure (Vite + React — v0.17.0)
 
 The single-file prototype (`mma-trader.html`) was retired at Phase 3a. The project is now a Vite + React app with the following modular layout:
 
 ```
+netlify/
+│   └── functions/
+│       └── rss-proxy.js      Netlify Functions v2 — RSS CORS proxy; strict ALLOWED_URLS Set; 403 on unlisted url; 512 KB cap; 10s timeout; GET only; served at /api/rss-proxy via config.path
+api/
+│   └── rss-proxy.js          Vercel serverless function — identical security logic; auto-routed at /api/rss-proxy from api/ directory
 public/
 │   └── sw.js                 Service Worker — install/activate only; scope /; no fetch handler (Phase 11)
 src/
@@ -467,7 +472,7 @@ Checklist persists per matchup via localStorage. Key = `cl_{f1id}_{f2id}`.
 
 ## Security Model
 
-### Current State (Vite + React — v0.16.0 + CORS proxy)
+### Current State (Vite + React — v0.17.0)
 
 | Surface | Risk | Status |
 |---------|------|--------|
@@ -644,7 +649,7 @@ A simple client-side "edge score" per matchup — no ML, no backend. Weighted ru
 
 ---
 
-## Phase 9–15 Roadmap Outline (all complete)
+## Phase 9–17 Roadmap Outline
 
 Ordered by value vs. effort. Full sprint tasks in TASKS.md.
 
@@ -658,6 +663,8 @@ Ordered by value vs. effort. Full sprint tasks in TASKS.md.
 | **Phase 14** ✅ | QoL + visual overhaul | `FighterSearch` combobox (ARIA-compliant; XSS-safe). `FighterCard` component (portrait/initials + arch/mod badges; interactive + static contexts). CompareScreen hero header with `FighterCard` × 2 + normalized implied probability gap. Category edge stripe (`categoryEdges` useMemo; `.cat-row--f1-edge/f2-edge`). `computePercentiles` + `TOP X%` badges in TabOverview. `statTiers.js` + tier labels in compare cells. TabOverview FLAGS → inline `.flags-pill-row` pills. Arch/mod pill badges everywhere. `pickLog.js` utility (200-entry cap, plain text). MarketsScreen `+ PICK` per card + inline form + PICKS log panel. VS./COMPARE in FighterScreen. COMPARE buttons in CalendarScreen. 392 tests; 0 lint errors. | `FighterSearch` input: `.trim()` + `.toLowerCase()` — results via JSX only, no innerHTML. `pick_log` key owned exclusively by `pickLog.js`; stored values coerced to `String()`, never HTML; `try/catch` on every read. Implied probability gap computed from pre-validated numeric values only. `useNavigate` (react-router-dom) — tests use MemoryRouter. No new external domains; no CSP changes; no new runtime npm dependencies. |
 | **Phase 15** ✅ | Matchup Context Engine | `src/constants/matchupWarnings.js` — `computeMatchupWarnings(f1, f2)` pure function; returns `Warning[]`. Three rule sets: `ARCHETYPE_RULES` (14 directional matchup edges), `STYLE_CLASHES` (8 symmetric interactions), `MOD_RULES` (10 modifier-triggered notes, optionally conditioned on opponent archetype). All rule strings static — fighter names substituted by CompareScreen at render. MATCHUP NOTES section in CompareScreen between hero header and stat table; four visual variants: style (amber), risk (red), fade (green), clash (blue). 27 tests (27 new); 419 total. | Pure function with no DOM access, no side effects, no external calls. All rule strings are hardcoded static literals — no user input interpolated. `computeMatchupWarnings` called in `useMemo` in CompareScreen; result rendered via JSX text nodes only. No new external domains; no CSP changes; no new runtime dependencies. |
 | **Phase 16** ✅ | Stat Range Search | `src/constants/statFilters.js` — 11 preset filter definitions (4 categories: STRIKING, GRAPPLING, FINISHING, PHYSICAL); each: `{ id, label, category, predicate(fighter) → boolean }`. FighterScreen collapsible STAT FILTERS panel: toggle button with active-count badge, chips grouped by category, AND logic with existing name search + weight class filter, CLEAR ALL. MUAY THAI + CLINCH FIGHTER added to ARCH_COLORS (`--teal` #3aafa9, `--gold` #c9a84c). 35 tests (35 new); 454 total. | Predicate functions are pure closures over static thresholds — no I/O, no side effects. Input to predicates is the in-memory FIGHTERS array (build-time scraped, validated at fetch time). No new external domains; no CSP changes; no new runtime dependencies. Active filter set stored as React state (`Set<string>`) — no localStorage, no URL params. |
+| **v0.17.0** ✅ | CORS Proxy + Visual & QoL Polish | `netlify/functions/rss-proxy.js` + `api/rss-proxy.js` — same-origin serverless RSS proxy. `useNews` routes all fetches through `/api/rss-proxy?url=...`. MMA Fighting + MMA Junkie removed from CSP `connect-src`. Visual polish: broken CSS variable fix (`--bg-elevated`, `--bg-card`), design tokens, global focus rings, sidebar slide animation, VS button CTA, label readability, mobile touch targets, card depth, `prefers-reduced-motion` support, ARIA on sidebar toggles. 2 tests (proxy routing); 456 total. | SSRF prevention: `ALLOWED_URLS.has(url)` — exact Set equality only, 2-entry allowlist, no patterns. 403 on any unlisted URL. 512 KB response cap, 10s timeout, GET only, no auth header forwarding. RSS origins removed from browser-reachable `connect-src`. Proxy runs server-side only — zero CORS exposure. No new runtime npm dependencies; no new external domains beyond the proxy itself. |
+| **Phase 17** 🔜 | Mobile-First UX | Dedicated mobile UX pass. Bottom nav labels, touch targets audit, sidebar swipe-to-close, mobile layouts for Compare/Markets/News/Calendar, `--touch-target` CSS token, responsive smoke tests. Target: first-class experience at 375px. | Touch event handlers are internal DOM events — no new CSP surfaces. `font-size ≥ 16px` on inputs prevents iOS auto-zoom. No new external domains. Run `npm audit` if any swipe library is evaluated. |
 
 ---
 

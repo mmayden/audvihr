@@ -4,40 +4,43 @@ All notable changes to this project. Format: [version] — date — description.
 
 ---
 
-## [Unreleased] — CORS Proxy for Live RSS
+## [0.17.0] — 2026-03-18
 
-### Added
-- `netlify/functions/rss-proxy.js` — Netlify Functions v2 serverless function (ESM). Proxies MMA Fighting and MMA Junkie RSS feeds server-side with a strict two-entry allowlist. Invalid or unlisted `url` params return 403 immediately (SSRF prevention). Response size capped at 512 KB. Served at `/api/rss-proxy` via `config.path` (takes precedence over the SPA redirect rule).
+### CORS Proxy for Live RSS
+
+#### Added
+- `netlify/functions/rss-proxy.js` — Netlify Functions v2 serverless function (ESM). Proxies MMA Fighting and MMA Junkie RSS feeds server-side with a strict two-entry `ALLOWED_URLS` Set allowlist. Invalid or unlisted `url` params return 403 immediately (SSRF prevention). Response size capped at 512 KB. 10-second upstream timeout. GET-only, no client auth headers forwarded. Served at `/api/rss-proxy` via `config.path` (takes precedence over the SPA redirect rule).
 - `api/rss-proxy.js` — Vercel equivalent with identical security logic. Auto-routed from the `api/` directory at `/api/rss-proxy`.
 
-### Changed
+#### Changed
 - **useNews.js** — All RSS fetches now route through `/api/rss-proxy?url=...` instead of hitting the RSS origins directly. Silent-degradation behavior is unchanged — proxy errors still cause the affected source to contribute zero items, falling back to the static NEWS mock if all fail.
 - **netlify.toml** — Removed `https://www.mmafighting.com` and `https://mmajunkie.usatoday.com` from CSP `connect-src`. Browser now only contacts same-origin `/api/rss-proxy`.
-- **vercel.json** — Same CSP tightening. SPA rewrite exclusion updated to also exclude `api/` path.
+- **vercel.json** — Same CSP tightening. SPA rewrite exclusion updated to also exclude `api/` path prefix.
+
+#### Security
+- `ALLOWED_URLS.has(url)` — exact string equality only. No prefix matching, no hostname matching, no regex — any loosening reopens SSRF. Adding a new RSS source requires explicit Set entry in both function files and a decisions log entry.
+- Proxy does not forward `Cookie`, `Authorization`, or any other client-supplied headers to upstream.
+- CSP `connect-src` tightened: both RSS origins removed from browser-reachable domains. Any direct browser fetch to those origins is now blocked by CSP.
+
+### Visual & QoL Polish
+
+#### Changed
+- **app.css** — `--bg-elevated`, `--bg-card` CSS variables added as aliases to `--surface2`/`--surface` to fix undefined-variable references in Phase 11 alert styles; declared in all three theme blocks (`:root`, `[data-theme="light"]`, `@media prefers-color-scheme: light`).
+- **app.css** — Design tokens added: `--radius-sm`, `--radius`, `--radius-pill`, `--transition`, `--shadow-sm`, `--shadow-md`.
+- **app.css** — Global `:focus-visible` ring for `button`, `a`, `[tabindex]` using `var(--accent)`; five inputs upgraded from `--border2` to `--accent` on focus.
+- **app.css** — `.tabs-bar` scrollbar suppressed globally (`scrollbar-width: none` + webkit).
+- **app.css** — `@keyframes sidebarSlideIn`; mobile sidebar slides in from left (was instant snap).
+- **app.css** — `vs-btn` CTA: default upgraded from muted `--border2`/`--text-dim` to `--accent-dim`/`--accent`; hover fills with solid accent background.
+- **app.css** — Label sizes: `.stat-cell-label` 9px→10px, `.fin-l` 8px→9px, `.stat-tier-label` 8px→9px.
+- **app.css** — Mobile touch targets: `.filter-chip` min-height 36px; `.sidebar-fighter` padding 11px 14px; portrait 88×88px.
+- **app.css** — Topbar drop shadow + `.mkt-card`/`.news-card` hover `box-shadow: var(--shadow-sm)`.
+- **app.css** — `@media (prefers-reduced-motion: reduce)` block: all animations/transitions 0.01ms; `.srl-fill` + `.cl-prog-fill` suppressed.
+- **FighterScreen.jsx** — ROSTER button: `aria-expanded` + contextual `aria-label`; sidebar backdrop: `role="button"` + `aria-label`.
+- **CalendarScreen.jsx** — EVENTS button: same `aria-expanded`/`aria-label` treatment.
 
 ### Testing
-- `useNews.test.js` — 2 new proxy-routing tests: verifies all fetch calls use `/api/rss-proxy?url=` prefix (not direct RSS origins), and that both RSS source URLs are correctly encoded as query params.
-- Total: **456 tests, all passing. 0 lint errors.**
-
----
-
-## [Unreleased] — Visual & QoL Polish
-
-### Changed
-- **app.css** — Added `--bg-elevated`, `--bg-card` CSS variables (aliases to `--surface2`/`--surface`) to fix undefined-variable references in Phase 11 alert styles
-- **app.css** — Added design tokens: `--radius-sm`, `--radius`, `--radius-pill`, `--transition`, `--shadow-sm`, `--shadow-md`
-- **app.css** — Global `:focus-visible` ring for `button`, `a`, `[tabindex]` elements using `var(--accent)`
-- **app.css** — Input focus colors upgraded from `--border2` to `--accent` on: `.sidebar-input`, `.fighter-search-input`, `.notes-area`, `.mkt-pick-notes`, `.news-fighter-select`
-- **app.css** — `.tabs-bar` scrollbar hidden globally (`scrollbar-width: none` + webkit) — no scrollbar artifact on any viewport
-- **app.css** — Added `@keyframes sidebarSlideIn`; mobile sidebar overlay now slides in from the left instead of appearing instantly
-- **app.css** — `vs-btn` default state upgraded: now uses `var(--accent)` border/color (was muted `--border2`/`--text-dim`), hover fills with accent background — clearer CTA
-- **app.css** — `.stat-cell-label` from 9px → 10px; `.fin-l` from 8px → 9px; `.stat-tier-label` from 8px → 9px — improved readability across tabs
-- **app.css** — Mobile touch targets: `.filter-chip` min-height 36px; `.sidebar-fighter` padding increased to 11px 14px; portrait reduced to 88×88px with tighter card identity padding
-- **app.css** — Topbar subtle drop shadow (`box-shadow: 0 1px 6px`) for visual separation
-- **app.css** — `.mkt-card` and `.news-card` hover state gains `box-shadow: var(--shadow-sm)` for depth
-- **app.css** — `@media (prefers-reduced-motion: reduce)` — all animations/transitions set to 0.01ms; `.srl-fill` and `.cl-prog-fill` transitions suppressed
-- **FighterScreen.jsx** — ROSTER toggle button: `aria-expanded` + `aria-label` state attributes added; sidebar backdrop has `role="button"` + `aria-label`
-- **CalendarScreen.jsx** — EVENTS toggle button: same `aria-expanded`/`aria-label` treatment as FighterScreen
+- `useNews.test.js` — 2 new proxy-routing tests: verifies all fetch calls route through `/api/rss-proxy?url=` (not direct RSS origins), and that both source URLs are correctly encoded as query params.
+- Total: **456 tests, all passing. 0 lint errors. 0 CVEs.**
 
 ---
 

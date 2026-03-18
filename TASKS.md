@@ -10,22 +10,75 @@
 
 ## Current Sprint
 
-**Branch:** `master`
-**Last completed:** CORS Proxy for Live RSS — 2026-03-18
-**Next:** Phase 17 scope TBD. Mobile-first development begins soon — see Backlog. Cut a `feature/phase-17-*` branch when scoped.
+**Branch:** `feature/phase-17-mobile` (cut when ready)
+**Last completed:** v0.17.0 — CORS Proxy + Visual Polish — 2026-03-18
+**Next:** Phase 17 — Mobile-First UX. See tasks below.
+
+### Phase 17 — Mobile-First UX (Planned)
+
+**Goal:** Dedicated mobile UX pass that makes Audwihr a first-class experience on phones (≤ 480px) and small tablets (481–767px). The responsive foundation is in place; this phase deepens it.
+
+#### Bottom Nav
+- [ ] Add visible text labels beneath bottom nav icons (currently icon-only on very small viewports)
+- [ ] Ensure active screen indicator is unambiguous at all sizes (bold label + accent underline or dot)
+- [ ] Confirm 44px minimum tap target on all five nav items
+
+#### Fighter Screen (mobile)
+- [ ] Tab bar: 6 tabs overflow — ensure swipe-scrolling is fluid with no visible scrollbar; verify all tabs reachable on 375px viewport
+- [ ] Hero card: reconsider portrait + badges layout at 375px — portrait may need to drop to 64px or become optional at smallest breakpoint
+- [ ] Stat filters panel: chips should wrap cleanly; CLEAR ALL accessible without scrolling
+
+#### Compare Screen (mobile)
+- [ ] `FighterCard` hero columns stack vertically on mobile (F1 above F2 with VS between)
+- [ ] Stat table: scrolls horizontally or collapses to single-column diff view on ≤ 480px
+- [ ] MATCHUP NOTES cards: full-width on mobile, readable without horizontal scroll
+
+#### Calendar Screen (mobile)
+- [ ] Event sidebar drawer already works — audit open/close UX on real mobile viewport
+- [ ] Fight entry rows: COMPARE button still visible and tappable at 375px
+
+#### Markets Screen (mobile)
+- [ ] Market cards: full-width single-column on mobile; three-column live row collapses to rows
+- [ ] Bell icon + threshold input: accessible at touch scale; input doesn't zoom page on focus (font-size ≥ 16px)
+- [ ] PICKS panel: scrollable list with clear close affordance on mobile
+
+#### News Screen (mobile)
+- [ ] Category chip bar: horizontally scrollable without visible scrollbar; all chips reachable
+- [ ] News card: headline truncation at 2–3 lines on mobile; tap expands
+
+#### Touch Interactions
+- [ ] Swipe-to-close sidebar: `touchstart`/`touchmove`/`touchend` handlers on `.sidebar--open`; velocity threshold ≥ 80px/s OR drag distance ≥ 40% of sidebar width triggers close
+- [ ] Tap-outside-to-close already works via `.sidebar-backdrop` — verify backdrop z-index on all screens
+
+#### CSS / Design Tokens
+- [ ] Add `--touch-target: 44px` token for primary interactive elements; `--touch-target-sm: 36px` for secondary chips — replace magic numbers in media query block
+- [ ] Audit `@media (max-width: 767px)` block for any elements still below touch target minimums
+
+#### Testing & Docs
+- [ ] Manual smoke test on real device (or Chrome DevTools mobile emulator) for all 6 screens at 375px and 768px breakpoints
+- [ ] Add responsive smoke tests if any screen has a conditional render path that differs on mobile
+- [ ] `npm run test:run` exits 0; `npm run lint` exits 0; `npm audit` clean
+- [ ] CHANGELOG.md `[Unreleased]` → `[0.18.0]` at merge; TASKS.md + PLANNING.md updated
+
+**Security notes for Phase 17:**
+- Touch event handlers (`touchstart`/`touchmove`/`touchend`) are internal DOM events — no new external surfaces, no CSP changes required.
+- No new npm runtime dependencies planned. If a swipe library is evaluated, run `npm audit` before adding.
+- `font-size ≥ 16px` on `<input>` elements prevents iOS auto-zoom — security-neutral but UX-critical.
 
 ---
 
 ## ✅ Completed Sprints
 
-### ✅ CORS Proxy for Live RSS — 2026-03-18
+### ✅ v0.17.0 — CORS Proxy + Visual & QoL Polish — 2026-03-18
 
-- [x] `netlify/functions/rss-proxy.js` — Netlify Functions v2; strict allowlist (2 URLs); 403 on unlisted url; 512 KB cap; served at `/api/rss-proxy` via `config.path`
+- [x] `netlify/functions/rss-proxy.js` — Netlify Functions v2; strict 2-URL `ALLOWED_URLS` Set; 403 on unlisted url; 512 KB cap; 10s timeout; GET only; no auth header forwarding; served at `/api/rss-proxy` via `config.path`
 - [x] `api/rss-proxy.js` — Vercel equivalent; identical security logic; auto-routed from `api/`
-- [x] `useNews.js` — fetch routes changed to `/api/rss-proxy?url=...`; silent-degradation behavior unchanged
-- [x] `netlify.toml` + `vercel.json` — removed `mmafighting.com` + `mmajunkie.usatoday.com` from CSP `connect-src`; vercel rewrite exclusion updated to include `api/`
-- [x] `useNews.test.js` — 2 proxy-routing tests added; 456 total passing; 0 lint errors
-- [x] CHANGELOG.md, TASKS.md, PLANNING.md updated
+- [x] `useNews.js` — all RSS fetches routed through `/api/rss-proxy?url=...`; silent-degradation unchanged
+- [x] `netlify.toml` + `vercel.json` — `mmafighting.com` + `mmajunkie.usatoday.com` removed from CSP `connect-src`; Vercel SPA rewrite exclusion updated to also exclude `api/`
+- [x] `useNews.test.js` — 2 proxy-routing tests; 456 total passing; 0 lint errors
+- [x] CSS: `--bg-elevated`/`--bg-card` tokens in all three theme blocks; `--radius-*`, `--transition`, `--shadow-*` design tokens; global `:focus-visible` ring; 5 inputs upgraded to `--accent` focus border; tab-bar scrollbar suppressed; `@keyframes sidebarSlideIn`; vs-btn CTA elevated; label size improvements; mobile touch targets; card hover depth; `prefers-reduced-motion` block
+- [x] ARIA: `aria-expanded` + `aria-label` on ROSTER/EVENTS toggles; `role="button"` + `aria-label` on backdrops (FighterScreen, CalendarScreen)
+- [x] CHANGELOG.md `[Unreleased]` × 2 → `[0.17.0]`; TASKS.md Phase 17 scoped; PLANNING.md file structure + version + roadmap table updated
 
 ---
 
@@ -204,7 +257,7 @@
 
 #### Low / nice-to-have
 - [x] ~~**Visual reskin pass**~~ — partial: Post-Phase-16 polish pass delivered focus rings, input focus colors, label readability improvements, mobile touch targets, card depth, reduced-motion support, sidebar slide animation, and CTA improvements. Final art direction still possible but core polish is done.
-- [ ] **Mobile-first development phase** — Begin dedicated mobile UX pass (Phase 17 candidate): optimize layouts for <768px, improve bottom nav, enhance touch interactions beyond the initial responsive work
+- [ ] **Mobile-first development phase** — Phase 17 scoped above. Cut `feature/phase-17-mobile` branch when ready to begin.
 - [ ] **Sound design** — optional click feedback, opt-in only; deliberate decision required before adding audio
 
 ---
