@@ -4,13 +4,13 @@ All notable changes to this project. Format: [version] — date — description.
 
 ---
 
-## [Unreleased]
+## [0.18.0] — 2026-03-18
 
 ### Phase 17 — Mobile-First UX
 
 #### Added
 - **`app.css`** — `--touch-target: 44px` and `--touch-target-sm: 36px` CSS tokens added to all three theme blocks (`:root`, `[data-theme="light"]`, `@media prefers-color-scheme: light`).
-- **`app.css`** — `@media (max-width: 480px)` block for small-phone specifics: `compare-fighter-header` stacks vertically (F1 / VS / F2); news headline clamped to 3 lines with `.news-headline--expanded` opt-in modifier for tap-to-expand.
+- **`app.css`** — `@media (max-width: 480px)` block for small-phone specifics: `compare-fighter-header` stacks vertically (F1 / VS / F2); news headline clamped to 3 lines with `.news-headline--expanded` opt-in modifier for tap-to-expand; `.compare-table-wrap` adds `overflow-x: auto` + `.ctable` `min-width: 400px` for horizontal scroll; `.card-portrait` shrinks to 64×64px with adjusted `portrait-initials` size.
 - **`App.jsx`** — Bottom nav items now show an emoji icon above the text label (🥊 FIGHTERS, ⚖️ COMPARE, 🗓 CALENDAR, 📊 MARKETS, 📰 NEWS); `aria-label` added to each button; `.bottom-nav-icon` span carries `aria-hidden="true"`.
 
 #### Changed
@@ -38,7 +38,9 @@ All notable changes to this project. Format: [version] — date — description.
 - **0 new CSP entries. 0 new npm runtime dependencies. 0 new external domains.**
 
 #### Testing
-- **465 tests, all passing. 0 lint errors. 0 CVEs.**
+- **`CalendarScreen.test.jsx`** — 7 new tests covering sidebar toggle (open/close via EVENTS button, backdrop click, `sidebar--open` class, `aria-expanded` attribute).
+- **`NewsScreen.test.jsx`** — 9 new tests covering headline expand/collapse (click, double-click, Enter key, Space key, `aria-expanded`, `role="button"`).
+- **481 tests, all passing. 0 lint errors. 0 CVEs.**
 
 ---
 

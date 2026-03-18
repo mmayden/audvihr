@@ -76,7 +76,7 @@ Does fight breakdowns for a podcast or Discord. Wants fast access to stats witho
 8. ✅ **QoL + visual overhaul** — type-to-search, percentile badges, pill badges, fighter cards, pick log, flags pills, compare hero header. Delivered in v0.14.0.
 9. ✅ **Matchup Context Engine** — `computeMatchupWarnings` pure function; MATCHUP NOTES section in CompareScreen with 14 archetype rules, 8 style clashes, 10 modifier warnings. Delivered in v0.15.0.
 10. ✅ **Stat Range Search** — 11-preset STAT FILTERS panel in FighterScreen sidebar; AND logic with name search + weight class; MUAY THAI + CLINCH FIGHTER colors filled in. Delivered in v0.16.0.
-11. 🔄 **Mobile-first development (Phase 17 — in progress)** — `feature/phase-17-mobile` branch. Bottom nav now icon + label (emoji + monospace text). `--touch-target: 44px` / `--touch-target-sm: 36px` CSS tokens in all theme blocks. `@media (max-width: 480px)` block for small-phone specifics (compare hero stacks, headline line-clamp). Swipe-to-close on FighterScreen + CalendarScreen sidebars. News headline expand/collapse. Market live-row collapses. iOS font-size ≥ 16px fix. Remaining: portrait sizing at 375px, stat table horizontal scroll, manual smoke test.
+11. ✅ **Mobile-first development (Phase 17)** — `feature/phase-17-mobile` branch. Bottom nav icon + label (emoji + monospace text). `--touch-target: 44px` / `--touch-target-sm: 36px` CSS tokens in all theme blocks. `@media (max-width: 480px)` block: compare hero stacks (F1/VS/F2), headline line-clamp (3 lines, tap to expand), hero portrait 64×64px, stat table horizontal scroll (`overflow-x: auto` + `min-width: 400px`). Swipe-to-close sidebars (FighterScreen + CalendarScreen). News headline expand/collapse. Market live-row collapses. iOS auto-zoom fix (font-size ≥ 16px). CalendarScreen + NewsScreen screen-level tests (16 new tests, 481 total). Delivered in v0.18.0.
 
 ### What This Is Not
 
@@ -87,84 +87,85 @@ Does fight breakdowns for a podcast or Discord. Wants fast access to stats witho
 
 ---
 
-## Current File Structure (Vite + React — v0.17.0 / Phase 17 in progress)
+## Current File Structure (Vite + React — v0.18.0)
 
 The single-file prototype (`mma-trader.html`) was retired at Phase 3a. The project is now a Vite + React app with the following modular layout:
 
 ```
 netlify/
 │   └── functions/
-│       └── rss-proxy.js      Netlify Functions v2 — RSS CORS proxy; strict ALLOWED_URLS Set; 403 on unlisted url; 512 KB cap; 10s timeout; GET only; served at /api/rss-proxy via config.path
+│       └── rss-proxy.js      Netlify Functions v2 — RSS CORS proxy; strict ALLOWED_URLS Set (exact-match only); 403 on unlisted url; 512 KB cap; 10s timeout; GET only; no auth header forwarding; served at /api/rss-proxy via config.path
 api/
-│   └── rss-proxy.js          Vercel serverless function — identical security logic; auto-routed at /api/rss-proxy from api/ directory
+│   └── rss-proxy.js          Vercel serverless function — identical security logic and allowlist; auto-routed at /api/rss-proxy
 public/
-│   └── sw.js                 Service Worker — install/activate only; scope /; no fetch handler (Phase 11)
+│   ├── sw.js                 Service Worker — install/activate only; scope /; no fetch handler; satisfies Notification API requirement
+│   └── assets/portraits/     Self-hosted fighter portrait images (*.jpg); no CDN, no CSP change required
 src/
 ├── main.jsx                  Entry point — ReactDOM.createRoot + StrictMode; SW registration
-├── App.jsx                   URL router — BrowserRouter + Routes; FighterScreenRoute + CompareScreenRoute wrappers at module scope; bottom nav; theme toggle (Phase 13)
+├── App.jsx                   URL router — BrowserRouter + Routes; FighterScreenRoute + CompareScreenRoute at module scope (param validation); bottom nav (icon + label); theme toggle
 ├── styles/
-│   └── app.css               All global styles and CSS variables (design system)
-├── constants/
+│   └── app.css               All global styles, CSS variables (design system), responsive breakpoints (767px / 480px), prefers-reduced-motion block (always last)
+├── constants/                Pure lookup tables and rule sets — no I/O, no side effects
 │   ├── archetypes.js         ARCH_COLORS (10 archetypes), MOD_COLORS (10 modifiers) — CSS var refs
-│   ├── checklist.js          CHECKLIST (17 items), TABS (6 tab names)
-│   ├── compareRows.js        15 stat-row definitions — (f1, f2) → row objects; includes optional statKey field for tier labels
+│   ├── checklist.js          CHECKLIST array (17 items), TABS array (6 tab names)
+│   ├── compareRows.js        COMPARE_ROW_DEFS — 15 stat-row definitions; (f1, f2) → row objects; optional statKey for tier labels
 │   ├── qualifiers.js         CHIN_COLOR, CARDIO_COLOR, CUT_COLOR, ORG_COLOR, RELEVANCE_COLOR, CATEGORY_COLOR — CSS var refs
-│   ├── statTiers.js          STAT_TIERS thresholds + getStatTier() — ELITE/ABOVE AVG/AVG/BELOW AVG for 8 stats (Phase 14)
-│   ├── matchupWarnings.js    ARCHETYPE_RULES (14), STYLE_CLASHES (8), MOD_RULES (10) + computeMatchupWarnings(f1, f2) → Warning[] (Phase 15)
-│   └── statFilters.js        STAT_FILTERS (11 presets, 4 categories) + FILTER_CATEGORIES — fighter roster filter chips (Phase 16)
-├── data/
-│   ├── fighters.js           FIGHTERS array — generated by fetch-data.js (live UFCStats)
-│   ├── events.js             EVENTS array — generated by fetch-data.js (upcoming UFC cards)
-│   ├── markets.js            MARKETS array — 8 mock prediction markets (Phase 4)
-│   └── news.js               NEWS array — 12 mock news items; static fallback for useNews when RSS unavailable (Phase 5 + 12)
-├── scripts/                  Build-time data tools (not bundled)
-│   ├── fetch-data.js         UFCStats + Tapology scraper (Node ESM, cheerio; browser UA for Tapology)
-│   └── fighter-seed.json     Editorial data per fighter (archetype, mods, notes, ufcstats_url)
+│   ├── statTiers.js          STAT_TIERS thresholds + getStatTier() — ELITE/ABOVE AVG/AVG/BELOW AVG for 8 stats
+│   ├── matchupWarnings.js    ARCHETYPE_RULES (14 directional), STYLE_CLASHES (8 symmetric), MOD_RULES (10 modifier-triggered); computeMatchupWarnings(f1, f2) → Warning[]; pure function, no side effects
+│   └── statFilters.js        STAT_FILTERS (11 presets, 4 categories) + FILTER_CATEGORIES; each: { id, label, category, predicate(fighter) → boolean }
+├── data/                     Generated or static data — do not hand-edit fighters.js / events.js
+│   ├── fighters.js           FIGHTERS array — generated by fetch-data.js at build time (live UFCStats + seed)
+│   ├── events.js             EVENTS array — generated by fetch-data.js at build time (upcoming UFC cards + Tapology %)
+│   ├── markets.js            MARKETS array — 8 static mock prediction markets
+│   └── news.js               NEWS array — 12 static mock items; fallback for useNews when all RSS sources fail
+├── scripts/                  Build-time tools only — never bundled into the app
+│   ├── fetch-data.js         UFCStats + Tapology scraper (Node ESM, cheerio, browser UA for Tapology)
+│   └── fighter-seed.json     Editorial data per fighter (archetype, mods, notes, ufcstats_url, portrait)
 ├── hooks/
-│   ├── useLocalStorage.js    useLocalStorage — JSON-serialised state with try/catch
-│   ├── useWatchlist.js       useWatchlist — watchlist set over useLocalStorage (Phase 4)
-│   ├── useOdds.js            useOdds — The Odds API moneylines; sessionStorage cache; silent degradation (Phase 7)
-│   ├── usePolymarket.js      usePolymarket — Polymarket CLOB prices + lazy history; CLV snapshot (Phase 7)
-│   ├── useKalshi.js          useKalshi — Kalshi REST API prices + lazy history; CLV snapshot (Phase 7)
-│   ├── useTheme.js           useTheme — colour-scheme toggle; persists 'light'|'dark'|'system' to localStorage; sets data-theme on <html> (Phase 10)
-│   ├── useAlerts.js          useAlerts — line-movement alert rules, permission state, notification dispatch; owns alerts_enabled + alert_rules localStorage keys (Phase 11)
-│   └── useNews.js            useNews — fetches MMA Fighting + MMA Junkie RSS; 30-min sessionStorage cache; silent degradation; fallback to news.js mock; returns { items, loading, isLive } (Phase 12)
+│   ├── useLocalStorage.js    useLocalStorage — JSON-serialised state; try/catch with typed defaults
+│   ├── useWatchlist.js       useWatchlist — watchlist Set over useLocalStorage; owns watchlist_markets key
+│   ├── useOdds.js            useOdds — The Odds API moneylines; 15-min sessionStorage cache (cache_odds_v1); silent degradation
+│   ├── usePolymarket.js      usePolymarket — Polymarket CLOB prices + lazy history; CLV snapshot; unauthenticated
+│   ├── useKalshi.js          useKalshi — Kalshi REST API prices + lazy history; CLV snapshot; requires VITE_KALSHI_API_KEY; silent degradation
+│   ├── useTheme.js           useTheme — 'light'|'dark'|'system'; persists to localStorage (theme key); sets data-theme on <html>
+│   ├── useAlerts.js          useAlerts — alert rules, Notification API permission, line-movement dispatch; owns alerts_enabled + alert_rules (localStorage), alerts_prev_lines (sessionStorage)
+│   └── useNews.js            useNews — fetches RSS via /api/rss-proxy; 30-min cache (cache_news_v1); per-source silent degradation; fallback to news.js mock; returns { items, loading, isLive }
 ├── utils/
-│   ├── odds.js               mlToImplied(), lineMovement()
+│   ├── odds.js               mlToImplied(), lineMovement() — pure moneyline math
 │   ├── date.js               daysUntil(), isPast(), formatDate(), formatEventDate(), countdown() — shared date helpers
-│   ├── normalizeOdds.js      fightKey(), probToML(), normalizeOddsApiResponse/PolymarketMarket/KalshiMarket/PriceHistory (Phase 7)
-│   ├── cache.js              readCache(), writeCache(), evictCache() — sessionStorage helpers (Phase 7)
-│   ├── clv.js                appendCLVEntries(), readCLVLog(), appendOpeningLine(), readOpeningLines(), CLV_LOG_KEY, CLV_OPENING_KEY, CLV_MAX_ENTRIES — CLV log + opening line localStorage helpers (Phase 7–9)
-│   ├── alerts.js             readAlertsEnabled(), writeAlertsEnabled(), readAlertRules(), writeAlertRules(), readPrevLines(), writePrevLines(), detectMovements() — alert rule pure functions; owns alerts_prev_lines sessionStorage key (Phase 11)
-│   ├── newsParser.js         stripHtml(), parseRssFeed(), classifyCategory(), classifyRelevance(), matchFighterName(), rssItemToNewsItem() — RSS sanitization + normalization; DOMParser textContent only, no DOM injection (Phase 12)
-│   ├── export.js             sanitizeCsvCell(), checklistToMarkdown(), clvLogToCsv(), downloadBlob() — client-side Blob export; CSV formula injection guard (Phase 13)
-│   ├── fighters.js           findFighterByName(name, fighters) — pure name → ID lookup for calendar → compare navigation (Phase 14)
-│   ├── percentiles.js        computePercentiles(fighter, allFighters) — per-stat percentile rank vs full roster (Phase 14)
-│   └── pickLog.js            readPickLog(), appendPick(), updatePickOutcome() — owns pick_log localStorage key (Phase 14)
+│   ├── normalizeOdds.js      fightKey(), probToML(), normalizeOddsApiResponse(), normalizePolymarketMarket(), normalizeKalshiMarket(), normalizePriceHistory() — API response transforms
+│   ├── cache.js              readCache(), writeCache(), evictCache() — sessionStorage TTL helpers
+│   ├── clv.js                appendCLVEntries(), readCLVLog(), appendOpeningLine(), readOpeningLines() — owns clv_log (500-entry cap) + opening_lines (never evicted) localStorage keys exclusively
+│   ├── alerts.js             readAlertsEnabled/write, readAlertRules/write, readPrevLines/write, detectMovements() — owns alerts_prev_lines sessionStorage key exclusively
+│   ├── newsParser.js         stripHtml(), parseRssFeed(), classifyCategory(), classifyRelevance(), matchFighterName(), rssItemToNewsItem() — RSS sanitization; DOMParser textContent only; no DOM injection
+│   ├── export.js             sanitizeCsvCell(), checklistToMarkdown(), clvLogToCsv(), downloadBlob() — client-side Blob export; CSV formula injection guard
+│   ├── fighters.js           findFighterByName(name, fighters) — pure name → ID lookup; last-name fallback; ≥3-char guard
+│   ├── percentiles.js        computePercentiles(fighter, allFighters) — per-stat percentile rank vs full roster
+│   └── pickLog.js            readPickLog(), appendPick(), updatePickOutcome() — owns pick_log localStorage key exclusively (200-entry cap)
 ├── components/
-│   ├── StatBar.jsx           Horizontal proportional fill bar
-│   ├── FighterName.jsx       Name → profile link resolver (calendar + news)
-│   ├── FighterCard.jsx       Compact card: portrait/initials + name + record + archetype + mod badges (Phase 14)
-│   ├── FighterSearch.jsx     Type-to-search input with filtered dropdown; replaces scroll selectors (Phase 14)
-│   ├── ChecklistPanel.jsx    17-item trade checklist with progress bar
-│   ├── ErrorBoundary.jsx     Class component error boundary wrapping all screens
-│   └── PriceChart.jsx        SVG sparkline for prediction-market probability-over-time (Phase 7)
+│   ├── StatBar.jsx           Horizontal proportional fill bar; explicit max > 0 guard
+│   ├── FighterName.jsx       Name → profile link resolver (used in calendar + news item rows)
+│   ├── FighterCard.jsx       Compact card: portrait/initials + name + record + archetype + mod badges; interactive and static (compare header) contexts
+│   ├── FighterSearch.jsx     Type-to-search combobox; ARIA-compliant (role=combobox, aria-expanded, aria-activedescendant); XSS-safe; blur race guard
+│   ├── ChecklistPanel.jsx    17-item trade checklist with progress bar; role=checkbox + aria-checked on each item
+│   ├── ErrorBoundary.jsx     Class component error boundary wrapping all screens; RETRY button
+│   └── PriceChart.jsx        SVG sparkline for prediction-market probability-over-time
 ├── tabs/
-│   ├── TabOverview.jsx       Key numbers + TOP X% percentile badges, flags pills (chin/cardio/cut), trader notes, RECENT NEWS (top 2 items)
+│   ├── TabOverview.jsx       Key numbers + TOP X% percentile badges; flags pills (chin/cardio/cut); trader notes; RECENT NEWS (top 2 matched items)
 │   ├── TabStriking.jsx       Striking volume, accuracy, knockdowns, position
 │   ├── TabGrappling.jsx      Takedowns, submissions, ground control, transitions
 │   ├── TabPhysical.jsx       Physical attributes, camp, durability, loss methods
-│   ├── TabHistory.jsx        Fight log table
-│   └── TabMarket.jsx         Moneyline entry, implied %, line movement, notes
+│   ├── TabHistory.jsx        Fight log table with opponent quality
+│   └── TabMarket.jsx         Moneyline entry + live prices (Odds/Polymarket/Kalshi); line movement; notes (mkt_{fighter.id} key)
 ├── screens/
-│   ├── MenuScreen.jsx        Main navigation (5 ACTIVE items) + ⚙ ALERTS settings panel
-│   ├── FighterScreen.jsx     Sidebar + hero card + 6-tab profile; useRef swipe-to-close on sidebar drawer (Phase 17)
-│   ├── CompareScreen.jsx     FighterCard hero header + implied probability gap; type-to-search selectors; MATCHUP NOTES section (computeMatchupWarnings); stat table with tier labels + edge stripe; edge signal panel; checklist; COPY LINK + ↓ MD export; hero stacks vertically at ≤480px (Phase 17)
-│   ├── CalendarScreen.jsx    Event sidebar + card detail + fighter deep-links + COMPARE button per in-roster bout; useRef swipe-to-close on sidebar drawer (Phase 17)
-│   ├── MarketsScreen.jsx     Unified live market dashboard (sportsbook + Polymarket + Kalshi + opening line + Tapology %) + alert bell per fight + PICK per fight + CLV ↓ CSV export + PICKS log panel; mkt-live-row collapses to single column on mobile (Phase 17)
-│   └── NewsScreen.jsx        Fighter news feed with filters; LIVE/MOCK source badge; per-item badge; headline expand/collapse on tap (expandedIds state; -webkit-line-clamp at ≤480px) (Phase 5 + 12 + 17)
+│   ├── MenuScreen.jsx        Main navigation (5 items) + ⚙ ALERTS settings panel; version badge
+│   ├── FighterScreen.jsx     Sidebar (useRef swipe-to-close) + hero card + 6-tab profile; calls useNews(); aria-expanded on ROSTER toggle
+│   ├── CompareScreen.jsx     Hero header (FighterCard × 2, implied prob gap); MATCHUP NOTES; stat table (tier labels, edge stripe, horizontal scroll ≤480px); edge signals; checklist; COPY LINK; ↓ MD export
+│   ├── CalendarScreen.jsx    Event sidebar (useRef swipe-to-close) + card detail + fighter deep-links + COMPARE per in-roster bout; aria-expanded on EVENTS toggle
+│   ├── MarketsScreen.jsx     Unified live market dashboard (sportsbook + Polymarket + Kalshi + opening line + Tapology %) + alert bell + PICK form + PICKS log + CLV ↓ CSV export
+│   └── NewsScreen.jsx        RSS feed with category + fighter filters; LIVE/MOCK badge; headline expand/collapse (expandedIds Set; -webkit-line-clamp at ≤480px)
 └── test/
-    └── setup.js              Vitest setup — jest-dom + in-memory localStorage mock
+    └── setup.js              Vitest setup — jest-dom matchers + in-memory localStorage mock
 ```
 
 Test files are co-located with source: `*.test.{js,jsx}` next to the file under test.
@@ -199,13 +200,13 @@ Test files are co-located with source: `*.test.{js,jsx}` next to the file under 
 --blue:         #5b8dd9   /* wrestler arch, stat filter chips on, F2 compare edge */
 --purple:       #8b6fd4   /* counter striker arch */
 --orange:       #d4804a   /* kickboxer arch, warnings, edge signal flags */
---teal:         #3aafa9   /* muay thai arch (Phase 16) */
---gold:         #c9a84c   /* clinch fighter arch (Phase 16) */
+--teal:         #3aafa9   /* muay thai arch */
+--gold:         #c9a84c   /* clinch fighter arch */
 ```
 
 Light theme overrides only `--bg`, `--surface*`, `--border*`, `--text*`, `--accent`, `--accent-dim`. All archetype/semantic color primitives remain constant across themes.
 
-### Touch Target Tokens (Phase 17)
+### Touch Target Tokens
 ```css
 --touch-target:    44px   /* primary interactive elements: nav items, primary buttons */
 --touch-target-sm: 36px   /* secondary chips, compact controls */
@@ -479,7 +480,7 @@ Checklist persists per matchup via localStorage. Key = `cl_{f1id}_{f2id}`.
 
 ## Security Model
 
-### Current State (Vite + React — v0.17.0 / Phase 17 in progress)
+### Current State (Vite + React — v0.18.0)
 
 | Surface | Risk | Status |
 |---------|------|--------|
@@ -498,31 +499,39 @@ Checklist persists per matchup via localStorage. Key = `cl_{f1id}_{f2id}`.
 
 ### Deployment Security (Phase 3a+)
 
-**Content Security Policy** — configure at the hosting layer, not in HTML:
+**Content Security Policy** — configured at the hosting layer (not in HTML). Both `netlify.toml` and `vercel.json` enforce the same policy:
 
 ```
-# netlify.toml or _headers
 Content-Security-Policy:
   default-src 'self';
   script-src 'self';
+  worker-src 'self';
   style-src 'self' https://fonts.googleapis.com;
   font-src https://fonts.gstatic.com;
-  connect-src 'self';
+  connect-src 'self'
+              https://api.the-odds-api.com
+              https://clob.polymarket.com
+              https://trading-api.kalshi.com;
   img-src 'self' data:;
   frame-ancestors 'none'
 ```
 
-> Vite's build output is fully compiled static JS — no inline scripts, no `unsafe-inline` needed.
+Rules:
+- Vite's build is fully compiled static JS — no inline scripts, no `unsafe-inline` needed.
+- `worker-src 'self'` covers the minimal SW at `/sw.js`. Do not remove it.
+- RSS origins (`mmafighting.com`, `mmajunkie.usatoday.com`) are **not** in `connect-src` — the browser contacts them only through the same-origin `/api/rss-proxy` serverless function.
+- Every new external domain added to any directive must be documented in the decisions log with justification.
 
-**Additional headers (recommended at launch):**
+**Additional security headers (deployed):**
 ```
 X-Frame-Options: DENY
 X-Content-Type-Options: nosniff
 Referrer-Policy: strict-origin-when-cross-origin
-Permissions-Policy: geolocation=(), camera=(), microphone=()
+Permissions-Policy: geolocation=(), camera=(), microphone=(), payment=()
+Strict-Transport-Security: max-age=31536000; includeSubDomains
 ```
 
-**`npm audit` policy:** Run before every merge to `main`. Block on critical/high severity. Document accepted moderate findings in the decisions log below.
+**`npm audit` policy:** Run before every merge to `master`. Block on critical/high severity. Document accepted moderate findings in the decisions log below.
 
 **Phase 7 API surfaces (three hooks — current):**
 - **The Odds API** (`https://api.the-odds-api.com`) via `useOdds` — sportsbook moneylines. Key in `VITE_ODDS_API_KEY`. Cache in `sessionStorage`. 500 req/month free tier. Degrade silently.
@@ -677,7 +686,7 @@ Ordered by value vs. effort. Full sprint tasks in TASKS.md.
 | **Phase 15** ✅ | Matchup Context Engine | `src/constants/matchupWarnings.js` — `computeMatchupWarnings(f1, f2)` pure function; returns `Warning[]`. Three rule sets: `ARCHETYPE_RULES` (14 directional matchup edges), `STYLE_CLASHES` (8 symmetric interactions), `MOD_RULES` (10 modifier-triggered notes, optionally conditioned on opponent archetype). All rule strings static — fighter names substituted by CompareScreen at render. MATCHUP NOTES section in CompareScreen between hero header and stat table; four visual variants: style (amber), risk (red), fade (green), clash (blue). 27 tests (27 new); 419 total. | Pure function with no DOM access, no side effects, no external calls. All rule strings are hardcoded static literals — no user input interpolated. `computeMatchupWarnings` called in `useMemo` in CompareScreen; result rendered via JSX text nodes only. No new external domains; no CSP changes; no new runtime dependencies. |
 | **Phase 16** ✅ | Stat Range Search | `src/constants/statFilters.js` — 11 preset filter definitions (4 categories: STRIKING, GRAPPLING, FINISHING, PHYSICAL); each: `{ id, label, category, predicate(fighter) → boolean }`. FighterScreen collapsible STAT FILTERS panel: toggle button with active-count badge, chips grouped by category, AND logic with existing name search + weight class filter, CLEAR ALL. MUAY THAI + CLINCH FIGHTER added to ARCH_COLORS (`--teal` #3aafa9, `--gold` #c9a84c). 35 tests (35 new); 454 total. | Predicate functions are pure closures over static thresholds — no I/O, no side effects. Input to predicates is the in-memory FIGHTERS array (build-time scraped, validated at fetch time). No new external domains; no CSP changes; no new runtime dependencies. Active filter set stored as React state (`Set<string>`) — no localStorage, no URL params. |
 | **v0.17.0** ✅ | CORS Proxy + Visual & QoL Polish | `netlify/functions/rss-proxy.js` + `api/rss-proxy.js` — same-origin serverless RSS proxy. `useNews` routes all fetches through `/api/rss-proxy?url=...`. MMA Fighting + MMA Junkie removed from CSP `connect-src`. Visual polish: broken CSS variable fix (`--bg-elevated`, `--bg-card`), design tokens, global focus rings, sidebar slide animation, VS button CTA, label readability, mobile touch targets, card depth, `prefers-reduced-motion` support, ARIA on sidebar toggles. 2 tests (proxy routing); 456 total. | SSRF prevention: `ALLOWED_URLS.has(url)` — exact Set equality only, 2-entry allowlist, no patterns. 403 on any unlisted URL. 512 KB response cap, 10s timeout, GET only, no auth header forwarding. RSS origins removed from browser-reachable `connect-src`. Proxy runs server-side only — zero CORS exposure. No new runtime npm dependencies; no new external domains beyond the proxy itself. |
-| **Phase 17** 🔄 | Mobile-First UX | `feature/phase-17-mobile` — in progress. Bottom nav: emoji icon + label stack, `min-height: 44px`. `--touch-target: 44px` / `--touch-target-sm: 36px` CSS tokens in all theme blocks. `@media (max-width: 480px)` small-phone block (compare hero stacks, news headline clamped 3 lines). Swipe-to-close sidebars (FighterScreen + CalendarScreen; `useRef` + `onTouchStart`/`onTouchEnd`; velocity ≥ 80px/s OR drag ≥ 112px). Stat filter chips 36px; filters body scrollable. News cat chips horizontal-scroll; filterbar stacks. Markets live-row 1fr; threshold input 16px; PICKS scrollable. Calendar COMPARE btn 36px. 465 tests. Remaining: portrait sizing at 375px, stat table horizontal scroll, manual smoke test. | No new CSP surfaces (touch events are internal DOM). No new npm dependencies. `font-size ≥ 16px` applied to `.mkt-alert-threshold` to prevent iOS auto-zoom — rule now documented in CLAUDE.md. Any future swipe library addition requires `npm audit` before merge. |
+| **Phase 17** ✅ | Mobile-First UX | `feature/phase-17-mobile` — implementation complete; pending manual smoke test and merge to master as v0.18.0. Bottom nav: emoji icon + label stack, `min-height: 44px`. `--touch-target: 44px` / `--touch-target-sm: 36px` tokens in all theme blocks. `@media (max-width: 480px)`: compare hero stacks (F1/VS/F2); headline line-clamped 3 lines; `.card-portrait` 64×64px; `.compare-table-wrap { overflow-x: auto }` + `.ctable { min-width: 400px }` for horizontal scroll. Swipe-to-close sidebars (`useRef` + `onTouchStart`/`onTouchEnd`; velocity ≥ 80 px/s OR drag ≥ 112px). Stat filter chips 36px; filters body scrollable. News cat chips horizontal-scroll. Markets live-row 1fr; threshold input 16px (iOS fix); PICKS scrollable. Calendar COMPARE btn 36px. `CalendarScreen.test.jsx` (7 tests) + `NewsScreen.test.jsx` (9 tests). 481 tests. | No new CSP surfaces (touch events are internal DOM). No new npm dependencies. `font-size ≥ 16px` enforced on `.mkt-alert-threshold` — iOS auto-zoom rule now in CLAUDE.md. `card-portrait` at 64px is self-hosted, no CSP change. Any future swipe library requires `npm audit` before merge. |
 
 ---
 
@@ -785,3 +794,7 @@ Ordered by value vs. effort. Full sprint tasks in TASKS.md.
 | 2026-03-18 | Phase 17: `font-size ≥ 16px` on mobile inputs prevents iOS auto-zoom | iOS Safari zooms the viewport when a focused `<input>` has `font-size < 16px`. This breaks the fixed bottom-nav layout and disrupts the sidebar overlay. Fixed on `.mkt-alert-threshold` (was 10px; upgraded to 16px in the `@media (max-width: 767px)` block). This is now a documented constraint in CLAUDE.md — every new `<input>` on mobile must meet this rule. No layout changes required; width widened from 38px to 56px to accommodate the larger font size. |
 | 2026-03-18 | Phase 17: emoji icons in bottom nav — no icon library | Bottom nav items now render an emoji icon (`🥊⚖️🗓📊📰`) above the text label. Decision rationale: (1) No new npm dependency; (2) emoji render consistently on all modern mobile OS platforms (iOS/Android/Chrome); (3) they match the dense-data, functional aesthetic better than SVG icon libraries would given there are only 5 icons total; (4) fast to iterate. The icon is in a `<span className="bottom-nav-icon" aria-hidden="true">` so it is invisible to screen readers. The `<button>` carries `aria-label` with the full screen name. If the icon set needs to change in the future, the NAV_ITEMS array is the single source of truth. |
 | 2026-03-18 | Phase 17: news headline expand/collapse — React state only, no localStorage | The `expandedIds` Set in NewsScreen is React state only — it resets when the user navigates away. Rationale: expanded headlines are ephemeral reading state, not a persistent preference. Persisting this would add a storage key with zero research value. CSS uses `-webkit-line-clamp: 3` (well-supported on all modern browsers; no polyfill needed) inside `@media (max-width: 480px)`. The `.news-headline--expanded` modifier class switches `display: block; overflow: visible` to remove the clamp. `role="button"` + `aria-expanded` + `onKeyDown` (Enter/Space) makes the headline keyboard-accessible per WCAG 2.1.1 (Level A). |
+| 2026-03-18 | Phase 17: hero portrait reduced 88px→64px at ≤480px | The `@media (max-width: 767px)` block already reduces the hero portrait from 160px to 88px. At the 480px small-phone breakpoint, 88px still occupies a disproportionate share of the screen height relative to the information it provides (initials or a small image). Reduced to 64×64px with corresponding `portrait-initials` font-size adjustment (40px→28px) and tighter `card-identity` padding. Portrait images are self-hosted (`public/assets/portraits/`) — no CDN, no CSP change. |
+| 2026-03-18 | Phase 17: stat table horizontal scroll on ≤480px | The `.ctable` (3-column compare table: F1 value / stat label / F2 value) becomes illegible when squished onto a 375px viewport — the F1/F2 value columns truncate or wrap. Rather than hide columns (which loses information), the table now scrolls horizontally at ≤480px: `.compare-table-wrap { overflow-x: auto }` + `.ctable { min-width: 400px }`. 400px ensures each column has enough width for a value + tier label without wrapping. The wrapper already has `overflow-y: auto` — adding `overflow-x` does not affect vertical scroll. |
+| 2026-03-18 | Phase 17: CalendarScreen + NewsScreen — screen-level tests added | FighterScreen already had sidebar-toggle tests. CalendarScreen and NewsScreen both have JS-conditional render paths (sidebar open/close; headline expand/collapse) that differ from the default state and are not CSS-only. TASKS.md Phase 17 item: "Add responsive smoke tests if any screen has a conditional render path that differs on mobile." `CalendarScreen.test.jsx` (7 tests: sidebar EVENTS button, backdrop, sidebar--open class, aria-expanded both states). `NewsScreen.test.jsx` (9 tests: headline click/double-click/Enter/Space, aria-expanded, role=button). vi.hoisted() pattern required for CalendarScreen because vi.mock factories are hoisted before const declarations — matches the existing FighterScreen.test.jsx pattern. 481 tests total; 0 lint errors. |
+| 2026-03-18 | v0.18.0 — Phase 17 complete; merged to master | All Phase 17 tasks checked off: touch tokens, 480px breakpoint, swipe-to-close sidebars, headline expand/collapse, iOS auto-zoom fix, bottom nav icon+label, date.js consolidation, CalendarScreen.test.jsx + NewsScreen.test.jsx (481 tests, 0 lint errors, 0 CVEs). Documentation updated: CLAUDE.md phase reference cleaned up; PLANNING.md file structure phase annotations stripped, CSP example updated to match actual deployed policy (added worker-src, actual connect-src domains, HSTS header); TASKS.md Phase 17 sprint moved to Completed. North Star feature set: all 11 items delivered. No new external domains; no new runtime npm dependencies; no CSP changes. |

@@ -780,6 +780,15 @@ a:focus-visible,
     border-bottom: 1px solid var(--border);
   }
 
+  /* Compare stat table — horizontal scroll on narrow viewports */
+  .compare-table-wrap { overflow-x: auto; padding: 12px; }
+  .ctable { min-width: 400px; }
+
+  /* FighterScreen hero card — portrait shrinks further at smallest breakpoint */
+  .card-portrait { width: 64px; min-width: 64px; height: 64px; }
+  .portrait-initials { font-size: 28px; }
+  .card-identity { padding: 10px 12px; }
+
   /* News — headline clamped to 3 lines on small viewports; tap card to expand */
   .news-headline {
     display: -webkit-box;

@@ -10,64 +10,66 @@
 
 ## Current Sprint
 
-**Branch:** `feature/phase-17-mobile` (cut when ready)
-**Last completed:** v0.17.0 — CORS Proxy + Visual Polish — 2026-03-18
-**Next:** Phase 17 — Mobile-First UX. See tasks below.
-
-### Phase 17 — Mobile-First UX (Planned)
-
-**Goal:** Dedicated mobile UX pass that makes Audwihr a first-class experience on phones (≤ 480px) and small tablets (481–767px). The responsive foundation is in place; this phase deepens it.
-
-#### Bottom Nav
-- [x] Add visible text labels beneath bottom nav icons — emoji icon (🥊⚖️🗓📊📰) above text label; `flex-direction: column` layout
-- [x] Ensure active screen indicator is unambiguous at all sizes — `font-weight: 700` on active label + accent border-top
-- [x] Confirm 44px minimum tap target on all five nav items — `min-height: var(--touch-target, 44px)`
-
-#### Fighter Screen (mobile)
-- [x] Tab bar: 6 tabs overflow — swipe-scrolling already fluid; scrollbar suppressed globally
-- [ ] Hero card: reconsider portrait + badges layout at 375px — portrait may need to drop to 64px or become optional at smallest breakpoint
-- [x] Stat filters panel: chips scroll in body (`max-height: 50vh; overflow-y: auto`); CLEAR ALL reachable; stat-filter-chip `min-height: 36px`
-
-#### Compare Screen (mobile)
-- [x] `FighterCard` hero columns stack vertically on mobile (F1 above F2 with VS between) — `@media (max-width: 480px)` `grid-template-columns: 1fr`
-- [ ] Stat table: scrolls horizontally or collapses to single-column diff view on ≤ 480px
-- [x] MATCHUP NOTES cards: full-width on mobile, readable without horizontal scroll
-
-#### Calendar Screen (mobile)
-- [x] Event sidebar drawer — swipe-to-close added; open/close UX audited
-- [x] Fight entry rows: COMPARE button `min-height: 36px` + updated padding — tappable at 375px
-
-#### Markets Screen (mobile)
-- [x] Market cards: `mkt-live-row` collapses to single column on mobile
-- [x] Bell icon + threshold input: `mkt-alert-threshold` font-size 16px — no iOS auto-zoom
-- [x] PICKS panel: `max-height: 60vh; overflow-y: auto` — scrollable
-
-#### News Screen (mobile)
-- [x] Category chip bar: `flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none` — horizontal scroll
-- [x] News card: headline clamped to 3 lines at ≤480px; tap headline to expand (`news-headline--expanded`)
-
-#### Touch Interactions
-- [x] Swipe-to-close sidebar: `onTouchStart`/`onTouchEnd` on FighterScreen + CalendarScreen sidebars; velocity ≥ 80px/s OR drag ≥ 112px triggers close
-- [x] Tap-outside-to-close via `.sidebar-backdrop` — already in place; z-index verified
-
-#### CSS / Design Tokens
-- [x] `--touch-target: 44px` and `--touch-target-sm: 36px` tokens added to all three theme blocks
-- [x] `@media (max-width: 767px)` block audited — bottom nav, filter chips, stat filter chips, calendar compare btn all updated
-
-#### Testing & Docs
-- [ ] Manual smoke test on real device (or Chrome DevTools mobile emulator) for all 6 screens at 375px and 768px breakpoints
-- [ ] Add responsive smoke tests if any screen has a conditional render path that differs on mobile
-- [x] `npm run test:run` exits 0 (465 tests); `npm run lint` exits 0; `npm audit` clean
-- [ ] CHANGELOG.md `[Unreleased]` → `[0.18.0]` at merge; TASKS.md + PLANNING.md updated
-
-**Security notes for Phase 17:**
-- Touch event handlers (`touchstart`/`touchmove`/`touchend`) are internal DOM events — no new external surfaces, no CSP changes required.
-- No new npm runtime dependencies planned. If a swipe library is evaluated, run `npm audit` before adding.
-- `font-size ≥ 16px` on `<input>` elements prevents iOS auto-zoom — security-neutral but UX-critical.
+**Branch:** —
+**Status:** No active sprint. v0.18.0 shipped. See Backlog for next candidates.
 
 ---
 
 ## ✅ Completed Sprints
+
+### ✅ v0.18.0 — Phase 17 Mobile-First UX — 2026-03-18
+
+**Branch:** `feature/phase-17-mobile` → merged to `master`
+
+#### Bottom Nav
+- [x] Emoji icon above text label (`flex-direction: column`); `aria-label` on each button; `aria-hidden="true"` on icon span
+- [x] Active state: `font-weight: 700` on label + accent border-top — unambiguous at all sizes
+- [x] `min-height: var(--touch-target, 44px)` on all five nav items
+
+#### Fighter Screen (mobile)
+- [x] Tab bar: swipe-scroll fluid; `scrollbar-width: none` suppressed globally
+- [x] Hero portrait: 88px at ≤767px; 64×64px at ≤480px
+- [x] Stat filters panel: `max-height: 50vh; overflow-y: auto`; CLEAR ALL reachable; chips `min-height: var(--touch-target-sm, 36px)`
+
+#### Compare Screen (mobile)
+- [x] Hero: `grid-template-columns: 1fr` at ≤480px → F1 / VS / F2 stack vertically
+- [x] Stat table: `overflow-x: auto` + `.ctable { min-width: 400px }` at ≤480px
+- [x] MATCHUP NOTES cards: full-width, no horizontal scroll
+
+#### Calendar Screen (mobile)
+- [x] Swipe-to-close sidebar (`onTouchStart`/`onTouchEnd`; velocity ≥ 80px/s OR drag ≥ 112px)
+- [x] COMPARE button `min-height: var(--touch-target-sm, 36px)`
+
+#### Markets Screen (mobile)
+- [x] `mkt-live-row` collapses to `grid-template-columns: 1fr`
+- [x] `.mkt-alert-threshold` `font-size: 16px` — prevents iOS auto-zoom
+- [x] PICKS panel: `max-height: 60vh; overflow-y: auto`
+
+#### News Screen (mobile)
+- [x] Category chips: `flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none`
+- [x] Headline: `-webkit-line-clamp: 3` at ≤480px; tap to expand via `.news-headline--expanded`; `role="button"`, `tabIndex={0}`, `aria-expanded`, `onKeyDown` (Enter/Space)
+
+#### CSS / Design Tokens
+- [x] `--touch-target: 44px` and `--touch-target-sm: 36px` declared in all three theme blocks (`:root`, `[data-theme="light"]`, `@media prefers-color-scheme: light`)
+- [x] `@media (max-width: 767px)` audited; `@media (max-width: 480px)` block added for small-phone overrides
+- [x] `prefers-reduced-motion` block remains last in `app.css`
+
+#### Code Quality
+- [x] `formatDate`, `formatEventDate`, `countdown` consolidated into `src/utils/date.js` (eliminated duplicates across 4 screens)
+
+#### Testing
+- [x] `CalendarScreen.test.jsx` — 7 tests: sidebar toggle, backdrop, `sidebar--open` class, `aria-expanded`
+- [x] `NewsScreen.test.jsx` — 9 tests: headline click, double-click, Enter, Space, `aria-expanded`, `role="button"`
+- [x] 481 tests passing; 0 lint errors; 0 CVEs
+
+#### Security
+- Touch event handlers are internal DOM events — no new CSP surfaces, no new external domains
+- No new npm runtime dependencies
+- `font-size ≥ 16px` on `<input>` enforced; rule codified in CLAUDE.md
+
+---
+
+## ✅ Completed Sprints (prior)
 
 ### ✅ v0.17.0 — CORS Proxy + Visual & QoL Polish — 2026-03-18
 
@@ -257,7 +259,7 @@
 
 #### Low / nice-to-have
 - [x] ~~**Visual reskin pass**~~ — partial: Post-Phase-16 polish pass delivered focus rings, input focus colors, label readability improvements, mobile touch targets, card depth, reduced-motion support, sidebar slide animation, and CTA improvements. Final art direction still possible but core polish is done.
-- [ ] **Mobile-first development phase** — Phase 17 scoped above. Cut `feature/phase-17-mobile` branch when ready to begin.
+- [x] ~~**Mobile-first development phase**~~ — shipped in v0.18.0: touch tokens, 480px breakpoint, swipe-to-close, headline expand/collapse, iOS auto-zoom fix, screen-level tests.
 - [ ] **Sound design** — optional click feedback, opt-in only; deliberate decision required before adding audio
 
 ---

@@ -39,7 +39,7 @@ export const MenuScreen = ({ onSelect }) => {
           >
             ⚙ ALERTS
           </button>
-          <span className="topbar-version-badge">v0.17.0</span>
+          <span className="topbar-version-badge">v0.18.0</span>
         </div>
       </div>
 
