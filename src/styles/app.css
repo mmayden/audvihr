@@ -17,6 +17,8 @@
   --blue:       #5b8dd9;
   --purple:     #8b6fd4;
   --orange:     #d4804a;
+  --teal:       #3aafa9;  /* muay thai archetype */
+  --gold:       #c9a84c;  /* clinch fighter archetype */
   --font:       'Inter', sans-serif;
   --mono:       'JetBrains Mono', monospace;
 }
@@ -91,6 +93,23 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
 .filter-chip { font-size: 10px; font-family: var(--mono); padding: 2px 7px; border: 1px solid var(--border); color: var(--text-dim); cursor: pointer; transition: all .12s; background: transparent; white-space: nowrap; }
 .filter-chip:hover { border-color: var(--border2); color: var(--text); }
 .filter-chip.on { border-color: var(--accent-dim); color: var(--accent); background: rgba(212,168,67,.07); }
+/* Stat filters panel */
+.stat-filters-panel { border-bottom: 1px solid var(--border); }
+.stat-filters-toggle { width: 100%; display: flex; align-items: center; gap: 6px; padding: 7px 10px; background: transparent; border: none; cursor: pointer; font-size: 10px; font-family: var(--mono); font-weight: 700; letter-spacing: .06em; color: var(--text-dim); transition: color .12s; text-align: left; }
+.stat-filters-toggle:hover { color: var(--text); }
+.stat-filters-toggle--active { color: var(--accent); }
+.stat-filters-toggle--active:hover { color: var(--accent); }
+.stat-filters-count { background: var(--accent); color: var(--bg); font-size: 9px; font-family: var(--mono); font-weight: 700; padding: 1px 5px; border-radius: 2px; }
+.stat-filters-caret { margin-left: auto; font-size: 8px; }
+.stat-filters-body { padding: 6px 10px 10px; display: flex; flex-direction: column; gap: 8px; }
+.stat-filters-group { display: flex; flex-direction: column; gap: 4px; }
+.stat-filters-cat { font-size: 9px; font-family: var(--mono); font-weight: 700; letter-spacing: .1em; color: var(--text-dim); }
+.stat-filters-chips { display: flex; flex-wrap: wrap; gap: 3px; }
+.stat-filter-chip { font-size: 9px; font-family: var(--mono); padding: 2px 6px; border: 1px solid var(--border); color: var(--text-dim); cursor: pointer; transition: all .12s; background: transparent; white-space: nowrap; }
+.stat-filter-chip:hover { border-color: var(--border2); color: var(--text); }
+.stat-filter-chip.on { border-color: var(--blue); color: var(--blue); background: rgba(91,141,217,.08); }
+.stat-filters-clear { margin-top: 2px; font-size: 9px; font-family: var(--mono); padding: 3px 8px; background: transparent; border: 1px solid var(--border2); color: var(--text-dim); cursor: pointer; transition: all .12s; align-self: flex-start; }
+.stat-filters-clear:hover { border-color: var(--red); color: var(--red); }
 .sidebar-list { flex: 1; overflow-y: auto; }
 .sidebar-fighter { padding: 9px 14px; cursor: pointer; border-bottom: 1px solid rgba(46,51,64,.5); transition: background .12s; }
 .sidebar-fighter:hover { background: var(--surface2); }

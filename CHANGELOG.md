@@ -4,6 +4,22 @@ All notable changes to this project. Format: [version] — date — description.
 
 ---
 
+## [0.16.0] — 2026-03-18
+
+### Phase 16 — Stat Range Search
+
+#### Added
+- `src/constants/statFilters.js` — `STAT_FILTERS` array (11 presets across 4 categories: STRIKING, GRAPPLING, FINISHING, PHYSICAL) + `FILTER_CATEGORIES` order constant. Each entry: `{ id, label, category, predicate(fighter) → boolean }`. Presets: HIGH VOLUME, LOW VOLUME, ELITE DEFENSE, HIGH ABSORPTION, WRESTLING THREAT, SUB THREAT, TD RESISTANT, HIGH FINISHER, KO POWER, DECISION FIGHTER, SOUTHPAW. Thresholds calibrated against 69-fighter roster.
+- **FighterScreen** — collapsible STAT FILTERS panel in sidebar (below weight class chips). Toggle button shows active-filter count badge when any are on. Chips grouped by category; active chips highlighted in blue. CLEAR ALL button appears when any filter is active. All active filters applied with AND logic in the `filtered` useMemo — combines with existing name search and weight class filter.
+- **archetypes.js** — `MUAY THAI` → `var(--teal)` and `CLINCH FIGHTER` → `var(--gold)` added to `ARCH_COLORS` (10 archetypes total); both were referenced in `matchupWarnings.js` rules but lacked color entries.
+- **app.css** — `--teal: #3aafa9` and `--gold: #c9a84c` CSS variables in `:root`; stat filter panel classes: `.stat-filters-panel`, `.stat-filters-toggle`, `.stat-filters-toggle--active`, `.stat-filters-count`, `.stat-filters-caret`, `.stat-filters-body`, `.stat-filters-group`, `.stat-filters-cat`, `.stat-filters-chips`, `.stat-filter-chip`, `.stat-filter-chip.on`, `.stat-filters-clear`.
+
+#### Testing
+- `statFilters.test.js` — 35 tests: structure (array shape, unique ids, valid categories), all 11 filter predicates (pass/fail/boundary), combined multi-filter application, all-average fighter matches nothing.
+- Total: **454 tests, all passing. 0 lint errors.**
+
+---
+
 ## [0.15.0] — 2026-03-17
 
 ### Phase 15 — Matchup Context Engine
