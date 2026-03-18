@@ -31,6 +31,8 @@
   --transition:  .15s ease;
   --shadow-sm:   0 2px 8px rgba(0,0,0,.25);
   --shadow-md:   0 4px 16px rgba(0,0,0,.35);
+  --touch-target:    44px;
+  --touch-target-sm: 36px;
 }
 
 /* ---- Light theme — applied via [data-theme="light"] on <html> ---- */
@@ -48,6 +50,8 @@
   --accent-dim: #8a6010;
   --bg-elevated: var(--surface2);
   --bg-card:     var(--surface);
+  --touch-target:    44px;
+  --touch-target-sm: 36px;
 }
 
 /* ---- System-preference light theme (no manual override) ---- */
@@ -66,6 +70,8 @@
     --accent-dim: #8a6010;
     --bg-elevated: var(--surface2);
     --bg-card:     var(--surface);
+    --touch-target:    44px;
+    --touch-target-sm: 36px;
   }
 }
 
@@ -611,22 +617,26 @@ a:focus-visible,
   .bottom-nav-item {
     flex: 1;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 2px;
     background: transparent;
     border: none;
     cursor: pointer;
     color: var(--text-dim);
     font-family: var(--mono);
-    font-size: 8px;
+    font-size: 7px;
     font-weight: 600;
     letter-spacing: .06em;
-    padding: 8px 2px;
+    padding: 4px 2px;
+    min-height: var(--touch-target, 44px);
     transition: color .15s;
     -webkit-tap-highlight-color: transparent;
   }
+  .bottom-nav-icon { font-size: 18px; line-height: 1; display: block; }
   .bottom-nav-item:hover { color: var(--text); }
-  .bottom-nav-item.active { color: var(--accent); border-top: 2px solid var(--accent); }
+  .bottom-nav-item.active { color: var(--accent); border-top: 2px solid var(--accent); font-weight: 700; }
 
   /* Shrink each screen to leave room for the fixed bottom nav */
   .app {
@@ -714,6 +724,28 @@ a:focus-visible,
   /* News list — reduce padding */
   .news-list { padding: 10px 12px; }
 
+  /* Stat filters panel — scrollable body keeps CLEAR ALL reachable */
+  .stat-filters-body { max-height: 50vh; overflow-y: auto; scrollbar-width: none; }
+  .stat-filters-body::-webkit-scrollbar { display: none; }
+  /* Stat filter chips — minimum touch target */
+  .stat-filter-chip { min-height: var(--touch-target-sm, 36px); padding: 4px 10px; }
+
+  /* News — category chip bar scrolls horizontally without wrapping */
+  .news-filterbar { flex-direction: column; align-items: stretch; }
+  .news-cat-chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .news-cat-chips::-webkit-scrollbar { display: none; }
+  .news-fighter-select { width: 100%; }
+
+  /* Markets — live row stacks to a single column on narrow viewports */
+  .mkt-live-row { grid-template-columns: 1fr; }
+  /* Prevent iOS auto-zoom on threshold input (font-size must be ≥ 16px) */
+  .mkt-alert-threshold { font-size: 16px; width: 56px; }
+  /* PICKS log panel scrollable */
+  .markets-pick-panel { max-height: 60vh; overflow-y: auto; }
+
+  /* Calendar — COMPARE button meets minimum touch target */
+  .cal-compare-btn { min-height: var(--touch-target-sm, 36px); padding: 6px 12px; display: inline-flex; align-items: center; }
+
   /* Theme toggle — hide floating button, show inline in bottom nav */
   .theme-toggle-floating { display: none; }
   .bottom-nav-theme {
@@ -734,6 +766,33 @@ a:focus-visible,
     -webkit-tap-highlight-color: transparent;
   }
   .bottom-nav-theme:hover { color: var(--text); }
+}
+
+/* ============================================================
+   Phase 17 — Small-phone breakpoint (≤ 480 px)
+   ============================================================ */
+@media (max-width: 480px) {
+  /* Compare — FighterCard columns stack vertically (F1 / VS / F2) */
+  .compare-fighter-header { grid-template-columns: 1fr; }
+  .compare-vs-col {
+    padding: 6px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* News — headline clamped to 3 lines on small viewports; tap card to expand */
+  .news-headline {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .news-headline--expanded {
+    display: block;
+    overflow: visible;
+    -webkit-line-clamp: unset;
+  }
 }
 
 /* ============================================================

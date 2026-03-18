@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EVENTS } from '../data/events';
 import { FIGHTERS } from '../data/fighters';
@@ -38,6 +38,23 @@ export const CalendarScreen = ({onBack, onGoFighter}) => {
   const [selId,setSelId] = useState((firstUpcoming||sorted[0]).id);
   const [orgFilter,setOrgFilter] = useState('ALL');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const swipeStartX = useRef(null);
+  const swipeStartTime = useRef(null);
+
+  const handleSidebarTouchStart = useCallback((e) => {
+    swipeStartX.current = e.touches[0].clientX;
+    swipeStartTime.current = Date.now();
+  }, []);
+
+  const handleSidebarTouchEnd = useCallback((e) => {
+    if (swipeStartX.current === null) return;
+    const dx = swipeStartX.current - e.changedTouches[0].clientX;
+    const velocity = (dx / (Date.now() - swipeStartTime.current)) * 1000;
+    swipeStartX.current = null;
+    swipeStartTime.current = null;
+    if (dx > 112 || velocity > 80) setSidebarOpen(false);
+  }, []);
+
   const sel = EVENTS.find(e=>e.id===selId);
   const orgs = ['ALL',...new Set(EVENTS.map(e=>e.org))];
   const filtered = sorted.filter(e=>orgFilter==='ALL'||e.org===orgFilter);
@@ -60,7 +77,11 @@ export const CalendarScreen = ({onBack, onGoFighter}) => {
       </div>
       <div className="main-layout">
         {sidebarOpen && <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} role="button" aria-label="Close events list" tabIndex={-1} />}
-        <div className={`sidebar${sidebarOpen ? ' sidebar--open' : ''}`}>
+        <div
+          className={`sidebar${sidebarOpen ? ' sidebar--open' : ''}`}
+          onTouchStart={handleSidebarTouchStart}
+          onTouchEnd={handleSidebarTouchEnd}
+        >
           <div className="sidebar-header">EVENTS — {filtered.length}</div>
           <div className="sidebar-filters">
             {orgs.map(o=><button key={o} className={`filter-chip ${orgFilter===o?'on':''}`} onClick={()=>setOrgFilter(o)}>{o}</button>)}

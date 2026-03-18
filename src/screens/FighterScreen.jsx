@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FIGHTERS } from '../data/fighters';
 import { ARCH_COLORS, MOD_COLORS } from '../constants/archetypes';
@@ -34,6 +34,27 @@ export const FighterScreen = ({onBack, initialFighter}) => {
   const [tab, setTab] = useState('OVERVIEW');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { items: allNews } = useNews();
+  const swipeStartX = useRef(null);
+  const swipeStartTime = useRef(null);
+
+  /** Track finger position when swipe begins on the open sidebar. */
+  const handleSidebarTouchStart = useCallback((e) => {
+    swipeStartX.current = e.touches[0].clientX;
+    swipeStartTime.current = Date.now();
+  }, []);
+
+  /**
+   * Close sidebar if user swipes left with velocity ≥ 80 px/s
+   * OR drag distance ≥ 40% of sidebar width (112 px).
+   */
+  const handleSidebarTouchEnd = useCallback((e) => {
+    if (swipeStartX.current === null) return;
+    const dx = swipeStartX.current - e.changedTouches[0].clientX;
+    const velocity = (dx / (Date.now() - swipeStartTime.current)) * 1000;
+    swipeStartX.current = null;
+    swipeStartTime.current = null;
+    if (dx > 112 || velocity > 80) setSidebarOpen(false);
+  }, []);
 
   const toggleStatFilter = (id) => {
     setActiveFilters(prev => {
@@ -77,7 +98,11 @@ export const FighterScreen = ({onBack, initialFighter}) => {
       </div>
       <div className="main-layout">
         {sidebarOpen && <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} role="button" aria-label="Close roster" tabIndex={-1} />}
-        <div className={`sidebar${sidebarOpen ? ' sidebar--open' : ''}`}>
+        <div
+          className={`sidebar${sidebarOpen ? ' sidebar--open' : ''}`}
+          onTouchStart={handleSidebarTouchStart}
+          onTouchEnd={handleSidebarTouchEnd}
+        >
           <div className="sidebar-header">ROSTER — {filtered.length}</div>
           <div className="sidebar-search"><input className="sidebar-input" placeholder="Search..." value={search} onChange={e=>setSearch(e.target.value)}/></div>
           <div className="sidebar-filters">{WEIGHT_FILTERS.map(w=><button key={w} className={`filter-chip ${weightFilter===w?'on':''}`} onClick={()=>setWeightFilter(w)}>{w==='ALL'?'ALL':w.split(' ')[0].toUpperCase()}</button>)}</div>

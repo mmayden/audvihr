@@ -30,11 +30,11 @@ import { useTheme } from './hooks/useTheme';
 
 /** Bottom-nav items. */
 const NAV_ITEMS = [
-  { id: 'fighters', label: 'FIGHTERS', path: '/fighters' },
-  { id: 'compare',  label: 'COMPARE',  path: '/compare'  },
-  { id: 'calendar', label: 'CALENDAR', path: '/calendar' },
-  { id: 'markets',  label: 'MARKETS',  path: '/markets'  },
-  { id: 'news',     label: 'NEWS',     path: '/news'     },
+  { id: 'fighters', label: 'FIGHTERS', icon: '🥊', path: '/fighters' },
+  { id: 'compare',  label: 'COMPARE',  icon: '⚖️',  path: '/compare'  },
+  { id: 'calendar', label: 'CALENDAR', icon: '🗓',  path: '/calendar' },
+  { id: 'markets',  label: 'MARKETS',  icon: '📊',  path: '/markets'  },
+  { id: 'news',     label: 'NEWS',     icon: '📰',  path: '/news'     },
 ];
 
 /** Map MenuScreen screen-ID strings to paths. */
@@ -110,8 +110,10 @@ const AppInner = () => {
             key={item.id}
             className={`bottom-nav-item${activeId === item.id ? ' active' : ''}`}
             onClick={() => navigate(item.path)}
+            aria-label={item.label}
           >
-            {item.label}
+            <span className="bottom-nav-icon" aria-hidden="true">{item.icon}</span>
+            <span>{item.label}</span>
           </button>
         ))}
         <button className="bottom-nav-theme" onClick={toggleTheme} aria-label="Toggle colour theme">{themeLabel}</button>

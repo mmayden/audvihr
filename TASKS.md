@@ -19,45 +19,45 @@
 **Goal:** Dedicated mobile UX pass that makes Audwihr a first-class experience on phones (≤ 480px) and small tablets (481–767px). The responsive foundation is in place; this phase deepens it.
 
 #### Bottom Nav
-- [ ] Add visible text labels beneath bottom nav icons (currently icon-only on very small viewports)
-- [ ] Ensure active screen indicator is unambiguous at all sizes (bold label + accent underline or dot)
-- [ ] Confirm 44px minimum tap target on all five nav items
+- [x] Add visible text labels beneath bottom nav icons — emoji icon (🥊⚖️🗓📊📰) above text label; `flex-direction: column` layout
+- [x] Ensure active screen indicator is unambiguous at all sizes — `font-weight: 700` on active label + accent border-top
+- [x] Confirm 44px minimum tap target on all five nav items — `min-height: var(--touch-target, 44px)`
 
 #### Fighter Screen (mobile)
-- [ ] Tab bar: 6 tabs overflow — ensure swipe-scrolling is fluid with no visible scrollbar; verify all tabs reachable on 375px viewport
+- [x] Tab bar: 6 tabs overflow — swipe-scrolling already fluid; scrollbar suppressed globally
 - [ ] Hero card: reconsider portrait + badges layout at 375px — portrait may need to drop to 64px or become optional at smallest breakpoint
-- [ ] Stat filters panel: chips should wrap cleanly; CLEAR ALL accessible without scrolling
+- [x] Stat filters panel: chips scroll in body (`max-height: 50vh; overflow-y: auto`); CLEAR ALL reachable; stat-filter-chip `min-height: 36px`
 
 #### Compare Screen (mobile)
-- [ ] `FighterCard` hero columns stack vertically on mobile (F1 above F2 with VS between)
+- [x] `FighterCard` hero columns stack vertically on mobile (F1 above F2 with VS between) — `@media (max-width: 480px)` `grid-template-columns: 1fr`
 - [ ] Stat table: scrolls horizontally or collapses to single-column diff view on ≤ 480px
-- [ ] MATCHUP NOTES cards: full-width on mobile, readable without horizontal scroll
+- [x] MATCHUP NOTES cards: full-width on mobile, readable without horizontal scroll
 
 #### Calendar Screen (mobile)
-- [ ] Event sidebar drawer already works — audit open/close UX on real mobile viewport
-- [ ] Fight entry rows: COMPARE button still visible and tappable at 375px
+- [x] Event sidebar drawer — swipe-to-close added; open/close UX audited
+- [x] Fight entry rows: COMPARE button `min-height: 36px` + updated padding — tappable at 375px
 
 #### Markets Screen (mobile)
-- [ ] Market cards: full-width single-column on mobile; three-column live row collapses to rows
-- [ ] Bell icon + threshold input: accessible at touch scale; input doesn't zoom page on focus (font-size ≥ 16px)
-- [ ] PICKS panel: scrollable list with clear close affordance on mobile
+- [x] Market cards: `mkt-live-row` collapses to single column on mobile
+- [x] Bell icon + threshold input: `mkt-alert-threshold` font-size 16px — no iOS auto-zoom
+- [x] PICKS panel: `max-height: 60vh; overflow-y: auto` — scrollable
 
 #### News Screen (mobile)
-- [ ] Category chip bar: horizontally scrollable without visible scrollbar; all chips reachable
-- [ ] News card: headline truncation at 2–3 lines on mobile; tap expands
+- [x] Category chip bar: `flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none` — horizontal scroll
+- [x] News card: headline clamped to 3 lines at ≤480px; tap headline to expand (`news-headline--expanded`)
 
 #### Touch Interactions
-- [ ] Swipe-to-close sidebar: `touchstart`/`touchmove`/`touchend` handlers on `.sidebar--open`; velocity threshold ≥ 80px/s OR drag distance ≥ 40% of sidebar width triggers close
-- [ ] Tap-outside-to-close already works via `.sidebar-backdrop` — verify backdrop z-index on all screens
+- [x] Swipe-to-close sidebar: `onTouchStart`/`onTouchEnd` on FighterScreen + CalendarScreen sidebars; velocity ≥ 80px/s OR drag ≥ 112px triggers close
+- [x] Tap-outside-to-close via `.sidebar-backdrop` — already in place; z-index verified
 
 #### CSS / Design Tokens
-- [ ] Add `--touch-target: 44px` token for primary interactive elements; `--touch-target-sm: 36px` for secondary chips — replace magic numbers in media query block
-- [ ] Audit `@media (max-width: 767px)` block for any elements still below touch target minimums
+- [x] `--touch-target: 44px` and `--touch-target-sm: 36px` tokens added to all three theme blocks
+- [x] `@media (max-width: 767px)` block audited — bottom nav, filter chips, stat filter chips, calendar compare btn all updated
 
 #### Testing & Docs
 - [ ] Manual smoke test on real device (or Chrome DevTools mobile emulator) for all 6 screens at 375px and 768px breakpoints
 - [ ] Add responsive smoke tests if any screen has a conditional render path that differs on mobile
-- [ ] `npm run test:run` exits 0; `npm run lint` exits 0; `npm audit` clean
+- [x] `npm run test:run` exits 0 (465 tests); `npm run lint` exits 0; `npm audit` clean
 - [ ] CHANGELOG.md `[Unreleased]` → `[0.18.0]` at merge; TASKS.md + PLANNING.md updated
 
 **Security notes for Phase 17:**

@@ -6,6 +6,35 @@ All notable changes to this project. Format: [version] — date — description.
 
 ## [Unreleased]
 
+### Phase 17 — Mobile-First UX
+
+#### Added
+- **`app.css`** — `--touch-target: 44px` and `--touch-target-sm: 36px` CSS tokens added to all three theme blocks (`:root`, `[data-theme="light"]`, `@media prefers-color-scheme: light`).
+- **`app.css`** — `@media (max-width: 480px)` block for small-phone specifics: `compare-fighter-header` stacks vertically (F1 / VS / F2); news headline clamped to 3 lines with `.news-headline--expanded` opt-in modifier for tap-to-expand.
+- **`App.jsx`** — Bottom nav items now show an emoji icon above the text label (🥊 FIGHTERS, ⚖️ COMPARE, 🗓 CALENDAR, 📊 MARKETS, 📰 NEWS); `aria-label` added to each button; `.bottom-nav-icon` span carries `aria-hidden="true"`.
+
+#### Changed
+- **`app.css` — `@media (max-width: 767px)` mobile block:**
+  - `.bottom-nav-item` — `flex-direction: column`, `gap: 2px`, `min-height: var(--touch-target, 44px)` (all five nav items now meet 44px minimum); font-size 8px→7px to accommodate icon+label.
+  - `.bottom-nav-item.active` — `font-weight: 700` added to bold the active label.
+  - `.stat-filter-chip` — `min-height: var(--touch-target-sm, 36px)` ensures filter chips meet 36px target.
+  - `.stat-filters-body` — `max-height: 50vh; overflow-y: auto` keeps CLEAR ALL reachable in the mobile sidebar.
+  - `.news-filterbar` — `flex-direction: column; align-items: stretch` so chip bar and fighter select stack neatly.
+  - `.news-cat-chips` — `flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none` — horizontal scroll without visible scrollbar.
+  - `.mkt-live-row` — `grid-template-columns: 1fr` collapses 3-column live row to stacked rows on mobile.
+  - `.mkt-alert-threshold` — `font-size: 16px` prevents iOS auto-zoom on focus.
+  - `.markets-pick-panel` — `max-height: 60vh; overflow-y: auto` — PICKS log panel scrollable.
+  - `.cal-compare-btn` — `min-height: var(--touch-target-sm, 36px)` and updated padding for reliable tap target.
+- **`FighterScreen.jsx`** — Touch swipe-to-close on the sidebar: `onTouchStart` / `onTouchEnd` handlers on the sidebar div; closes when swipe-left velocity ≥ 80 px/s OR drag distance ≥ 112 px (40% of 280px sidebar width).
+- **`CalendarScreen.jsx`** — Same swipe-to-close pattern as FighterScreen.
+- **`NewsScreen.jsx`** — News headline truncated to 3 lines on ≤480px viewports via `.news-headline--expanded` toggle; tapping the headline expands/collapses; `role="button"`, `tabIndex={0}`, `aria-expanded` for accessibility.
+- **`App.test.jsx`** — Updated `textContent` assertion to `toContain('FIGHTERS')` to account for the icon+label DOM structure.
+
+#### Testing
+- **465 tests, all passing. 0 lint errors.**
+
+---
+
 ### Code Quality & Cleanup
 
 #### Changed

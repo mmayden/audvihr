@@ -17,6 +17,7 @@ const CATEGORIES = ['ALL', 'FIGHT', 'INJURY', 'CAMP', 'WEIGH-IN', 'RESULT'];
 export const NewsScreen = ({ onBack, onGoFighter }) => {
   const [catFilter, setCatFilter] = useState('ALL');
   const [fighterFilter, setFighterFilter] = useState('ALL');
+  const [expandedIds, setExpandedIds] = useState(new Set());
 
   const { items, loading, isLive } = useNews();
 
@@ -109,7 +110,18 @@ export const NewsScreen = ({ onBack, onGoFighter }) => {
               </span>
               <span className="news-date">{formatDate(item.date)}</span>
             </div>
-            <div className="news-headline">{item.headline}</div>
+            <div
+              className={`news-headline${expandedIds.has(item.id) ? ' news-headline--expanded' : ''}`}
+              onClick={() => setExpandedIds(prev => {
+                const next = new Set(prev);
+                next.has(item.id) ? next.delete(item.id) : next.add(item.id);
+                return next;
+              })}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpandedIds(prev => { const next = new Set(prev); next.has(item.id) ? next.delete(item.id) : next.add(item.id); return next; }); } }}
+              aria-expanded={expandedIds.has(item.id)}
+            >{item.headline}</div>
             <div className="news-body">{item.body}</div>
             <div className="news-footer">
               <span className="news-source">{item.source}</span>

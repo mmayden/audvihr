@@ -41,7 +41,7 @@ describe('App — bottom nav', () => {
     fireEvent.click(fightersBtn);
     const activeItem = document.querySelector('.bottom-nav-item.active');
     expect(activeItem).toBeTruthy();
-    expect(activeItem.textContent).toBe('FIGHTERS');
+    expect(activeItem.textContent).toContain('FIGHTERS');
   });
 
   it('renders the theme toggle button', () => {
