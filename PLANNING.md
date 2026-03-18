@@ -169,23 +169,35 @@ Test files are co-located with source: `*.test.{js,jsx}` next to the file under 
 
 ### Color Palette (CSS Variables)
 ```css
+/* Surface / structure */
 --bg:           #12141a   /* page background */
 --surface:      #1a1d26   /* card/panel background */
 --surface2:     #21252f   /* elevated surface */
 --surface3:     #272c38   /* active/selected state */
 --border:       #2e3340   /* default border */
 --border2:      #3a4055   /* hover/active border */
+
+/* Text */
 --text:         #c8cdd8   /* body text */
 --text-dim:     #6b7285   /* labels, metadata */
 --text-bright:  #eef0f5   /* headings, primary values */
---accent:       #d4a843   /* primary accent: amber */
+
+/* Accent */
+--accent:       #d4a843   /* primary accent: amber — pressure fighter arch, checklist, active states */
 --accent-dim:   #8a6e2a   /* muted accent */
---green:        #4caf82   /* positive, wins */
---red:          #d95f5f   /* negative, losses, danger */
---blue:         #5b8dd9   /* grappling, F2 in compare */
---purple:       #8b6fd4   /* counter striker arch, clinch */
---orange:       #d4804a   /* warnings, body strikes */
+
+/* Semantic colors */
+--green:        #4caf82   /* positive, wins, BJJ/sub hunter arch */
+--red:          #d95f5f   /* negative, losses, danger, boxer-puncher arch */
+--dark-red:     #c0392b   /* brawler arch, front-runner modifier */
+--blue:         #5b8dd9   /* wrestler arch, stat filter chips on, F2 compare edge */
+--purple:       #8b6fd4   /* counter striker arch */
+--orange:       #d4804a   /* kickboxer arch, warnings, edge signal flags */
+--teal:         #3aafa9   /* muay thai arch (Phase 16) */
+--gold:         #c9a84c   /* clinch fighter arch (Phase 16) */
 ```
+
+Light theme overrides only `--bg`, `--surface*`, `--border*`, `--text*`, `--accent`, `--accent-dim`. All archetype/semantic color primitives remain constant across themes.
 
 ### Typography
 - Body: `Inter` (weights 300–700)
@@ -210,6 +222,11 @@ Test files are co-located with source: `*.test.{js,jsx}` next to the file under 
 
 - ✅ **MATCHUP NOTES section.** Rich warning cards in CompareScreen between hero header and stat table. Four visual variants: style (amber, structural edge), risk (red, durability/cardio/cut flags), fade (green, trajectory), clash (blue, symmetric style interaction). Subject badge shows fighter last name + "EDGE" for directional rules; omitted for symmetric clashes.
 - ✅ **`matchupWarnings.js` rules engine.** Pure, testable, fully static — no fighter names, no DOM, no side effects. Lookup tables only. 27 tests covering all branches including bidirectional logic, archetype-conditioned modifier amplification, and null-input guards.
+
+**Phase 16 deliverables — all delivered in v0.16.0:**
+
+- ✅ **STAT FILTERS panel.** Collapsible panel in FighterScreen sidebar with 11 preset chips across 4 categories (STRIKING, GRAPPLING, FINISHING, PHYSICAL). Toggle button shows active-filter count badge. Active chips styled in `--blue`. All active filters applied with AND logic — stacks with existing name search and weight class filter. CLEAR ALL button. State is React-only (`Set<string>`) — no localStorage persistence by design; filters reset on navigation.
+- ✅ **MUAY THAI + CLINCH FIGHTER archetype colors.** Both were referenced in matchup rules but had no color entry. Now: MUAY THAI → `--teal` (#3aafa9), CLINCH FIGHTER → `--gold` (#c9a84c). `ARCH_COLORS` is now complete — all 10 archetypes have entries.
 
 **Immovable rules:**
 - All colors from CSS variables — never hardcode hex values in JSX or CSS classes.

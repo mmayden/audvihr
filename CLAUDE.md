@@ -27,6 +27,7 @@ These are non-negotiable. Do not skip them to save time or complexity.
 - **`noindex, nofollow` robots meta tag.** This is a personal trading tool — it must not be indexed by search engines. The tag is already present in `index.html`; do not remove it.
 - **URL params carry fighter IDs only.** React Router (Phase 13) is live. URL parameters must contain only numeric fighter IDs and screen slugs. Validated with `/^\d+$/` + `parseInt` in `FighterScreenRoute` / `CompareScreenRoute` in `App.jsx` before any FIGHTERS lookup. No API keys, no localStorage state, no session tokens in URLs.
 - **Dependency hygiene.** Run `npm audit` before every merge to `master`. Fix all critical/high severity issues before merging. Document any accepted moderate issues in PLANNING.md.
+- **Stat filter predicates are a zero-XSS surface.** `STAT_FILTERS[*].predicate(fighter)` receives only in-memory FIGHTERS objects produced at build time by `scripts/fetch-data.js`. No user input, no localStorage reads, no fetch calls. Predicates are pure boolean closures over numeric/string literals. No sanitization is required inside predicate bodies — but any future predicate that reads user-supplied data must add explicit validation.
 
 ### Storage Key Ownership
 
@@ -197,6 +198,8 @@ src/
 - **`worker-src 'self'` in CSP.** The SW is registered from the same origin. Both `netlify.toml` and `vercel.json` include `worker-src 'self'` in the Content-Security-Policy header. Do not remove it.
 - **Pick log in localStorage.** `src/utils/pickLog.js` owns the `pick_log` key (200-entry cap, same eviction pattern as `clv_log`). All stored values are plain text strings. No other module reads or writes this key.
 - **`FighterSearch` input sanitization.** The search input is filtered against the in-memory `FIGHTERS` array using `.trim()` + `.toLowerCase()`. Results rendered via JSX only — no innerHTML, no dangerouslySetInnerHTML. Input is never reflected into the DOM as markup.
+- **Stat filter active state is React-only — no localStorage persistence.** `activeFilters` in `FighterScreen` is a `Set<string>` held in `useState`. It resets on navigation. Do not persist filter state to localStorage or URL params — active filters are session-local UI state only. Filter predicates in `statFilters.js` receive in-memory FIGHTERS objects (build-time-scraped, trusted data) — they are pure functions with no I/O and no user input surface.
+- **`aria-pressed` on stat filter chips.** Each `.stat-filter-chip` must carry `aria-pressed={activeFilters.has(sf.id)}` — this is the correct ARIA pattern for toggle buttons (not `aria-checked`, which is for checkboxes). Do not remove or swap the attribute type.
 - **Current test count: 454 passing.** Do not merge changes that reduce this number without a documented reason.
 
 ---
