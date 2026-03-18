@@ -10,13 +10,24 @@
 
 ## Current Sprint
 
-**Branch:** `master` (Phase 16 complete — no active sprint)
-**Last completed:** Post-Phase-16 Visual & QoL Polish — 2026-03-18
+**Branch:** `master`
+**Last completed:** CORS Proxy for Live RSS — 2026-03-18
 **Next:** Phase 17 scope TBD. Mobile-first development begins soon — see Backlog. Cut a `feature/phase-17-*` branch when scoped.
 
 ---
 
 ## ✅ Completed Sprints
+
+### ✅ CORS Proxy for Live RSS — 2026-03-18
+
+- [x] `netlify/functions/rss-proxy.js` — Netlify Functions v2; strict allowlist (2 URLs); 403 on unlisted url; 512 KB cap; served at `/api/rss-proxy` via `config.path`
+- [x] `api/rss-proxy.js` — Vercel equivalent; identical security logic; auto-routed from `api/`
+- [x] `useNews.js` — fetch routes changed to `/api/rss-proxy?url=...`; silent-degradation behavior unchanged
+- [x] `netlify.toml` + `vercel.json` — removed `mmafighting.com` + `mmajunkie.usatoday.com` from CSP `connect-src`; vercel rewrite exclusion updated to include `api/`
+- [x] `useNews.test.js` — 2 proxy-routing tests added; 456 total passing; 0 lint errors
+- [x] CHANGELOG.md, TASKS.md, PLANNING.md updated
+
+---
 
 ### ✅ Post-Phase-16 Visual & QoL Polish — 2026-03-18
 
@@ -179,7 +190,7 @@
 ## Backlog (Unscheduled — Post Phase 16)
 
 #### High value
-- [ ] **CORS proxy for live RSS** — one Netlify/Vercel edge function; `useNews` hook is fully ready, this is pure infra
+- [x] ~~**CORS proxy for live RSS**~~ — shipped 2026-03-18: `netlify/functions/rss-proxy.js` + `api/rss-proxy.js`; strict allowlist; `useNews` routes through `/api/rss-proxy`
 - [x] ~~**Fighter stat range search**~~ — shipped in Phase 16 (11-preset STAT FILTERS panel in FighterScreen sidebar)
 - [x] ~~**MUAY THAI + CLINCH FIGHTER in ARCH_COLORS**~~ — shipped in Phase 16 (teal/gold)
 - [ ] **Stat trend lines** — per-fight stat trajectory over last N fights; requires scraper enhancement to store per-fight stats alongside career averages

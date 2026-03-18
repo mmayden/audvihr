@@ -71,7 +71,7 @@ Does fight breakdowns for a podcast or Discord. Wants fast access to stats witho
 3. ✅ **Opening line preservation** — `opening_lines` localStorage key (never evicted). Delivered in v0.9.0.
 4. ✅ **Tapology public % integration** — build-time scrape; PUBLIC row + FADE badge (≥15pt divergence). Delivered in v0.9.0.
 5. ✅ **Mobile layout** — responsive bottom nav + sidebar drawer; dark/light/system theme. Delivered in v0.10.0.
-6. ✅ **Live news integration** — `useNews` hook; DOMParser text-only sanitization; LIVE/MOCK badges. Delivered in v0.12.0. (CORS proxy is backlog.)
+6. ✅ **Live news integration** — `useNews` hook; DOMParser text-only sanitization; LIVE/MOCK badges. Delivered in v0.12.0. CORS proxy shipped 2026-03-18 — live RSS now functional in production.
 7. ✅ **Shareable research** — React Router URL routing; `/compare/:f1id/:f2id` links; MD + CSV export. Delivered in v0.13.0.
 8. ✅ **QoL + visual overhaul** — type-to-search, percentile badges, pill badges, fighter cards, pick log, flags pills, compare hero header. Delivered in v0.14.0.
 9. ✅ **Matchup Context Engine** — `computeMatchupWarnings` pure function; MATCHUP NOTES section in CompareScreen with 14 archetype rules, 8 style clashes, 10 modifier warnings. Delivered in v0.15.0.
@@ -467,7 +467,7 @@ Checklist persists per matchup via localStorage. Key = `cl_{f1id}_{f2id}`.
 
 ## Security Model
 
-### Current State (Vite + React — v0.16.0)
+### Current State (Vite + React — v0.16.0 + CORS proxy)
 
 | Surface | Risk | Status |
 |---------|------|--------|
@@ -480,6 +480,9 @@ Checklist persists per matchup via localStorage. Key = `cl_{f1id}_{f2id}`.
 | External RSS feed content | Untrusted HTML/JS injected via feed title/description into DOM | **Mitigated** — `newsParser.js` uses `DOMParser('text/html').body.textContent` for all feed content. Tags never rendered. `dangerouslySetInnerHTML` prohibited for feed content. XSS coverage in `newsParser.test.js`. |
 | Secrets / credentials | Hardcoded in source | **Mitigated** — `VITE_ODDS_API_KEY` and `VITE_KALSHI_API_KEY` in `.env` (gitignored). Kalshi key sent from browser (accepted constraint for personal tool — see decisions log). |
 | Search engine indexing | Personal trading tool exposed publicly | **Mitigated** — `noindex, nofollow` robots meta tag in `index.html` |
+| CORS proxy SSRF | `url` param forwarded to arbitrary upstream servers | **Mitigated** — `ALLOWED_URLS.has(url)` exact-match allowlist in both `netlify/functions/rss-proxy.js` and `api/rss-proxy.js`. 2-entry Set (MMA Fighting + MMA Junkie). Any unlisted URL returns 403 immediately. No prefix matching, no hostname matching, no regex — only `Set.has()`. |
+| CORS proxy response abuse | Proxy used to exfiltrate large payloads | **Mitigated** — 512 KB response size cap. 10-second upstream timeout. GET-only. No forwarding of client auth headers. |
+| Direct browser fetch to RSS origins | Browser bypasses proxy, exposes RSS domains to CSP connect-src | **Eliminated** — RSS origins removed from CSP `connect-src`. Only `useNews` calls the proxy. Any direct fetch to those origins will now be blocked by CSP. |
 
 ### Deployment Security (Phase 3a+)
 
@@ -518,7 +521,8 @@ Permissions-Policy: geolocation=(), camera=(), microphone=()
 - **Tapology scrape (Phase 9)** ✅ — build-time HTML scrape (no API key). No runtime `connect-src` entry needed.
 - **Fighter portrait images (Phase 10)** ✅ — self-hosted `public/assets/portraits/`. No CSP change required.
 - **Service Worker + Notification API (Phase 11)** ✅ — SW scope `/`, no fetch handler. Alert body: string concatenation only (`textContent` semantics). `worker-src 'self'` added to CSP.
-- **External news feeds (Phase 12)** ✅ — `https://www.mmafighting.com` + `https://mmajunkie.usatoday.com` added to `connect-src`. All feed content text-extracted via DOMParser — no HTML reaches the DOM. XSS coverage in `newsParser.test.js`.
+- **External news feeds (Phase 12)** ✅ — All feed content text-extracted via DOMParser — no HTML reaches the DOM. XSS coverage in `newsParser.test.js`.
+- **CORS proxy for live RSS (2026-03-18)** ✅ — `netlify/functions/rss-proxy.js` (Netlify Functions v2) + `api/rss-proxy.js` (Vercel). Strict `ALLOWED_URLS` Set — exact-match only, 2 entries. 403 on any unlisted url. 512 KB cap, 10s timeout, GET only, no auth header forwarding. `useNews` updated to route all fetches through `/api/rss-proxy?url=...`. `mmafighting.com` + `mmajunkie.usatoday.com` removed from CSP `connect-src` — browser can no longer directly contact these origins.
 
 **Completed phase surfaces (continued):**
 - **React Router + shareable URLs (Phase 13)** ✅ — `BrowserRouter` in `App.jsx`. URL params contain only numeric fighter IDs. `FighterScreenRoute` and `CompareScreenRoute` validate params with `/^\d+$/` before FIGHTERS lookup. History API navigation requires no CSP change. SPA fallback added to `netlify.toml` (200 redirect) and `vercel.json` (rewrites). `noindex` tag preserved.
@@ -753,3 +757,4 @@ Ordered by value vs. effort. Full sprint tasks in TASKS.md.
 | 2026-03-18 | Post-Phase-16: `vs-btn` default state changed from muted to accent | The VS./COMPARE button in FighterScreen hero is the primary navigation CTA — the single action that transitions users from the fighter profile to the compare workflow. Using `--border2`/`--text-dim` as the default state made it visually indistinct from informational pills. Upgraded to `--accent-dim`/`--accent` by default, solid accent fill on hover. This is consistent with the topbar buttons and checklist CTAs which already use the accent pattern. |
 | 2026-03-18 | Post-Phase-16: input focus colors → `--accent` across all inputs | Five inputs (sidebar search, fighter search, notes area, pick notes, news filter select) used `--border2` on focus — the same color as their default hover border. This provided no meaningful visual distinction for keyboard navigation. Changed to `--accent` to match the button focus ring and the existing `.mc-input:focus` pattern (which already used `--accent` correctly). |
 | 2026-03-18 | Post-Phase-16: mobile begins — touch target baseline established | Filter chips and sidebar fighter rows brought to 36px minimum tap height. Portrait size reduced (160px → 88px) to recover vertical space on small viewports without sacrificing the identity section. These changes are preparatory for the upcoming mobile-first development phase. No layout architecture changes yet — that is Phase 17 scope. |
+| 2026-03-18 | CORS proxy for live RSS: same-origin serverless function, strict allowlist | Direct browser fetches to MMA Fighting and MMA Junkie RSS feeds fail in production because neither site sends `Access-Control-Allow-Origin` headers. Added `netlify/functions/rss-proxy.js` (Netlify Functions v2, served at `/api/rss-proxy` via `config.path`) and `api/rss-proxy.js` (Vercel, auto-routed from `api/` directory). Both validate the `url` query param against a two-entry Set allowlist — any unlisted URL returns 403, preventing SSRF abuse. Response size is capped at 512 KB. `useNews` hook updated to route all RSS fetches through `/api/rss-proxy?url=...` (same-origin, no browser CORS restriction). MMA Fighting and MMA Junkie removed from CSP `connect-src` in both `netlify.toml` and `vercel.json` — the browser no longer connects to these origins directly. Vercel SPA rewrite exclusion updated to also exclude `api/`. |

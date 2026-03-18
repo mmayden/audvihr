@@ -20,7 +20,7 @@ These are non-negotiable. Do not skip them to save time or complexity.
 - **No hardcoded secrets.** API keys, tokens, credentials go in `.env` (Vite: `VITE_` prefix). `.env` files are gitignored. Never commit secrets.
 - **localStorage / sessionStorage input validation.** All reads from localStorage or sessionStorage must be wrapped in `try/catch` and validated against an expected shape. If validation fails, fall back to the typed default — never use raw parsed data unsanitized.
 - **User input sanitization at the boundary.** Validate and sanitize all form inputs (odds fields, notes) before using them in calculations. `parseInt()` with `isNaN` guard is the current pattern — maintain it.
-- **CSP required for web deployment.** Configured in `netlify.toml` and `vercel.json`. Current policy includes: `default-src 'self'`; `script-src 'self'`; `worker-src 'self'` (for Service Worker); `style-src 'self' fonts.googleapis.com`; `font-src fonts.gstatic.com`; `connect-src 'self'` + 5 API/feed domains (The Odds API, Polymarket, Kalshi, MMA Fighting, MMA Junkie); `img-src 'self' data:`; `frame-ancestors 'none'`. Do not weaken any directive. Every new external domain must be added to both files and documented in PLANNING.md decisions log.
+- **CSP required for web deployment.** Configured in `netlify.toml` and `vercel.json`. Current policy includes: `default-src 'self'`; `script-src 'self'`; `worker-src 'self'` (for Service Worker); `style-src 'self' fonts.googleapis.com`; `font-src fonts.gstatic.com`; `connect-src 'self'` + 3 API domains (The Odds API, Polymarket, Kalshi) — MMA news feeds are fetched server-side via `/api/rss-proxy` so their origins are no longer in `connect-src`; `img-src 'self' data:`; `frame-ancestors 'none'`. Do not weaken any directive. Every new external domain must be added to both files and documented in PLANNING.md decisions log.
 - **External feed content is untrusted — text extraction only.** `src/utils/newsParser.js` owns all RSS sanitization. `stripHtml()` uses `DOMParser('text/html').body.textContent` — tags are never rendered, only text extracted. `parseRssFeed()` uses `DOMParser('application/xml')`. Feed content (title, description) must never be passed to `innerHTML`, `dangerouslySetInnerHTML`, or any DOM-insertion API. Headline capped at 160 chars, body at 600 chars. XSS test coverage is mandatory.
 - **Alert notifications use plain text only.** The Notification API body must be constructed with string concatenation of validated values only. No HTML template literals, no `innerHTML`, no `dangerouslySetInnerHTML`. Browsers do not render HTML in notification bodies — never attempt to inject markup.
 - **CSV export must guard against formula injection.** Any value exported as CSV that begins with `=`, `+`, `-`, or `@` must be prefixed with a single quote `'` to prevent spreadsheet formula execution.
@@ -28,6 +28,7 @@ These are non-negotiable. Do not skip them to save time or complexity.
 - **URL params carry fighter IDs only.** React Router (Phase 13) is live. URL parameters must contain only numeric fighter IDs and screen slugs. Validated with `/^\d+$/` + `parseInt` in `FighterScreenRoute` / `CompareScreenRoute` in `App.jsx` before any FIGHTERS lookup. No API keys, no localStorage state, no session tokens in URLs.
 - **Dependency hygiene.** Run `npm audit` before every merge to `master`. Fix all critical/high severity issues before merging. Document any accepted moderate issues in PLANNING.md.
 - **Stat filter predicates are a zero-XSS surface.** `STAT_FILTERS[*].predicate(fighter)` receives only in-memory FIGHTERS objects produced at build time by `scripts/fetch-data.js`. No user input, no localStorage reads, no fetch calls. Predicates are pure boolean closures over numeric/string literals. No sanitization is required inside predicate bodies — but any future predicate that reads user-supplied data must add explicit validation.
+- **RSS proxy allowlist is immutable — exact match only, no patterns.** `netlify/functions/rss-proxy.js` and `api/rss-proxy.js` each maintain a hardcoded `ALLOWED_URLS` Set. Validation uses `ALLOWED_URLS.has(url)` — exact string equality only. Never relax this to a prefix match, hostname match, or regex — any such loosening reopens SSRF. Adding a new source requires explicit addition to the Set in both function files, documented in the PLANNING.md decisions log. The proxy does not forward request cookies, auth headers, or any client-supplied headers to upstream.
 
 ### Storage Key Ownership
 
@@ -104,6 +105,11 @@ Each storage key is owned by exactly one module. No other module reads or writes
 File and folder structure must match the following layout. Do not put components in the wrong location:
 
 ```
+netlify/
+│   └── functions/
+│       └── rss-proxy.js      Netlify Functions v2 — RSS CORS proxy; strict ALLOWED_URLS Set; 403 on unlisted url; 512 KB cap; served at /api/rss-proxy via config.path
+api/
+│   └── rss-proxy.js          Vercel serverless function — identical security logic; auto-routed at /api/rss-proxy
 public/
 │   ├── sw.js                 Service Worker — install/activate only; scope /; no fetch handler
 │   └── assets/portraits/     Self-hosted fighter portrait images (*.jpg); no CDN, no CSP change
@@ -186,7 +192,8 @@ src/
 - **Vite + React + React Router, web-deployed.** The single-file prototype (`mma-trader.html`) is retired. All work goes into the Vite project. `babel-standalone` is gone permanently. React Router v7 (`BrowserRouter`) is live in `App.jsx`; SPA fallback configured in `netlify.toml` + `vercel.json` + `vite.config.js`.
 - **Fighter and event data is live (build-time scraped).** `fighters.js` and `events.js` are generated by `scripts/fetch-data.js` at `npm run build`. Do not hand-edit them. `markets.js` is static mock. `news.js` is the static fallback seed for `useNews` — do not hand-edit it either (it's loaded when RSS sources are unavailable).
 - **Three live market hooks (Phase 7+).** `useOdds`, `usePolymarket`, and `useKalshi` make runtime API calls. All three degrade silently when their key is absent or the API is unreachable. `VITE_ODDS_API_KEY` (The Odds API) and `VITE_KALSHI_API_KEY` (Kalshi) go in `.env`. Polymarket is unauthenticated. Do not move API calls into `useEffect`-free code paths.
-- **Live news hook (Phase 12+).** `useNews` fetches MMA Fighting + MMA Junkie RSS, parses via `newsParser.js`, caches 30 min in sessionStorage. Degrades silently to `news.js` mock when CORS blocks. All feed content is text-only — no HTML reaches the DOM.
+- **Live news hook (Phase 12+).** `useNews` fetches MMA Fighting + MMA Junkie RSS via the same-origin `/api/rss-proxy` serverless function, parses via `newsParser.js`, caches 30 min in sessionStorage. Degrades silently to `news.js` mock when the proxy is unreachable or all sources return errors. All feed content is text-only — no HTML reaches the DOM.
+- **Serverless proxy is the only CORS bypass mechanism.** Do not add direct browser fetches to CORS-restricted external domains. If a new live data source requires CORS bypass, extend the proxy allowlist (both function files) and document the new URL in PLANNING.md. Proxy functions must always: validate against a strict allowlist (`Set.has(url)` — exact equality), enforce a response size cap, accept only GET, and not forward client auth headers to upstream.
 - **sessionStorage for API response caching.** Cache TTL: 15 min for The Odds API (quota budget), 10 min for Polymarket + Kalshi, 30 min for RSS news. Use `src/utils/cache.js` helpers — do not re-implement cache logic inline.
 - **CLV log in localStorage.** `src/utils/clv.js` owns the CLV log key (`clv_log`, 500-entry cap) and the opening line key (`opening_lines`, never evicted). Do not write to either key from any other path.
 - **All numbers and labels use JetBrains Mono.** All colors come from CSS variables — never hardcode hex values in JSX inline styles.
@@ -204,7 +211,7 @@ src/
 - **`aria-pressed` on stat filter chips.** Each `.stat-filter-chip` must carry `aria-pressed={activeFilters.has(sf.id)}` — this is the correct ARIA pattern for toggle buttons (not `aria-checked`, which is for checkboxes). Do not remove or swap the attribute type.
 - **Sidebar toggle buttons require `aria-expanded`.** The ROSTER button in FighterScreen and EVENTS button in CalendarScreen must carry `aria-expanded={sidebarOpen}` and a contextual `aria-label` reflecting the open/closed state. Sidebar backdrops (the tap-to-dismiss overlay) must carry `role="button"` and `aria-label`.
 - **Mobile development begins soon.** The responsive foundation (bottom nav, sidebar drawer, `@media (max-width: 767px)` block) is established. Upcoming work will deepen mobile UX. Keep touch target minimums at 36px for chips and 44px for primary buttons. Portrait images: 88×88px on mobile.
-- **Current test count: 454 passing.** Do not merge changes that reduce this number without a documented reason.
+- **Current test count: 456 passing.** Do not merge changes that reduce this number without a documented reason.
 
 ---
 

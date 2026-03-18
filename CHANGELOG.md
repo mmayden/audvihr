@@ -4,6 +4,23 @@ All notable changes to this project. Format: [version] — date — description.
 
 ---
 
+## [Unreleased] — CORS Proxy for Live RSS
+
+### Added
+- `netlify/functions/rss-proxy.js` — Netlify Functions v2 serverless function (ESM). Proxies MMA Fighting and MMA Junkie RSS feeds server-side with a strict two-entry allowlist. Invalid or unlisted `url` params return 403 immediately (SSRF prevention). Response size capped at 512 KB. Served at `/api/rss-proxy` via `config.path` (takes precedence over the SPA redirect rule).
+- `api/rss-proxy.js` — Vercel equivalent with identical security logic. Auto-routed from the `api/` directory at `/api/rss-proxy`.
+
+### Changed
+- **useNews.js** — All RSS fetches now route through `/api/rss-proxy?url=...` instead of hitting the RSS origins directly. Silent-degradation behavior is unchanged — proxy errors still cause the affected source to contribute zero items, falling back to the static NEWS mock if all fail.
+- **netlify.toml** — Removed `https://www.mmafighting.com` and `https://mmajunkie.usatoday.com` from CSP `connect-src`. Browser now only contacts same-origin `/api/rss-proxy`.
+- **vercel.json** — Same CSP tightening. SPA rewrite exclusion updated to also exclude `api/` path.
+
+### Testing
+- `useNews.test.js` — 2 new proxy-routing tests: verifies all fetch calls use `/api/rss-proxy?url=` prefix (not direct RSS origins), and that both RSS source URLs are correctly encoded as query params.
+- Total: **456 tests, all passing. 0 lint errors.**
+
+---
+
 ## [Unreleased] — Visual & QoL Polish
 
 ### Changed
