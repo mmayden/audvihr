@@ -153,6 +153,8 @@ export const FighterScreen = ({onBack, initialFighter}) => {
         </div>
         {sel ? (
           <div className="fighter-area">
+            <div className="ui-card hero-outer">
+              <div className="uc-hdr">FIGHTER PROFILE</div>
             <div className="card-hero">
               <div className="card-portrait">
                 {sel.portrait
@@ -196,6 +198,7 @@ export const FighterScreen = ({onBack, initialFighter}) => {
                 </div>
               </div>
             </div>
+            </div>{/* /hero-outer */}
             <div className="tabs-bar">{TABS.map(t=><button key={t} className={`tab-btn ${tab===t?'active':''}`} onClick={()=>setTab(t)}>{t}</button>)}</div>
             <div className="tab-content">
               {tab==='OVERVIEW'  && <TabOverview  fighter={sel} newsItems={fighterNews}/>}

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arena — Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --accent:      #00c8ff;
+  --accent-dim:  #006888;
+  --text:        #b8c4d8;
+  --text-dim:    #7890b0;
+  --text-bright: #dce6f8;
+  --green:       #22d686;
+  --red:         #f04050;
+  --gold:        #c8a040;
+  --orange:      #f07840;
+  --mono:        'JetBrains Mono', monospace;
+  --font:        'Inter', sans-serif;
+}
+
+html, body { height: 100%; overflow: hidden; background: #020308; }
+body { font-family: var(--font); font-size: 14px; color: var(--text); }
+
+/* ─────────────────────────────────────────
+   PARALLAX BACKGROUND SYSTEM
+   Each layer is oversized (116% each axis)
+   and centered so it can pan without gaps.
+───────────────────────────────────────── */
+.bg {
+  position: fixed;
+  /* oversized so panning never reveals edges */
+  inset: -8%;
+  width: 116%; height: 116%;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Layer 0 — void base (furthest, ~0 movement) */
+.bg-base {
+  z-index: 0;
+  background: radial-gradient(ellipse 120% 100% at 50% 50%,
+    #060c22 0%, #030610 45%, #020308 100%);
+}
+
+/* Layer 1 — deep arena atmosphere (slowest parallax) */
+.bg-atmo {
+  z-index: 1;
+  background:
+    /* Sphere LED ceiling arc */
+    radial-gradient(ellipse 140% 60% at 50% -8%,  rgba(0,55,140,.55) 0%, transparent 55%),
+    /* Octagon floor glow */
+    radial-gradient(ellipse 60% 35% at 50% 72%,   rgba(140,200,255,.13) 0%, transparent 60%),
+    /* Left crowd warmth */
+    radial-gradient(ellipse 38% 70% at 0%   50%,  rgba(100,55,10,.30)  0%, transparent 55%),
+    /* Right crowd warmth */
+    radial-gradient(ellipse 38% 70% at 100% 50%,  rgba(100,55,10,.30)  0%, transparent 55%);
+}
+
+/* Layer 2 — mid-depth glow orbs (medium parallax) */
+.bg-orbs {
+  z-index: 2;
+  background:
+    /* Top-left screen quad */
+    radial-gradient(ellipse 45% 40% at 18%  8%,  rgba(0,35,100,.28) 0%, transparent 65%),
+    /* Top-right screen quad */
+    radial-gradient(ellipse 45% 40% at 82%  8%,  rgba(0,35,100,.28) 0%, transparent 65%),
+    /* Centre accent bloom */
+    radial-gradient(ellipse 30% 25% at 50%  52%, rgba(0,180,255,.06) 0%, transparent 60%);
+  animation: orbDrift 14s ease-in-out infinite alternate;
+}
+@keyframes orbDrift {
+  from { opacity: .7; }
+  to   { opacity: 1;  }
+}
+
+/* Layer 3 — LED panel grid (fastest parallax, closest) */
+.bg-grid {
+  z-index: 3;
+  background-image:
+    linear-gradient(rgba(255,255,255,.014) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.014) 1px, transparent 1px);
+  background-size: 38px 38px;
+  /* Grid only visible in central zone — fades to nothing at edges */
+  mask-image: radial-gradient(ellipse 70% 65% at 50% 50%,
+    rgba(0,0,0,.75) 0%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 65% at 50% 50%,
+    rgba(0,0,0,.75) 0%, transparent 80%);
+}
+
+/* Layer 4 — edge vignette (fixed, no parallax — it's the "seat") */
+.bg-vignette {
+  position: fixed; inset: 0; z-index: 4; pointer-events: none;
+  background: radial-gradient(ellipse 90% 85% at 50% 50%,
+    transparent 28%, rgba(0,0,0,.92) 100%);
+}
+
+/* Slow accent breath — octagon "live" pulse */
+.bg-pulse {
+  position: fixed; inset: 0; z-index: 5; pointer-events: none;
+  background: radial-gradient(ellipse 55% 40% at 50% 65%,
+    rgba(0,180,255,.055) 0%, transparent 65%);
+  animation: arenaBreathe 11s ease-in-out infinite;
+}
+@keyframes arenaBreathe {
+  0%,100% { opacity: .5; transform: scale(1);    }
+  50%      { opacity: 1;  transform: scale(1.06); }
+}
+
+/* ─────────────────────────────────────────
+   APP SHELL
+───────────────────────────────────────── */
+.app { position: relative; z-index: 10; height: 100vh; display: flex; flex-direction: column; }
+
+/* TOPBAR */
+.topbar {
+  display: flex; align-items: center; gap: 16px;
+  padding: 0 24px; height: 48px; min-height: 48px;
+  background: rgba(2,3,10,.60);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  box-shadow: 0 1px 28px rgba(0,0,0,.55);
+}
+.logo    { font-family: var(--mono); font-size: 13px; font-weight: 700; letter-spacing: .14em; color: var(--accent); text-shadow: 0 0 22px rgba(0,200,255,.45); }
+.sep     { color: rgba(255,255,255,.15); }
+.section { font-size: 11px; color: var(--text-dim); letter-spacing: .07em; font-weight: 500; }
+.pill-btn {
+  margin-left: auto; font-family: var(--mono); font-size: 9px; letter-spacing: .1em;
+  padding: 4px 12px; border: 1px solid var(--accent-dim); color: var(--accent);
+  text-transform: uppercase; cursor: pointer; background: rgba(0,200,255,.04);
+  transition: all .15s;
+}
+.pill-btn:hover { background: var(--accent); color: #020308; }
+
+/* LAYOUT */
+.main { flex: 1; display: flex; overflow: hidden; }
+
+/* SIDEBAR */
+.sidebar {
+  width: 220px; min-width: 220px; display: flex; flex-direction: column;
+  background: rgba(3,4,12,.52);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-right: 1px solid rgba(255,255,255,.055);
+}
+.sh { padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,.05); font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: .14em; color: var(--text-dim); text-transform: uppercase; }
+.si {
+  padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,.025);
+  cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background .12s;
+}
+.si:hover   { background: rgba(0,200,255,.04); }
+.si.on      { background: rgba(0,200,255,.07); border-left: 2px solid var(--accent); }
+.si-name    { font-size: 12px; font-weight: 500; color: var(--text-bright); flex: 1; }
+.si-rec     { font-family: var(--mono); font-size: 9px; color: var(--text-dim); }
+.dot        { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.15); flex-shrink: 0; }
+.dot.on     { background: var(--accent); box-shadow: 0 0 7px var(--accent); }
+
+/* CONTENT */
+.content { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+
+/* GLASS CARD */
+.card {
+  background: rgba(4,6,16,.70);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  border: 1px solid rgba(255,255,255,.06);
+  border-top-color: rgba(255,255,255,.10);
+  border-radius: 4px;
+  box-shadow: 0 4px 36px rgba(0,0,0,.5), 0 1px 0 rgba(255,255,255,.035) inset;
+  overflow: hidden;
+}
+.ch {
+  padding: 9px 14px; border-bottom: 1px solid rgba(255,255,255,.05);
+  font-family: var(--mono); font-size: 9px; font-weight: 700;
+  letter-spacing: .14em; color: var(--text-dim); text-transform: uppercase;
+  display: flex; align-items: center; gap: 8px;
+}
+.cb { padding: 14px; }
+
+/* FIGHTER HERO */
+.hero   { display: flex; gap: 14px; align-items: center; }
+.avatar {
+  width: 70px; height: 70px; border-radius: 3px; flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(0,200,255,.16) 0%, rgba(0,50,90,.5) 100%);
+  border: 1px solid rgba(0,200,255,.22);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 20px; font-weight: 700; color: var(--accent);
+  box-shadow: 0 0 22px rgba(0,200,255,.1);
+}
+.fname  { font-size: 19px; font-weight: 700; color: var(--text-bright); letter-spacing: .02em; margin-bottom: 2px; }
+.frec   { font-family: var(--mono); font-size: 10px; color: var(--text-dim); margin-bottom: 7px; }
+.tag    { display: inline-block; padding: 2px 8px; border-radius: 100px; font-size: 9px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; font-family: var(--mono); }
+.tag-a  { background: rgba(0,200,255,.12); color: var(--accent); border: 1px solid rgba(0,200,255,.28); }
+.tag-m  { background: rgba(240,120,64,.10); color: var(--orange); border: 1px solid rgba(240,120,64,.22); margin-left: 4px; }
+
+/* STAT ROWS */
+.sr     { display: flex; align-items: center; gap: 10px; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,.028); }
+.sr:last-child { border-bottom: none; }
+.sl     { font-family: var(--mono); font-size: 9px; color: var(--text-dim); width: 78px; flex-shrink: 0; letter-spacing: .05em; text-transform: uppercase; }
+.sbw    { flex: 1; height: 3px; background: rgba(255,255,255,.07); border-radius: 2px; overflow: hidden; }
+.sbf    { height: 100%; border-radius: 2px; background: var(--accent); }
+.sbf.g  { background: var(--green); }
+.sbf.r  { background: var(--red);   }
+.sbf.o  { background: var(--gold);  }
+.sv     { font-family: var(--mono); font-size: 10px; color: var(--text-bright); width: 38px; text-align: right; flex-shrink: 0; }
+.st     { font-family: var(--mono); font-size: 8px; color: var(--text-dim); width: 52px; text-align: right; flex-shrink: 0; letter-spacing: .05em; }
+.st.e   { color: var(--accent); }
+
+/* ODDS */
+.odds-row { display: flex; gap: 10px; }
+.ob       { flex: 1; padding: 11px; text-align: center; background: rgba(255,255,255,.025); border: 1px solid rgba(255,255,255,.06); border-radius: 4px; }
+.ob.fav   { border-color: rgba(0,200,255,.22); background: rgba(0,200,255,.05); }
+.of       { font-size: 9px; color: var(--text-dim); margin-bottom: 3px; letter-spacing: .04em; }
+.om       { font-family: var(--mono); font-size: 22px; font-weight: 700; color: var(--text-bright); margin-bottom: 2px; }
+.om.fav   { color: var(--accent); text-shadow: 0 0 18px rgba(0,200,255,.38); }
+.om.dog   { color: var(--green); }
+.oi       { font-family: var(--mono); font-size: 9px; color: var(--text-dim); }
+.ovs      { display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 9px; color: var(--text-dim); padding: 0 2px; }
+
+/* LIVE */
+.live { display: inline-flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 9px; color: var(--green); border: 1px solid rgba(34,214,134,.28); padding: 2px 8px; border-radius: 100px; background: rgba(34,214,134,.06); }
+.ld   { width: 5px; height: 5px; border-radius: 50%; background: var(--green); animation: lp 1.6s ease-in-out infinite; }
+@keyframes lp { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+/* WARN */
+.wc   { padding: 9px 12px; border-left: 2px solid var(--red); background: rgba(240,64,80,.07); border-radius: 0 4px 4px 0; margin-bottom: 6px; }
+.wc:last-child { margin-bottom: 0; }
+.wc.gold { border-color: var(--gold); background: rgba(200,160,64,.07); }
+.wt   { font-size: 11px; font-weight: 600; color: var(--text-bright); margin-bottom: 2px; }
+.wt.gold { color: var(--gold); }
+.wb   { font-size: 10px; color: var(--text-dim); line-height: 1.5; }
+
+/* MOVEMENT */
+.mu { color: var(--green); font-family: var(--mono); font-size: 10px; }
+.md { color: var(--red);   font-family: var(--mono); font-size: 10px; }
+
+.note { position: fixed; bottom: 14px; right: 16px; z-index: 100; font-family: var(--mono); font-size: 8px; color: var(--text-dim); letter-spacing: .08em; opacity: .4; }
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,.07); }
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-pulse, .bg-orbs, .ld { animation: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── PARALLAX BACKGROUND LAYERS ── -->
+<div class="bg bg-base"    id="l0"></div>
+<div class="bg bg-atmo"    id="l1"></div>
+<div class="bg bg-orbs"    id="l2"></div>
+<div class="bg bg-grid"    id="l3"></div>
+<div class="bg-vignette"></div>
+<div class="bg-pulse"></div>
+
+<!-- ── APP ── -->
+<div class="app">
+  <div class="topbar">
+    <span class="logo">AUDWIHR</span>
+    <span class="sep">·</span>
+    <span class="section">FIGHTERS</span>
+    <button class="pill-btn">ARENA</button>
+  </div>
+
+  <div class="main">
+    <div class="sidebar">
+      <div class="sh">Roster</div>
+      <div class="si on"><span class="dot on"></span><span class="si-name">Islam Makhachev</span><span class="si-rec">28-1</span></div>
+      <div class="si"><span class="dot"></span><span class="si-name">Charles Oliveira</span><span class="si-rec">34-10</span></div>
+      <div class="si"><span class="dot"></span><span class="si-name">Dustin Poirier</span><span class="si-rec">29-9</span></div>
+      <div class="si"><span class="dot"></span><span class="si-name">Justin Gaethje</span><span class="si-rec">25-5</span></div>
+      <div class="si"><span class="dot"></span><span class="si-name">Arman Tsarukyan</span><span class="si-rec">22-3</span></div>
+      <div class="si"><span class="dot"></span><span class="si-name">Beneil Dariush</span><span class="si-rec">22-5</span></div>
+      <div class="si"><span class="dot"></span><span class="si-name">Rafael Fiziev</span><span class="si-rec">13-3</span></div>
+    </div>
+
+    <div class="content">
+      <div class="card">
+        <div class="ch">FIGHTER PROFILE <span style="margin-left:auto"><span class="live"><span class="ld"></span>LIVE</span></span></div>
+        <div class="cb">
+          <div class="hero">
+            <div class="avatar">IM</div>
+            <div>
+              <div class="fname">Islam Makhachev</div>
+              <div class="frec">28-1-0 · Lightweight Champion</div>
+              <span class="tag tag-a">Grappler</span>
+              <span class="tag tag-m">Champion</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="ch">KEY STATS</div>
+        <div class="cb">
+          <div class="sr"><span class="sl">Strike Acc</span><div class="sbw"><div class="sbf"   style="width:58%"></div></div><span class="sv">58%</span><span class="st">AVG</span></div>
+          <div class="sr"><span class="sl">TD Acc</span>    <div class="sbw"><div class="sbf g" style="width:88%"></div></div><span class="sv">88%</span><span class="st e">ELITE</span></div>
+          <div class="sr"><span class="sl">TD Def</span>    <div class="sbw"><div class="sbf g" style="width:82%"></div></div><span class="sv">82%</span><span class="st e">ELITE</span></div>
+          <div class="sr"><span class="sl">Sub Avg</span>   <div class="sbw"><div class="sbf o" style="width:75%"></div></div><span class="sv">1.8</span> <span class="st e">ELITE</span></div>
+          <div class="sr"><span class="sl">Str Def</span>   <div class="sbw"><div class="sbf"   style="width:64%"></div></div><span class="sv">64%</span><span class="st">ABOVE AVG</span></div>
+          <div class="sr"><span class="sl">Knockdowns</span><div class="sbw"><div class="sbf r" style="width:22%"></div></div><span class="sv">0.1</span> <span class="st">BELOW AVG</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="ch">MARKET LINES <span style="margin-left:auto;font-size:9px;color:var(--text-dim);font-weight:400">The Odds API · 4m ago</span></div>
+        <div class="cb">
+          <div class="odds-row">
+            <div class="ob fav"><div class="of">MAKHACHEV</div><div class="om fav">-420</div><div class="oi">80.8% implied</div></div>
+            <div class="ovs">VS</div>
+            <div class="ob"><div class="of">OLIVEIRA</div><div class="om dog">+320</div><div class="oi">23.8% implied</div></div>
+          </div>
+          <div style="margin-top:10px;display:flex;gap:8px;font-family:var(--mono);font-size:10px;">
+            <span style="color:var(--text-dim)">Opening:</span><span>-380</span>
+            <span class="md">▼ +40 steam</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="ch">MATCHUP NOTES</div>
+        <div class="cb">
+          <div class="wc"><div class="wt">GRAPPLING DOMINANCE</div><div class="wb">Makhachev's TD accuracy (88%) vs Oliveira's TD defense (58%). Sustained control expected.</div></div>
+          <div class="wc gold"><div class="wt gold">SUBMISSION THREAT</div><div class="wb">Oliveira has 21 submission wins. Risk non-trivial in scrambles even for elite wrestlers.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="note">ARENA-TEST · parallax</div>
+
+<script>
+// ── Smooth mouse parallax ──
+// Each layer moves at a different rate, creating depth illusion.
+// l0 = base (barely moves), l3 = grid (moves most).
+const layers = [
+  { el: document.getElementById('l0'), sx: 4,  sy: 3  },  // furthest
+  { el: document.getElementById('l1'), sx: 12, sy: 9  },
+  { el: document.getElementById('l2'), sx: 22, sy: 16 },
+  { el: document.getElementById('l3'), sx: 34, sy: 24 },  // closest
+];
+
+let tx = 0, ty = 0;  // target (raw mouse-derived)
+let cx = 0, cy = 0;  // current (lerped)
+
+document.addEventListener('mousemove', e => {
+  // Normalise to -1 … +1 relative to viewport centre
+  tx = (e.clientX / window.innerWidth  - 0.5) * 2;
+  ty = (e.clientY / window.innerHeight - 0.5) * 2;
+});
+
+// Gyroscope support for mobile
+if (window.DeviceOrientationEvent) {
+  window.addEventListener('deviceorientation', e => {
+    if (e.gamma != null) {
+      tx = Math.max(-1, Math.min(1, e.gamma / 20));
+      ty = Math.max(-1, Math.min(1, e.beta  / 20));
+    }
+  });
+}
+
+function tick() {
+  // Lerp toward target — smooth, not snappy
+  cx += (tx - cx) * 0.055;
+  cy += (ty - cy) * 0.055;
+
+  layers.forEach(({ el, sx, sy }) => {
+    // Invert so background moves opposite to cursor (parallax feel)
+    el.style.transform = `translate(${-cx * sx}px, ${-cy * sy}px)`;
+  });
+
+  requestAnimationFrame(tick);
+}
+tick();
+</script>
+</body>
+</html>

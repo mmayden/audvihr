@@ -17,6 +17,7 @@
  * Security: URL params are validated as positive integers before FIGHTERS
  * lookup. Non-numeric slugs fall through to null (screen handles gracefully).
  */
+import { useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
 import { FIGHTERS } from './data/fighters';
 import { MenuScreen } from './screens/MenuScreen';
@@ -85,8 +86,38 @@ const AppInner = () => {
 
   const activeId = NAV_ITEMS.find(n => pathname.startsWith(n.path))?.id ?? '';
 
+  // Parallax background — 4 depth layers move at different rates on mousemove
+  const bgRefs = useRef([]);
+  useEffect(() => {
+    const speeds = [[4, 3], [12, 9], [22, 16], [34, 24]];
+    let tx = 0, ty = 0, cx = 0, cy = 0, raf;
+    const onMove = (e) => {
+      tx = (e.clientX / window.innerWidth  - 0.5) * 2;
+      ty = (e.clientY / window.innerHeight - 0.5) * 2;
+    };
+    const tick = () => {
+      cx += (tx - cx) * 0.055;
+      cy += (ty - cy) * 0.055;
+      bgRefs.current.forEach((el, i) => {
+        if (el) el.style.transform = `translate(${-cx * speeds[i][0]}px, ${-cy * speeds[i][1]}px)`;
+      });
+      raf = window.requestAnimationFrame(tick);
+    };
+    document.addEventListener('mousemove', onMove);
+    raf = window.requestAnimationFrame(tick);
+    return () => { document.removeEventListener('mousemove', onMove); window.cancelAnimationFrame(raf); };
+  }, []);
+
   return (
     <>
+      {/* Parallax arena backdrop */}
+      <div className="bg-layer bg-layer-base" ref={el => { bgRefs.current[0] = el; }} />
+      <div className="bg-layer bg-layer-atmo" ref={el => { bgRefs.current[1] = el; }} />
+      <div className="bg-layer bg-layer-orbs" ref={el => { bgRefs.current[2] = el; }} />
+      <div className="bg-layer bg-layer-grid" ref={el => { bgRefs.current[3] = el; }} />
+      <div className="bg-vignette" />
+      <div className="bg-pulse" />
+
       <ErrorBoundary key={pathname}>
         <Routes>
           <Route path="/"                     element={<MenuScreen onSelect={(id) => navigate(SCREEN_PATH[id] ?? '/')} />} />
