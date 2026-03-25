@@ -44,7 +44,6 @@ Each storage key is owned by exactly one module. No other module reads or writes
 | `watchlist_markets` | localStorage | useWatchlist | array of market IDs |
 | `clv_log` | localStorage | `src/utils/clv.js` | CLV snapshot log (500-entry cap) |
 | `opening_lines` | localStorage | `src/utils/clv.js` | opening line archive (never evicted) |
-| `theme` | localStorage | `src/hooks/useTheme.js` | `'light'\|'dark'\|'system'` |
 | `alerts_enabled` | localStorage | `src/utils/alerts.js` | boolean global toggle |
 | `alert_rules` | localStorage | `src/utils/alerts.js` | `{ [fightKey]: { enabled, threshold } }` |
 | `alerts_prev_lines` | sessionStorage | `src/utils/alerts.js` | transient prev-ML snapshot |
@@ -123,7 +122,7 @@ public/
 │   └── assets/portraits/     Self-hosted fighter portrait images (*.jpg); no CDN, no CSP change
 src/
 ├── main.jsx                  Entry point — ReactDOM.createRoot + StrictMode; SW registration
-├── App.jsx                   URL router — BrowserRouter + Routes; FighterScreenRoute + CompareScreenRoute at module scope; DisclaimerGate wrapper; 4-layer parallax arena backdrop; bottom nav; floating theme toggle (non-home screens); passes toggleTheme + themeLabel to MenuScreen
+├── App.jsx                   URL router — BrowserRouter + Routes; FighterScreenRoute + CompareScreenRoute at module scope; DisclaimerGate wrapper; 4-layer parallax arena backdrop; bottom nav
 ├── styles/
 │   └── app.css               All global styles, CSS variables, component classes
 ├── constants/
@@ -150,7 +149,6 @@ src/
 │   ├── useOdds.js            useOdds — The Odds API moneylines; 15-min sessionStorage cache; silent degradation; fully optional since v0.18.3 (BFO build-time data is the free baseline)
 │   ├── usePolymarket.js      usePolymarket — Polymarket CLOB prices + lazy history; CLV snapshot
 │   ├── useKalshi.js          useKalshi — Kalshi REST API prices + lazy history; CLV snapshot; silent degradation
-│   ├── useTheme.js           useTheme — colour-scheme toggle; persists 'light'|'dark'|'system'; data-theme on <html>
 │   ├── useAlerts.js          useAlerts — alert rules, permission state, Notification API dispatch; owns alerts_enabled + alert_rules keys
 │   └── useNews.js            useNews — fetches MMA Fighting + MMA Junkie RSS; 30-min cache; fallback to news.js mock; returns { items, loading, isLive }
 ├── utils/
@@ -182,7 +180,7 @@ src/
 │   ├── TabHistory.jsx        Fight log table
 │   └── TabMarket.jsx         BFO sportsbook odds (build-time, multi-book) + manual odds entry + live Polymarket/Kalshi prices when matched
 ├── screens/
-│   ├── MenuScreen.jsx        Main navigation (5 ACTIVE items) + ⚙ ALERTS settings panel + inline theme toggle (toggleTheme + themeLabel props from App.jsx)
+│   ├── MenuScreen.jsx        Main navigation (5 ACTIVE items) + ⚙ ALERTS settings panel + ♡ SUPPORT donate link (Stripe)
 │   ├── FighterScreen.jsx     Sidebar + hero card (arch/mod pill badges + VS./COMPARE button) + 6-tab profile; calls useNews(); passes fighterNews to TabOverview; onTouchStart/onTouchEnd swipe-to-close on sidebar
 │   ├── CompareScreen.jsx     FighterCard hero header + implied probability gap; FighterSearch selectors; MATCHUP NOTES section (computeMatchupWarnings — style/risk/fade/clash cards); stat table with tier labels + category edge stripe (scrolls horizontally at ≤480px); edge signal panel; checklist; COPY LINK + ↓ MD export
 │   ├── CalendarScreen.jsx    Event sidebar + card detail + fighter deep-links + COMPARE button per in-roster bout; onTouchStart/onTouchEnd swipe-to-close on sidebar
@@ -212,10 +210,14 @@ src/
 - **CLV log in localStorage.** `src/utils/clv.js` owns the CLV log key (`clv_log`, 500-entry cap) and the opening line key (`opening_lines`, never evicted). Do not write to either key from any other path.
 - **All numbers and labels use JetBrains Mono.** Fonts are self-hosted via `@fontsource-variable/inter` and `@fontsource-variable/jetbrains-mono` (imported in `main.jsx`). No CDN dependency. All colors come from CSS variables — never hardcode hex values in JSX inline styles.
 - **CSS variables are the design system.** Do not use Tailwind, CSS Modules, or styled-components until a deliberate design system decision is made and logged in PLANNING.md.
-- **New CSS tokens must be declared in all three theme blocks.** Any new CSS variable added to `:root` that has a theme-relevant value must also be declared in `[data-theme="light"]` and the `@media (prefers-color-scheme: light)` block. Missing declarations cause invisible/fallback rendering in the alternate theme.
-- **`--accent-bg` and `--accent-bg-mid` are the canonical accent tint tokens.** Use `var(--accent-bg)` (≈7% opacity) for subtle fills (chip active state, banners, search option selected) and `var(--accent-bg-mid)` (≈12% opacity) for medium fills (hover states, badge backgrounds). Never hardcode `rgba(...)` values that reference the accent color — they will not adapt across MONOLITH/ARENA themes. Both are declared in all three theme blocks.
+- **New CSS tokens must be declared in `:root`.** Any new CSS variable goes in the `:root` block in `app.css`.
+- **`--accent-bg` and `--accent-bg-mid` are the canonical accent tint tokens.** Use `var(--accent-bg)` (≈7% opacity) for subtle fills (chip active state, banners, search option selected) and `var(--accent-bg-mid)` (≈12% opacity) for medium fills (hover states, badge backgrounds). Never hardcode `rgba(...)` values that reference the accent color. Both are declared in `:root`.
 - **`prefers-reduced-motion` block is at the end of `app.css`.** Do not add new animation or transition declarations after it — place new animated elements before the reduced-motion block so the override still applies.
-- **Two named theme palettes — MONOLITH and ARENA. Neither is white.** MONOLITH (`:root`, default): near-void cold blue-blacks, electric cyan accent `#00c8ff`. ARENA (`[data-theme="light"]`): deep charcoal-amber darks, ember orange accent `#e06828`. The toggle button label reads `'ARENA'` when MONOLITH is active (shows what you'll switch to) and `'MONOLITH'` when ARENA is active. The `useTheme` hook owns the `theme` localStorage key and drives `data-theme` on `<html>`. Do not write to the theme key from any other path.
+- **War Room visual tokens.** `--ease-spring` (`cubic-bezier(0.34, 1.56, 0.64, 1)`) for interactive element hover/press. `--ease-out` (`cubic-bezier(0.16, 1, 0.3, 1)`) for smooth deceleration. `--border-dashed` (`rgba(0,200,255,.08)`) for card header borders. `--border-accent` (`rgba(0,200,255,.15)`) for portrait frames. `--text-glow` (`#e0eeff`) for hero-level text. `--accent-glow` (`rgba(0,200,255,.25)`) for box-shadow glows. All declared in `:root`.
+- **Corner bracket reticles on `.ui-card`.** `::before` (top-left) and `::after` (bottom-right) position 12px corner brackets with accent-dim color. They expand to 18px on hover via `--ease-spring`. `.ui-card` uses `overflow: visible` to allow brackets to extend past the border — do not add `overflow: hidden` to `.ui-card`. Child elements that need clipping must set their own `overflow: hidden`.
+- **Stat bar terminus dots.** `.ov-bar-fill::after` and `.srl-fill::after` render 6px glowing circles at the end of fills. They use `background: inherit` + `box-shadow: 0 0 8px 2px currentColor`. The parent fill element needs `position: relative` and the track needs `overflow: visible`.
+- **Button spring transitions.** Interactive buttons use `transition: all .2s var(--ease-spring)` with `transform: translateY(-1px) scale(1.02)` on hover and `transform: translateY(0) scale(0.98)` on `:active`. Primary buttons add `box-shadow: 0 4px 24px var(--accent-glow)` on hover.
+- **Single dark theme — WAR ROOM.** Command center aesthetic with cold void background (`#060810`), cyan accent `#00c8ff`, threat-level color coding (green `#00e676` = CLEAR, amber `#ffab00` = CAUTION, red `#ff1744` = THREAT). All CSS variables defined in `:root`. There is no theme toggle. The `useTheme` hook has been removed. Design prototype at `public/warroom-demo.html`.
 - **Portrait images are self-hosted.** Drop fighter portrait files into `public/assets/portraits/` (e.g. `makhachev.jpg`). Add the filename to `fighter-seed.json` as the `portrait` field. No CDN, no CSP change, no build step required.
 - **Alert storage keys owned exclusively by `alerts.js`.** `alerts_enabled` and `alert_rules` (localStorage) and `alerts_prev_lines` (sessionStorage) may only be read/written by `src/utils/alerts.js` and `src/hooks/useAlerts.js`. No other module touches these keys.
 - **Service Worker is minimal and static.** `public/sw.js` contains only install/activate handlers. It makes no fetch calls. Do not add caching logic or background sync to it without a deliberate architecture decision. SW registration lives in `main.jsx` only.
@@ -226,12 +228,12 @@ src/
 - **`aria-pressed` on stat filter chips.** Each `.stat-filter-chip` must carry `aria-pressed={activeFilters.has(sf.id)}` — this is the correct ARIA pattern for toggle buttons (not `aria-checked`, which is for checkboxes). Do not remove or swap the attribute type.
 - **Sidebar toggle buttons require `aria-expanded`.** The ROSTER button in FighterScreen and EVENTS button in CalendarScreen must carry `aria-expanded={sidebarOpen}` and a contextual `aria-label` reflecting the open/closed state. Sidebar backdrops (the tap-to-dismiss overlay) must carry `role="button"` and `aria-label`.
 - **Mobile breakpoints (v0.18.0).** Two active breakpoints: `@media (max-width: 767px)` — general mobile layout (bottom nav, sidebar drawer, filter chips); `@media (max-width: 480px)` — small-phone overrides (compare hero stacks F1/VS/F2 vertically; news headline line-clamped to 3 lines; `.card-portrait` 64×64px; `.compare-table-wrap` scrolls horizontally with `.ctable { min-width: 400px }`). The `@media (prefers-reduced-motion: reduce)` block is always last in `app.css`.
-- **Touch target sizing uses CSS tokens — never magic pixel values.** `--touch-target: 44px` for primary interactive elements (nav items, primary buttons); `--touch-target-sm: 36px` for secondary chips and compact controls. Both tokens are declared in all three theme blocks (`:root`, `[data-theme="light"]`, `@media prefers-color-scheme: light`). Use `min-height: var(--touch-target, 44px)` — do not hardcode `44px`.
+- **Touch target sizing uses CSS tokens — never magic pixel values.** `--touch-target: 44px` for primary interactive elements (nav items, primary buttons); `--touch-target-sm: 36px` for secondary chips and compact controls. Both tokens are declared in `:root`. Use `min-height: var(--touch-target, 44px)` — do not hardcode `44px`.
 - **`font-size: 16px` minimum on any `<input>` rendered on mobile.** iOS Safari auto-zooms the page when an input with `font-size < 16px` receives focus. Apply the override inside the `@media (max-width: 767px)` block. Currently enforced on `.mkt-alert-threshold`. Any new input added to a mobile layout must respect this rule.
 - **Swipe-to-close sidebar — `useRef` + `onTouchStart`/`onTouchEnd` pattern.** Both FighterScreen and CalendarScreen sidebar drawers support swipe-left-to-close. Record `touchStartX` and `touchStartTime` in refs on `touchstart`; compute `dx = startX - endX` and `velocity = dx / dt * 1000` (px/s) on `touchend`; call `setSidebarOpen(false)` when `dx > 112` (40% of 280px sidebar) OR `velocity > 80` px/s. Do NOT use `onTouchMove` — it causes scroll conflicts. Handlers must be `useCallback`-wrapped.
 - **Bottom nav icon + label structure.** Each `.bottom-nav-item` renders a `<span className="bottom-nav-icon" aria-hidden="true">` (emoji icon) above a `<span>` (text label). The button itself carries `aria-label` with the full label text. The icon span is purely decorative (`aria-hidden="true"`). Do not render text-only nav items — the icon-above-label pattern is now the standard.
 - **News headline expand/collapse pattern.** `expandedIds` is a `Set` in `useState`. The `.news-headline` div carries `role="button"`, `tabIndex={0}`, `aria-expanded`, and an `onKeyDown` handler for Enter/Space. On `@media (max-width: 480px)` the headline is clamped to 3 lines via `-webkit-line-clamp: 3`; the `.news-headline--expanded` modifier class removes the clamp. The expand state is React-only — never persisted.
-- **Current test count: 538 passing.** Do not merge changes that reduce this number without a documented reason.
+- **Current test count: 527 passing.** Do not merge changes that reduce this number without a documented reason.
 - **Current version: v0.18.4-dev.** Update `package.json` `version`, `MenuScreen.jsx` version badge, and `CHANGELOG.md` before merging any new phase to `master`.
 
 ---

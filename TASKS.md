@@ -19,9 +19,11 @@
 - [x] Pre-commit hooks — `husky` + `lint-staged` (ESLint on staged `.js/.jsx` files)
 - [x] Security header parity test — 47 tests validating `netlify.toml` ↔ `vercel.json` header sync, CSP completeness, CSP hardening, `index.html` security
 - [x] `npm run validate` — lint + test + audit in one command
-- [x] Topbar reorganization — theme toggle moved from floating overlay into MenuScreen topbar; ALERTS + version + theme toggle properly spaced as flex children
+- [x] ARENA theme removed — MONOLITH sole colour scheme; `useTheme` hook + tests deleted; theme toggle removed from App.jsx, MenuScreen, and bottom nav
 - [x] Documentation refresh — PLANNING.md (stale CSP, file structure, decisions log), TASKS.md, CHANGELOG.md, CLAUDE.md, README.md modernized
-- [x] 538 tests passing (47 new); 0 lint errors; 0 CVEs
+- [x] Stripe donate link — "♡ SUPPORT THIS PROJECT" in MenuScreen below nav menu; `.menu-donate` CSS class; opens `donate.stripe.com` in new tab
+- [x] 527 tests passing (47 new); 0 lint errors; 0 CVEs
+- [x] **War Room design system** — complete `app.css` visual overhaul: corner bracket reticles on cards, dashed border headers, 200/800 weight typography contrast, stat bar terminus dots with glow, threat-level color coding (green/amber/red), spring-eased button transitions with scale lift, staggered entrance animations, live indicator pulse, gradient progress bars, checkbox glow, scanline background overlay, portrait corner ticks, input focus glow rings. Zero JSX changes — all existing class names preserved. 527 tests pass, 0 lint errors.
 
 ### Phase 17 — Deployment + Free Odds Pipeline (scoped 2026-03-24)
 
@@ -72,7 +74,7 @@
 - [ ] Smoke test: open FighterScreen, select a women's division fighter, confirm all 6 tabs render, percentile badges work, compare works
 
 ### Quality Gate (before merge)
-- [ ] `npm run test:run` — all existing 538 tests still pass; new keyboard nav tests added (target: ≥ 15 new tests)
+- [ ] `npm run test:run` — all existing 527 tests still pass; new keyboard nav tests added (target: ≥ 15 new tests)
 - [ ] `npm run lint` — 0 errors
 - [ ] `npm audit` — 0 critical/high CVEs
 - [ ] CHANGELOG.md `[Unreleased]` → `[0.19.0]`
@@ -89,7 +91,7 @@
 - [x] **DisclaimerGate** — two-step acceptance gate (age 18+ → risk acknowledgement); wraps entire app; `disclaimer_accepted` localStorage key; try/catch reads; UI-only compliance
 - [x] **Arena atmosphere** — 4-layer parallax backdrop (deep atmosphere, LED grid, ambient pulse, vignette); mouse-driven smooth lerp via `requestAnimationFrame`
 - [x] **Frosted glass** — `backdrop-filter: blur(14px)` + `--surface-glass` token on topbar, bottom-nav, sidebar overlay
-- [x] **Sphere CSS tokens** — `--sphere-base`, `--sphere-mid`, `--sphere-glow`, `--sphere-pulse-color`, `--surface-glass` in all three theme blocks
+- [x] **Sphere CSS tokens** — `--sphere-base`, `--sphere-mid`, `--sphere-glow`, `--sphere-pulse-color`, `--surface-glass` in `:root`
 - [x] **`--text-dim` WCAG AA fix** — MONOLITH `#3e4a62` → `#7890b0` (~5:1); ARENA `#6a5840` → `#a08870` (~4.5:1)
 - [x] **TabOverview stat bars** — percentile badges replaced with 6 coloured horizontal bars (green/cyan/red) + tier labels
 - [x] **FighterScreen hero** — compact 88px avatar box with cyan accent border
@@ -105,8 +107,8 @@
 **Branch:** `feature/phase-17-mobile`
 
 - [x] **MONOLITH theme** (`:root`): near-void cold blue-blacks; electric cyan `#00c8ff` accent; cold text `#dce6f8`; deeper shadows
-- [x] **ARENA theme** (`[data-theme="light"]`): deep charcoal-amber darks; ember orange `#e06828` accent; warm cream text `#f0e2cc`; tobacco borders — not white
-- [x] OS `prefers-color-scheme: light` mapped to ARENA palette
+- [x] **ARENA theme** (`[data-theme="light"]`): deep charcoal-amber darks; ember orange `#e06828` accent; warm cream text `#f0e2cc`; tobacco borders — not white (ARENA theme later removed in v0.18.4-dev)
+- [x] OS `prefers-color-scheme: light` mapped to ARENA palette (ARENA theme later removed in v0.18.4-dev)
 - [x] `--accent-bg` / `--accent-bg-mid` CSS tokens added to all three theme blocks; all 10 hardcoded `rgba(212,168,67,...)` gold tints replaced
 - [x] `.topbar` padding `0 80px 0 20px` on desktop (button overlay fix); mobile override `0 14px`
 - [x] `useTheme.js` — toggle label changed to `'ARENA'` / `'MONOLITH'`
@@ -150,7 +152,7 @@
 - [x] Headline: `-webkit-line-clamp: 3` at ≤480px; tap to expand via `.news-headline--expanded`; `role="button"`, `tabIndex={0}`, `aria-expanded`, `onKeyDown` (Enter/Space)
 
 #### CSS / Design Tokens
-- [x] `--touch-target: 44px` and `--touch-target-sm: 36px` declared in all three theme blocks (`:root`, `[data-theme="light"]`, `@media prefers-color-scheme: light`)
+- [x] `--touch-target: 44px` and `--touch-target-sm: 36px` declared in `:root`
 - [x] `@media (max-width: 767px)` audited; `@media (max-width: 480px)` block added for small-phone overrides
 - [x] `prefers-reduced-motion` block remains last in `app.css`
 
@@ -186,7 +188,7 @@
 
 ### ✅ Post-Phase-16 Visual & QoL Polish — 2026-03-18
 
-- [x] **CSS variables** — `--bg-elevated` and `--bg-card` defined (fix broken Phase 11 alert style references); `--radius-sm`, `--radius`, `--radius-pill`, `--transition`, `--shadow-sm`, `--shadow-md` added as forward-looking design tokens in all three theme blocks (`:root`, `[data-theme="light"]`, `@media prefers-color-scheme: light`)
+- [x] **CSS variables** — `--bg-elevated` and `--bg-card` defined (fix broken Phase 11 alert style references); `--radius-sm`, `--radius`, `--radius-pill`, `--transition`, `--shadow-sm`, `--shadow-md` added as forward-looking design tokens in `:root`
 - [x] **Focus ring** — Global `button:focus-visible`, `a:focus-visible`, `[tabindex]:focus-visible` rule using `var(--accent)`; keyboard navigation now visible
 - [x] **Input focus colors** — `.sidebar-input`, `.fighter-search-input`, `.notes-area`, `.mkt-pick-notes`, `.news-fighter-select` upgraded from `--border2` to `--accent` on focus
 - [x] **Tab bar scrollbar** — Hidden globally via `scrollbar-width: none` + `::-webkit-scrollbar { display: none }`; scrollbar artifact gone on all viewports
@@ -299,7 +301,7 @@
 
 ### ✅ Phase 10 — Mobile + UX Polish (v0.10.0) — 2026-03-16
 
-- [x] `src/hooks/useTheme.js` — persists `'light'|'dark'|'system'`; `data-theme` on `<html>`
+- [x] `src/hooks/useTheme.js` — persists `'light'|'dark'|'system'`; `data-theme` on `<html>` (ARENA theme and toggle later removed in v0.18.4-dev)
 - [x] `App.jsx` — bottom nav (`.bottom-nav`), hidden desktop / fixed mobile; floating theme toggle (desktop)
 - [x] `FighterScreen.jsx` + `CalendarScreen.jsx` — `sidebarOpen` state, ROSTER/EVENTS button, `.sidebar-backdrop`
 - [x] Portrait support — `<img>` when `sel.portrait` set; 2-letter initials fallback

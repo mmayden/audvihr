@@ -89,6 +89,14 @@ export const MenuScreen = ({ onSelect }) => {
             </div>
           ))}
         </div>
+        <a
+          className="menu-donate"
+          href="https://donate.stripe.com/bJe6oJfrDa4pfyi9vjaVa01"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          ♡ SUPPORT THIS PROJECT
+        </a>
       </div>
     </div>
   );

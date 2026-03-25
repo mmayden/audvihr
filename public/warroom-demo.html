@@ -1,0 +1,1888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AUDWIHR // WAR ROOM — Design Concept</title>
+<style>
+/* ================================================================
+   WAR ROOM — Command Center Design System
+   ================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@200;300;400;500;600;700;800&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* ── Void ── */
+  --bg:            #060810;
+  --bg-deep:       #040608;
+  --surface:       #0c0e18;
+  --surface2:      #10131f;
+  --surface3:      #161a28;
+
+  /* ── Borders ── */
+  --border:        rgba(255,255,255,.06);
+  --border2:       rgba(255,255,255,.10);
+  --border-accent: rgba(0,200,255,.15);
+  --border-dashed: rgba(0,200,255,.08);
+
+  /* ── Text ── */
+  --text:          #7888a8;
+  --text-dim:      #4a5878;
+  --text-bright:   #c8d8f0;
+  --text-glow:     #e0eeff;
+
+  /* ── Accent ── */
+  --accent:        #00c8ff;
+  --accent-dim:    rgba(0,200,255,.35);
+  --accent-bg:     rgba(0,200,255,.06);
+  --accent-glow:   rgba(0,200,255,.25);
+
+  /* ── Threat levels ── */
+  --clear:         #00e676;
+  --clear-dim:     rgba(0,230,118,.20);
+  --clear-glow:    rgba(0,230,118,.15);
+  --caution:       #ffab00;
+  --caution-dim:   rgba(255,171,0,.20);
+  --caution-glow:  rgba(255,171,0,.12);
+  --threat:        #ff1744;
+  --threat-dim:    rgba(255,23,68,.20);
+  --threat-glow:   rgba(255,23,68,.12);
+
+  /* ── Supplementary ── */
+  --blue:          #448aff;
+  --purple:        #7c4dff;
+  --teal:          #00bfa5;
+  --gold:          #ffd740;
+
+  /* ── Fonts ── */
+  --font:          'Inter', -apple-system, sans-serif;
+  --mono:          'JetBrains Mono', 'SF Mono', monospace;
+
+  /* ── Motion ── */
+  --ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out:      cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-smooth:   cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --duration:      0.2s;
+  --duration-slow: 0.4s;
+
+  /* ── Sizing ── */
+  --touch-target:    44px;
+  --touch-target-sm: 36px;
+}
+
+html, body { height: 100%; overflow-x: hidden; }
+
+body {
+  background: var(--bg-deep);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ================================================================
+   BACKGROUND — Void with grid + scan lines
+   ================================================================ */
+.wr-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0,40,100,.12) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 20% 80%, rgba(0,80,160,.06) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 20%, rgba(0,60,140,.06) 0%, transparent 60%);
+}
+.wr-grid {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background-image:
+    linear-gradient(rgba(0,200,255,.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,200,255,.018) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, rgba(0,0,0,.5) 0%, transparent 85%);
+}
+.wr-scanline {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,200,255,.008) 2px,
+    rgba(0,200,255,.008) 4px
+  );
+}
+.wr-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: radial-gradient(ellipse 85% 80% at 50% 50%, transparent 30%, rgba(0,0,0,.85) 100%);
+}
+
+/* ================================================================
+   LAYOUT
+   ================================================================ */
+.demo-container {
+  position: relative;
+  z-index: 10;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+.demo-section {
+  margin-bottom: 64px;
+}
+.demo-section-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: .25em;
+  color: var(--text-dim);
+  margin-bottom: 20px;
+  padding-left: 20px;
+  position: relative;
+}
+.demo-section-label::before {
+  content: '//';
+  color: var(--accent-dim);
+  margin-right: 8px;
+}
+.demo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.demo-grid--3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+.demo-full {
+  grid-column: 1 / -1;
+}
+
+/* ================================================================
+   WAR ROOM CARD — the core container
+   Corner brackets + scan effect + glass depth
+   ================================================================ */
+.wr-card {
+  position: relative;
+  background: rgba(8,10,20,.75);
+  backdrop-filter: blur(24px) saturate(130%);
+  -webkit-backdrop-filter: blur(24px) saturate(130%);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: border-color var(--duration) var(--ease-out),
+              box-shadow var(--duration-slow) var(--ease-out);
+}
+.wr-card:hover {
+  border-color: var(--border2);
+  box-shadow: 0 8px 40px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+/* Corner bracket reticles */
+.wr-card::before,
+.wr-card::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  pointer-events: none;
+  z-index: 5;
+  transition: border-color var(--duration) var(--ease-out),
+              width var(--duration) var(--ease-spring),
+              height var(--duration) var(--ease-spring);
+}
+.wr-card::before {
+  top: -1px;
+  left: -1px;
+  border-top: 1px solid var(--accent-dim);
+  border-left: 1px solid var(--accent-dim);
+}
+.wr-card::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 1px solid var(--accent-dim);
+  border-right: 1px solid var(--accent-dim);
+}
+.wr-card:hover::before,
+.wr-card:hover::after {
+  border-color: var(--accent);
+  width: 18px;
+  height: 18px;
+}
+
+/* Scan line sweep on hover */
+.wr-card .wr-scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+  overflow: hidden;
+}
+.wr-card:hover .wr-scan::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+  animation: scanSweep 1.2s var(--ease-smooth) forwards;
+}
+@keyframes scanSweep {
+  0%   { top: 0; opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* Card header */
+.wr-card-hdr {
+  padding: 10px 16px;
+  border-bottom: 1px dashed var(--border-dashed);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.wr-card-hdr-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: .18em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+.wr-card-hdr-accent {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  color: var(--accent);
+}
+.wr-card-hdr-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.wr-card-body {
+  padding: 16px;
+}
+
+/* ================================================================
+   TOPBAR
+   ================================================================ */
+.wr-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 24px;
+  background: rgba(4,6,12,.80);
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 32px rgba(0,0,0,.5);
+}
+.wr-topbar-logo {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .15em;
+  color: var(--text-glow);
+  text-shadow: 0 0 30px var(--accent-glow);
+}
+.wr-topbar-sep {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--border2);
+  font-weight: 200;
+}
+.wr-topbar-section {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: .12em;
+  color: var(--text-dim);
+}
+.wr-topbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ================================================================
+   BUTTONS
+   ================================================================ */
+.wr-btn {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  padding: 6px 16px;
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--text);
+  cursor: pointer;
+  transition: all var(--duration) var(--ease-spring);
+  position: relative;
+  overflow: hidden;
+}
+.wr-btn:hover {
+  transform: translateY(-1px) scale(1.02);
+  border-color: var(--accent-dim);
+  color: var(--text-bright);
+  box-shadow: 0 4px 20px rgba(0,200,255,.08);
+}
+.wr-btn:active {
+  transform: translateY(0) scale(0.98);
+  transition-duration: 0.08s;
+}
+.wr-btn--primary {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.wr-btn--primary:hover {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+  box-shadow: 0 4px 24px var(--accent-glow), 0 0 0 1px var(--accent-dim);
+  text-shadow: none;
+}
+.wr-btn--threat {
+  border-color: rgba(255,23,68,.3);
+  color: var(--threat);
+}
+.wr-btn--threat:hover {
+  background: var(--threat);
+  color: #fff;
+  box-shadow: 0 4px 24px var(--threat-glow);
+}
+.wr-btn--clear {
+  border-color: rgba(0,230,118,.3);
+  color: var(--clear);
+}
+.wr-btn--clear:hover {
+  background: var(--clear);
+  color: var(--bg);
+  box-shadow: 0 4px 24px var(--clear-glow);
+}
+
+/* ================================================================
+   MENU SCREEN
+   ================================================================ */
+.wr-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80px 20px 40px;
+}
+.wr-menu-wordmark {
+  font-family: var(--mono);
+  font-size: clamp(36px, 6vw, 56px);
+  font-weight: 800;
+  letter-spacing: .25em;
+  color: var(--text-glow);
+  text-shadow:
+    0 0 40px var(--accent-glow),
+    0 0 100px rgba(0,200,255,.12);
+  margin-bottom: 4px;
+}
+.wr-menu-sub {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 200;
+  letter-spacing: .35em;
+  color: var(--text-dim);
+  margin-bottom: 60px;
+}
+.wr-menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  max-width: 520px;
+}
+.wr-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: rgba(8,10,20,.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all var(--duration) var(--ease-out);
+  position: relative;
+  overflow: hidden;
+}
+.wr-menu-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  background: linear-gradient(90deg, var(--accent-bg), transparent);
+  transition: width var(--duration-slow) var(--ease-out);
+}
+.wr-menu-item:hover {
+  border-color: var(--border-accent);
+  background: rgba(8,12,24,.8);
+}
+.wr-menu-item:hover::before {
+  width: 100%;
+}
+.wr-menu-item:hover .wr-menu-item-num {
+  color: var(--accent);
+  text-shadow: 0 0 12px var(--accent-glow);
+}
+.wr-menu-item:hover .wr-menu-item-label {
+  color: var(--text-glow);
+  transform: translateX(4px);
+}
+.wr-menu-item-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 200;
+  color: var(--text-dim);
+  min-width: 24px;
+  transition: all var(--duration) var(--ease-out);
+  position: relative;
+  z-index: 1;
+}
+.wr-menu-item-label {
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  color: var(--text);
+  flex: 1;
+  transition: all var(--duration) var(--ease-out);
+  position: relative;
+  z-index: 1;
+}
+.wr-menu-item-badge {
+  font-family: var(--mono);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  color: var(--clear);
+  border: 1px solid rgba(0,230,118,.25);
+  padding: 2px 8px;
+  position: relative;
+  z-index: 1;
+}
+.wr-menu-item-arrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: all var(--duration) var(--ease-spring);
+  position: relative;
+  z-index: 1;
+}
+.wr-menu-item:hover .wr-menu-item-arrow {
+  opacity: 1;
+  transform: translateX(0);
+  color: var(--accent);
+}
+
+/* ================================================================
+   STAT BARS — War Room style
+   ================================================================ */
+.wr-stat-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,.025);
+}
+.wr-stat-row:last-child { border-bottom: none; }
+.wr-stat-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: .08em;
+  color: var(--text-dim);
+  width: 90px;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+.wr-stat-track {
+  flex: 1;
+  height: 4px;
+  background: rgba(255,255,255,.04);
+  position: relative;
+  overflow: visible;
+}
+.wr-stat-fill {
+  height: 100%;
+  position: relative;
+  transition: width 0.8s var(--ease-out);
+  border-radius: 0 1px 1px 0;
+}
+/* Glow effect on fill */
+.wr-stat-fill::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: inherit;
+  box-shadow: 0 0 8px 2px currentColor;
+  opacity: 0.8;
+}
+/* Threat-level colors */
+.wr-stat-fill--elite {
+  background: var(--clear);
+  color: var(--clear);
+}
+.wr-stat-fill--above {
+  background: var(--accent);
+  color: var(--accent);
+}
+.wr-stat-fill--avg {
+  background: var(--caution);
+  color: var(--caution);
+}
+.wr-stat-fill--below {
+  background: var(--threat);
+  color: var(--threat);
+}
+.wr-stat-val {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-bright);
+  width: 44px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.wr-stat-tier {
+  font-family: var(--mono);
+  font-size: 8px;
+  font-weight: 300;
+  letter-spacing: .06em;
+  width: 60px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.wr-stat-tier--elite { color: var(--clear); }
+.wr-stat-tier--above { color: var(--accent); }
+.wr-stat-tier--avg   { color: var(--caution); }
+.wr-stat-tier--below { color: var(--threat); }
+
+/* ================================================================
+   HERO CARD — Fighter profile header
+   ================================================================ */
+.wr-hero {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+}
+.wr-hero-portrait {
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(135deg, rgba(0,200,255,.08), rgba(0,200,255,.02));
+  border: 1px solid var(--border-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 18px;
+  position: relative;
+  flex-shrink: 0;
+}
+/* Corner ticks on portrait */
+.wr-hero-portrait::before,
+.wr-hero-portrait::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+}
+.wr-hero-portrait::before {
+  top: -1px; left: -1px;
+  border-top: 1px solid var(--accent);
+  border-left: 1px solid var(--accent);
+}
+.wr-hero-portrait::after {
+  bottom: -1px; right: -1px;
+  border-bottom: 1px solid var(--accent);
+  border-right: 1px solid var(--accent);
+}
+.wr-hero-initials {
+  font-family: var(--mono);
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--accent);
+  text-shadow: 0 0 20px var(--accent-glow);
+  user-select: none;
+}
+.wr-hero-identity {
+  flex: 1;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+}
+.wr-hero-name {
+  font-size: clamp(20px, 2.5vw, 30px);
+  font-weight: 800;
+  color: var(--text-glow);
+  letter-spacing: .02em;
+  line-height: 1.1;
+}
+.wr-hero-nickname {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--accent);
+  opacity: .7;
+}
+.wr-hero-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.wr-hero-record {
+  padding: 18px 24px;
+  border-left: 1px dashed var(--border-dashed);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  min-width: 150px;
+  flex-shrink: 0;
+}
+.wr-record-big {
+  font-family: var(--mono);
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-glow);
+  letter-spacing: .04em;
+}
+.wr-record-breakdown {
+  display: flex;
+  gap: 14px;
+}
+.wr-rb { text-align: center; }
+.wr-rb-n {
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 800;
+}
+.wr-rb-n--w { color: var(--clear); }
+.wr-rb-n--l { color: var(--threat); }
+.wr-rb-l {
+  font-family: var(--mono);
+  font-size: 8px;
+  font-weight: 200;
+  letter-spacing: .15em;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+.wr-finishes {
+  display: flex;
+  gap: 6px;
+}
+.wr-fin {
+  flex: 1;
+  background: rgba(255,255,255,.02);
+  border: 1px solid var(--border);
+  padding: 4px 8px;
+  text-align: center;
+  transition: border-color var(--duration);
+}
+.wr-fin:hover {
+  border-color: var(--border2);
+}
+.wr-fin-n {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 800;
+}
+.wr-fin-n--ko  { color: var(--threat); }
+.wr-fin-n--sub { color: var(--clear); }
+.wr-fin-n--dec { color: var(--text-dim); }
+.wr-fin-l {
+  font-family: var(--mono);
+  font-size: 7px;
+  font-weight: 200;
+  letter-spacing: .15em;
+  color: var(--text-dim);
+  margin-top: 1px;
+}
+
+/* ================================================================
+   PILLS & BADGES
+   ================================================================ */
+.wr-pill {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  padding: 3px 10px;
+  border: 1px solid;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  transition: all var(--duration) var(--ease-out);
+}
+.wr-pill--accent {
+  color: var(--accent);
+  border-color: var(--accent-dim);
+  background: rgba(0,200,255,.05);
+}
+.wr-pill--accent:hover {
+  background: rgba(0,200,255,.10);
+  box-shadow: 0 0 12px rgba(0,200,255,.10);
+}
+.wr-pill--clear {
+  color: var(--clear);
+  border-color: rgba(0,230,118,.25);
+  background: rgba(0,230,118,.04);
+}
+.wr-pill--caution {
+  color: var(--caution);
+  border-color: rgba(255,171,0,.25);
+  background: rgba(255,171,0,.04);
+}
+.wr-pill--threat {
+  color: var(--threat);
+  border-color: rgba(255,23,68,.25);
+  background: rgba(255,23,68,.04);
+}
+.wr-pill--muted {
+  color: var(--text-dim);
+  border-color: var(--border2);
+  background: transparent;
+}
+.wr-pill--champ {
+  color: var(--gold);
+  border-color: rgba(255,215,64,.3);
+  background: rgba(255,215,64,.06);
+}
+/* Arch/Mod badge variants */
+.wr-arch-badge {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  padding: 3px 10px;
+  border: 1px solid;
+  background: rgba(255,255,255,.02);
+  transition: all var(--duration);
+}
+.wr-arch-badge:hover {
+  background: rgba(255,255,255,.05);
+}
+.wr-mod-badge {
+  font-family: var(--mono);
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: .05em;
+  padding: 2px 8px;
+  border: 1px solid;
+  opacity: .8;
+  transition: opacity var(--duration);
+}
+.wr-mod-badge:hover {
+  opacity: 1;
+}
+
+/* ================================================================
+   TABS
+   ================================================================ */
+.wr-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background: rgba(6,8,14,.7);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.wr-tabs::-webkit-scrollbar { display: none; }
+.wr-tab {
+  padding: 12px 20px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: .1em;
+  color: var(--text-dim);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  border-bottom: 2px solid transparent;
+  transition: all var(--duration) var(--ease-out);
+  white-space: nowrap;
+  position: relative;
+}
+.wr-tab:hover {
+  color: var(--text);
+}
+.wr-tab.active {
+  color: var(--accent);
+  font-weight: 600;
+  border-bottom-color: var(--accent);
+}
+.wr-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 20%;
+  right: 20%;
+  height: 1px;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
+/* ================================================================
+   FLAGS / QUALIFIERS
+   ================================================================ */
+.wr-flags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.wr-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border: 1px solid;
+  border-radius: 2px;
+  font-family: var(--mono);
+  font-size: 10px;
+  transition: all var(--duration);
+}
+.wr-flag:hover {
+  transform: translateY(-1px);
+}
+.wr-flag-key {
+  font-weight: 200;
+  font-size: 8px;
+  letter-spacing: .12em;
+  opacity: .5;
+}
+.wr-flag-val {
+  font-weight: 700;
+}
+.wr-flag--clear  { color: var(--clear); border-color: rgba(0,230,118,.2); }
+.wr-flag--caution { color: var(--caution); border-color: rgba(255,171,0,.2); }
+.wr-flag--threat { color: var(--threat); border-color: rgba(255,23,68,.2); }
+
+/* ================================================================
+   LIVE INDICATOR
+   ================================================================ */
+.wr-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  color: var(--clear);
+}
+.wr-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--clear);
+  box-shadow: 0 0 6px var(--clear);
+  animation: livePulse 2s ease-in-out infinite;
+}
+@keyframes livePulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--clear); }
+  50%      { opacity: .4; box-shadow: 0 0 2px var(--clear); }
+}
+
+/* ================================================================
+   THREAT INDICATOR BAR
+   ================================================================ */
+.wr-threat-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border: 1px solid;
+  background: rgba(255,255,255,.01);
+  font-family: var(--mono);
+  font-size: 11px;
+  transition: all var(--duration);
+}
+.wr-threat-bar--up {
+  color: var(--clear);
+  border-color: rgba(0,230,118,.15);
+}
+.wr-threat-bar--down {
+  color: var(--threat);
+  border-color: rgba(255,23,68,.15);
+}
+.wr-threat-bar--neutral {
+  color: var(--caution);
+  border-color: rgba(255,171,0,.15);
+}
+.wr-threat-icon {
+  font-size: 14px;
+}
+
+/* ================================================================
+   MARKET CARD — with glow indicators
+   ================================================================ */
+.wr-mkt-card {
+  background: rgba(8,10,20,.75);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  transition: all var(--duration) var(--ease-out);
+  position: relative;
+  overflow: hidden;
+}
+.wr-mkt-card:hover {
+  border-color: var(--border2);
+  box-shadow: 0 4px 24px rgba(0,0,0,.4);
+}
+.wr-mkt-card.watched {
+  border-left: 2px solid var(--accent);
+}
+.wr-mkt-card.watched::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 60px;
+  background: linear-gradient(90deg, rgba(0,200,255,.04), transparent);
+  pointer-events: none;
+}
+.wr-mkt-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px dashed var(--border-dashed);
+}
+.wr-mkt-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-bright);
+  flex: 1;
+}
+.wr-mkt-name-vs {
+  color: var(--text-dim);
+  font-weight: 300;
+}
+.wr-mkt-odds-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+}
+.wr-mkt-odds-cell {
+  background: rgba(8,10,20,.9);
+  padding: 12px 16px;
+}
+.wr-mkt-fighter-name {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: .06em;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+.wr-mkt-odds-val {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+}
+.wr-mkt-odds-val--fav { color: var(--accent); }
+.wr-mkt-odds-val--dog { color: var(--clear); }
+.wr-mkt-implied {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 300;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+/* ================================================================
+   CHECKLIST
+   ================================================================ */
+.wr-cl-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255,255,255,.02);
+  transition: background var(--duration);
+}
+.wr-cl-item:hover {
+  background: rgba(255,255,255,.02);
+}
+.wr-cl-box {
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--border2);
+  flex-shrink: 0;
+  margin-top: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  transition: all var(--duration) var(--ease-spring);
+  border-radius: 2px;
+}
+.wr-cl-box.checked {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+.wr-cl-text {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.4;
+}
+.wr-cl-text.checked {
+  color: var(--text-dim);
+  text-decoration: line-through;
+  text-decoration-color: var(--text-dim);
+}
+.wr-cl-sub {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 300;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+/* Progress bar */
+.wr-progress {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.wr-progress-header {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 300;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+  letter-spacing: .08em;
+}
+.wr-progress-track {
+  height: 3px;
+  background: rgba(255,255,255,.04);
+  position: relative;
+  overflow: hidden;
+}
+.wr-progress-fill {
+  position: absolute;
+  inset: 0;
+  right: auto;
+  background: linear-gradient(90deg, var(--accent), var(--clear));
+  transition: width 0.6s var(--ease-out);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
+/* ================================================================
+   SIDEBAR FIGHTER ROW
+   ================================================================ */
+.wr-sidebar-fighter {
+  padding: 10px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255,255,255,.03);
+  transition: all var(--duration) var(--ease-out);
+  position: relative;
+}
+.wr-sidebar-fighter:hover {
+  background: rgba(0,200,255,.03);
+}
+.wr-sidebar-fighter.active {
+  background: rgba(0,200,255,.05);
+}
+.wr-sidebar-fighter.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+.wr-sf-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-bright);
+}
+.wr-sf-meta {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 300;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+.wr-sf-record {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+/* ================================================================
+   TRADER NOTES
+   ================================================================ */
+.wr-notes {
+  background: rgba(255,255,255,.01);
+  border-left: 2px solid var(--accent-dim);
+  padding: 14px 16px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text);
+}
+.wr-notes::before {
+  content: '//';
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent-dim);
+  font-weight: 200;
+  display: block;
+  margin-bottom: 6px;
+  letter-spacing: .2em;
+}
+
+/* ================================================================
+   INPUT
+   ================================================================ */
+.wr-input {
+  width: 100%;
+  background: rgba(255,255,255,.02);
+  border: 1px solid var(--border);
+  color: var(--text-bright);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 400;
+  padding: 8px 12px;
+  outline: none;
+  transition: all var(--duration) var(--ease-out);
+}
+.wr-input:focus {
+  border-color: var(--accent-dim);
+  box-shadow: 0 0 0 3px rgba(0,200,255,.06), inset 0 1px 3px rgba(0,0,0,.3);
+  background: rgba(0,200,255,.02);
+}
+.wr-input::placeholder {
+  color: var(--text-dim);
+  font-weight: 200;
+}
+
+/* ================================================================
+   ENTRANCE ANIMATIONS
+   ================================================================ */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInRight {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.anim-in {
+  animation: fadeInUp 0.5s var(--ease-out) both;
+}
+.anim-in-1 { animation-delay: 0.05s; }
+.anim-in-2 { animation-delay: 0.10s; }
+.anim-in-3 { animation-delay: 0.15s; }
+.anim-in-4 { animation-delay: 0.20s; }
+.anim-in-5 { animation-delay: 0.25s; }
+.anim-in-6 { animation-delay: 0.30s; }
+
+/* ================================================================
+   COMPARE — VS DISPLAY
+   ================================================================ */
+.wr-vs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--threat);
+  text-shadow: 0 0 12px var(--threat-glow);
+  position: relative;
+}
+
+/* ================================================================
+   DATA GRID — stat cells
+   ================================================================ */
+.wr-data-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+}
+.wr-data-cell {
+  background: rgba(8,10,20,.85);
+  padding: 14px 16px;
+  transition: background var(--duration);
+}
+.wr-data-cell:hover {
+  background: rgba(12,14,26,.9);
+}
+.wr-data-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 200;
+  letter-spacing: .12em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.wr-data-value {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-glow);
+}
+.wr-data-sub {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 300;
+  color: var(--text-dim);
+  margin-top: 3px;
+}
+
+/* ================================================================
+   NEWS CARD
+   ================================================================ */
+.wr-news-card {
+  background: rgba(8,10,20,.7);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: all var(--duration) var(--ease-out);
+}
+.wr-news-card:hover {
+  border-color: var(--border2);
+  box-shadow: 0 4px 20px rgba(0,0,0,.3);
+}
+.wr-news-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.wr-news-headline {
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-bright);
+  line-height: 1.4;
+  cursor: pointer;
+  transition: color var(--duration);
+}
+.wr-news-headline:hover {
+  color: var(--text-glow);
+}
+.wr-news-body {
+  padding: 0 14px 10px;
+  font-size: 12px;
+  font-weight: 300;
+  color: var(--text-dim);
+  line-height: 1.7;
+}
+.wr-news-date {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 200;
+  color: var(--text-dim);
+  margin-left: auto;
+}
+
+/* ================================================================
+   RESPONSIVE
+   ================================================================ */
+@media (max-width: 767px) {
+  .demo-grid { grid-template-columns: 1fr; }
+  .demo-grid--3 { grid-template-columns: 1fr; }
+  .wr-hero { flex-wrap: wrap; }
+  .wr-hero-record { border-left: none; border-top: 1px dashed var(--border-dashed); width: 100%; }
+  .wr-mkt-odds-row { grid-template-columns: 1fr; }
+  .wr-data-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ================================================================
+   REDUCED MOTION
+   ================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="wr-bg"></div>
+<div class="wr-grid"></div>
+<div class="wr-scanline"></div>
+<div class="wr-vignette"></div>
+
+<!-- ============================================================
+     TOPBAR
+     ============================================================ -->
+<div class="wr-topbar">
+  <span class="wr-topbar-logo">AUDWIHR</span>
+  <span class="wr-topbar-sep">//</span>
+  <span class="wr-topbar-section">WAR ROOM CONCEPT</span>
+  <div class="wr-topbar-right">
+    <span class="wr-live"><span class="wr-live-dot"></span> LIVE</span>
+    <button class="wr-btn">ROSTER</button>
+    <button class="wr-btn wr-btn--primary">&larr; MENU</button>
+  </div>
+</div>
+
+<div class="demo-container">
+
+  <!-- ============================================================
+       SECTION: MENU
+       ============================================================ -->
+  <div class="demo-section">
+    <div class="wr-menu">
+      <div class="wr-menu-wordmark anim-in">AUDWIHR</div>
+      <div class="wr-menu-sub anim-in anim-in-1">MMA Prediction Market Trader</div>
+      <div class="wr-menu-list">
+        <div class="wr-menu-item anim-in anim-in-2">
+          <span class="wr-menu-item-num">01</span>
+          <span class="wr-menu-item-label">FIGHTERS</span>
+          <span class="wr-menu-item-badge">ACTIVE</span>
+          <span class="wr-menu-item-arrow">&rarr;</span>
+        </div>
+        <div class="wr-menu-item anim-in anim-in-3">
+          <span class="wr-menu-item-num">02</span>
+          <span class="wr-menu-item-label">COMPARE</span>
+          <span class="wr-menu-item-badge">ACTIVE</span>
+          <span class="wr-menu-item-arrow">&rarr;</span>
+        </div>
+        <div class="wr-menu-item anim-in anim-in-4">
+          <span class="wr-menu-item-num">03</span>
+          <span class="wr-menu-item-label">FIGHT CALENDAR</span>
+          <span class="wr-menu-item-badge">ACTIVE</span>
+          <span class="wr-menu-item-arrow">&rarr;</span>
+        </div>
+        <div class="wr-menu-item anim-in anim-in-5">
+          <span class="wr-menu-item-num">04</span>
+          <span class="wr-menu-item-label">MARKETS</span>
+          <span class="wr-menu-item-badge">ACTIVE</span>
+          <span class="wr-menu-item-arrow">&rarr;</span>
+        </div>
+        <div class="wr-menu-item anim-in anim-in-6">
+          <span class="wr-menu-item-num">05</span>
+          <span class="wr-menu-item-label">FIGHTER NEWS</span>
+          <span class="wr-menu-item-badge">ACTIVE</span>
+          <span class="wr-menu-item-arrow">&rarr;</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SECTION: FIGHTER HERO + STATS
+       ============================================================ -->
+  <div class="demo-section">
+    <div class="demo-section-label">FIGHTER PROFILE</div>
+
+    <div class="wr-card anim-in" style="margin-bottom: 16px;">
+      <div class="wr-scan"></div>
+      <div class="wr-card-hdr">
+        <span class="wr-card-hdr-label">target acquired</span>
+        <span class="wr-card-hdr-accent">FIGHTER PROFILE</span>
+      </div>
+      <div class="wr-hero">
+        <div class="wr-hero-portrait">
+          <span class="wr-hero-initials">IM</span>
+        </div>
+        <div class="wr-hero-identity">
+          <div class="wr-hero-name">Islam Makhachev</div>
+          <div class="wr-hero-nickname">&ldquo;Don&rsquo;t remember&rdquo;</div>
+          <div class="wr-hero-pills">
+            <span class="wr-pill wr-pill--champ">CHAMPION</span>
+            <span class="wr-pill wr-pill--muted">LIGHTWEIGHT</span>
+            <span class="wr-pill wr-pill--muted">UFC</span>
+            <span class="wr-pill wr-pill--muted">ORTHODOX</span>
+          </div>
+          <div class="wr-hero-pills" style="margin-top: 2px;">
+            <span class="wr-arch-badge" style="color: var(--blue); border-color: var(--blue);">WRESTLER</span>
+            <span class="wr-mod-badge" style="color: var(--teal); border-color: rgba(0,191,165,.35);">PRESSURE</span>
+            <span class="wr-mod-badge" style="color: var(--caution); border-color: rgba(255,171,0,.35);">CONTROL</span>
+          </div>
+          <button class="wr-btn wr-btn--primary" style="margin-top: 10px; align-self: flex-start;">VS. / COMPARE</button>
+        </div>
+        <div class="wr-hero-record">
+          <div class="wr-record-big">26-1-0</div>
+          <div class="wr-record-breakdown">
+            <div class="wr-rb"><div class="wr-rb-n wr-rb-n--w">26</div><div class="wr-rb-l">WIN</div></div>
+            <div class="wr-rb"><div class="wr-rb-n wr-rb-n--l">1</div><div class="wr-rb-l">LOSS</div></div>
+            <div class="wr-rb"><div class="wr-rb-n" style="color:var(--text)">14</div><div class="wr-rb-l">STRK</div></div>
+          </div>
+          <div class="wr-finishes">
+            <div class="wr-fin"><div class="wr-fin-n wr-fin-n--ko">5</div><div class="wr-fin-l">KO</div></div>
+            <div class="wr-fin"><div class="wr-fin-n wr-fin-n--sub">12</div><div class="wr-fin-l">SUB</div></div>
+            <div class="wr-fin"><div class="wr-fin-n wr-fin-n--dec">9</div><div class="wr-fin-l">DEC</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="wr-tabs" style="margin-bottom: 16px;">
+      <button class="wr-tab active">OVERVIEW</button>
+      <button class="wr-tab">STRIKING</button>
+      <button class="wr-tab">GRAPPLING</button>
+      <button class="wr-tab">PHYSICAL</button>
+      <button class="wr-tab">HISTORY</button>
+      <button class="wr-tab">MARKET</button>
+    </div>
+
+    <!-- Key Stats -->
+    <div class="demo-grid">
+      <div class="wr-card anim-in anim-in-1">
+        <div class="wr-scan"></div>
+        <div class="wr-card-hdr">
+          <span class="wr-card-hdr-label">analysis</span>
+          <span class="wr-card-hdr-accent">KEY STATS</span>
+        </div>
+        <div class="wr-card-body" style="padding: 10px 16px;">
+          <div class="wr-stat-row">
+            <span class="wr-stat-label">STRIKE ACC</span>
+            <div class="wr-stat-track"><div class="wr-stat-fill wr-stat-fill--above" style="width: 59%;"></div></div>
+            <span class="wr-stat-val">59%</span>
+            <span class="wr-stat-tier wr-stat-tier--above">ABOVE AVG</span>
+          </div>
+          <div class="wr-stat-row">
+            <span class="wr-stat-label">TD ACC</span>
+            <div class="wr-stat-track"><div class="wr-stat-fill wr-stat-fill--elite" style="width: 62%;"></div></div>
+            <span class="wr-stat-val">62%</span>
+            <span class="wr-stat-tier wr-stat-tier--elite">ELITE</span>
+          </div>
+          <div class="wr-stat-row">
+            <span class="wr-stat-label">TD DEF</span>
+            <div class="wr-stat-track"><div class="wr-stat-fill wr-stat-fill--elite" style="width: 89%;"></div></div>
+            <span class="wr-stat-val">89%</span>
+            <span class="wr-stat-tier wr-stat-tier--elite">ELITE</span>
+          </div>
+          <div class="wr-stat-row">
+            <span class="wr-stat-label">STR DEF</span>
+            <div class="wr-stat-track"><div class="wr-stat-fill wr-stat-fill--above" style="width: 64%;"></div></div>
+            <span class="wr-stat-val">64%</span>
+            <span class="wr-stat-tier wr-stat-tier--above">ABOVE AVG</span>
+          </div>
+          <div class="wr-stat-row">
+            <span class="wr-stat-label">STR / MIN</span>
+            <div class="wr-stat-track"><div class="wr-stat-fill wr-stat-fill--avg" style="width: 42%;"></div></div>
+            <span class="wr-stat-val">3.75</span>
+            <span class="wr-stat-tier wr-stat-tier--avg">AVG</span>
+          </div>
+          <div class="wr-stat-row">
+            <span class="wr-stat-label">STR ABS</span>
+            <div class="wr-stat-track"><div class="wr-stat-fill wr-stat-fill--elite" style="width: 78%;"></div></div>
+            <span class="wr-stat-val">1.98</span>
+            <span class="wr-stat-tier wr-stat-tier--elite">ELITE</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <!-- Flags -->
+        <div class="wr-card anim-in anim-in-2">
+          <div class="wr-scan"></div>
+          <div class="wr-card-hdr">
+            <span class="wr-card-hdr-label">assessment</span>
+            <span class="wr-card-hdr-accent">FLAGS</span>
+          </div>
+          <div class="wr-card-body">
+            <div class="wr-flags">
+              <div class="wr-flag wr-flag--clear">
+                <span class="wr-flag-key">CHIN</span>
+                <span class="wr-flag-val">GRANITE</span>
+              </div>
+              <div class="wr-flag wr-flag--clear">
+                <span class="wr-flag-key">CARDIO</span>
+                <span class="wr-flag-val">ELITE</span>
+              </div>
+              <div class="wr-flag wr-flag--caution">
+                <span class="wr-flag-key">CUT</span>
+                <span class="wr-flag-val">MODERATE</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trader Notes -->
+        <div class="wr-card anim-in anim-in-3">
+          <div class="wr-scan"></div>
+          <div class="wr-card-hdr">
+            <span class="wr-card-hdr-label">intel</span>
+            <span class="wr-card-hdr-accent">TRADER NOTES</span>
+          </div>
+          <div class="wr-card-body" style="padding: 0;">
+            <div class="wr-notes">
+              Dominant wrestler-grappler. Suffocating top control makes him the safest favorite on most cards. Only real question mark is striking defense against elite pressure boxers. The Tsarukyan rematch is the highest-EV line to watch.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SECTION: DATA GRID (Striking stats)
+       ============================================================ -->
+  <div class="demo-section">
+    <div class="demo-section-label">DATA CELLS</div>
+    <div class="wr-card anim-in">
+      <div class="wr-scan"></div>
+      <div class="wr-card-hdr">
+        <span class="wr-card-hdr-label">telemetry</span>
+        <span class="wr-card-hdr-accent">STRIKING</span>
+      </div>
+      <div class="wr-data-grid">
+        <div class="wr-data-cell">
+          <div class="wr-data-label">SLpM</div>
+          <div class="wr-data-value">3.75</div>
+          <div class="wr-data-sub">str landed / min</div>
+        </div>
+        <div class="wr-data-cell">
+          <div class="wr-data-label">SApM</div>
+          <div class="wr-data-value" style="color: var(--clear);">1.98</div>
+          <div class="wr-data-sub">str absorbed / min</div>
+        </div>
+        <div class="wr-data-cell">
+          <div class="wr-data-label">STR ACC</div>
+          <div class="wr-data-value">59%</div>
+          <div class="wr-data-sub">significant accuracy</div>
+        </div>
+        <div class="wr-data-cell">
+          <div class="wr-data-label">KD RATIO</div>
+          <div class="wr-data-value" style="color: var(--caution);">0.84</div>
+          <div class="wr-data-sub">knockdowns / 15 min</div>
+        </div>
+        <div class="wr-data-cell">
+          <div class="wr-data-label">HEAD</div>
+          <div class="wr-data-value">45%</div>
+          <div class="wr-data-sub">target distribution</div>
+        </div>
+        <div class="wr-data-cell">
+          <div class="wr-data-label">STR DEF</div>
+          <div class="wr-data-value" style="color: var(--accent);">64%</div>
+          <div class="wr-data-sub">strikes avoided</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SECTION: MARKET CARD
+       ============================================================ -->
+  <div class="demo-section">
+    <div class="demo-section-label">MARKET INTELLIGENCE</div>
+    <div class="demo-grid">
+      <div class="wr-mkt-card watched anim-in">
+        <div class="wr-mkt-header">
+          <div>
+            <div class="wr-mkt-name">Makhachev <span class="wr-mkt-name-vs">vs</span> Tsarukyan</div>
+            <div style="font-family: var(--mono); font-size: 9px; font-weight: 200; color: var(--text-dim); margin-top: 2px;">LIGHTWEIGHT &middot; UFC 311</div>
+          </div>
+          <span class="wr-live"><span class="wr-live-dot"></span> LIVE</span>
+        </div>
+        <div class="wr-mkt-odds-row">
+          <div class="wr-mkt-odds-cell">
+            <div class="wr-mkt-fighter-name">MAKHACHEV</div>
+            <div class="wr-mkt-odds-val wr-mkt-odds-val--fav">-275</div>
+            <div class="wr-mkt-implied">73.3% implied</div>
+          </div>
+          <div class="wr-mkt-odds-cell">
+            <div class="wr-mkt-fighter-name">TSARUKYAN</div>
+            <div class="wr-mkt-odds-val wr-mkt-odds-val--dog">+220</div>
+            <div class="wr-mkt-implied">31.2% implied</div>
+          </div>
+        </div>
+        <div class="wr-threat-bar wr-threat-bar--up" style="margin: 0; border-left: none; border-right: none;">
+          <span class="wr-threat-icon">&#9650;</span>
+          <span>LINE MOVING: Makhachev -245 &rarr; -275 (steamed)</span>
+        </div>
+      </div>
+
+      <div class="wr-mkt-card anim-in anim-in-1">
+        <div class="wr-mkt-header">
+          <div>
+            <div class="wr-mkt-name">Volkanovski <span class="wr-mkt-name-vs">vs</span> Lopes</div>
+            <div style="font-family: var(--mono); font-size: 9px; font-weight: 200; color: var(--text-dim); margin-top: 2px;">FEATHERWEIGHT &middot; UFC 312</div>
+          </div>
+          <div style="font-family: var(--mono); font-size: 11px; font-weight: 800; color: var(--caution);">6D</div>
+        </div>
+        <div class="wr-mkt-odds-row">
+          <div class="wr-mkt-odds-cell">
+            <div class="wr-mkt-fighter-name">VOLKANOVSKI</div>
+            <div class="wr-mkt-odds-val wr-mkt-odds-val--fav">-190</div>
+            <div class="wr-mkt-implied">65.5% implied</div>
+          </div>
+          <div class="wr-mkt-odds-cell">
+            <div class="wr-mkt-fighter-name">LOPES</div>
+            <div class="wr-mkt-odds-val wr-mkt-odds-val--dog">+160</div>
+            <div class="wr-mkt-implied">38.5% implied</div>
+          </div>
+        </div>
+        <div class="wr-threat-bar wr-threat-bar--down" style="margin: 0; border-left: none; border-right: none;">
+          <span class="wr-threat-icon">&#9660;</span>
+          <span>LINE DROPPING: Volkanovski -210 &rarr; -190</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SECTION: BUTTONS + PILLS + BADGES
+       ============================================================ -->
+  <div class="demo-section">
+    <div class="demo-section-label">CONTROLS & BADGES</div>
+    <div class="wr-card anim-in">
+      <div class="wr-scan"></div>
+      <div class="wr-card-hdr">
+        <span class="wr-card-hdr-label">component</span>
+        <span class="wr-card-hdr-accent">BUTTONS</span>
+      </div>
+      <div class="wr-card-body" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+        <button class="wr-btn">DEFAULT</button>
+        <button class="wr-btn wr-btn--primary">PRIMARY</button>
+        <button class="wr-btn wr-btn--clear">CLEAR</button>
+        <button class="wr-btn wr-btn--threat">THREAT</button>
+      </div>
+    </div>
+
+    <div class="wr-card anim-in anim-in-1" style="margin-top: 16px;">
+      <div class="wr-scan"></div>
+      <div class="wr-card-hdr">
+        <span class="wr-card-hdr-label">component</span>
+        <span class="wr-card-hdr-accent">PILLS & BADGES</span>
+      </div>
+      <div class="wr-card-body" style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+        <span class="wr-pill wr-pill--accent">WRESTLER</span>
+        <span class="wr-pill wr-pill--clear">ELITE</span>
+        <span class="wr-pill wr-pill--caution">MODERATE</span>
+        <span class="wr-pill wr-pill--threat">BELOW AVG</span>
+        <span class="wr-pill wr-pill--champ">CHAMPION</span>
+        <span class="wr-pill wr-pill--muted">LIGHTWEIGHT</span>
+        <span class="wr-live"><span class="wr-live-dot"></span> LIVE</span>
+      </div>
+    </div>
+
+    <div class="wr-card anim-in anim-in-2" style="margin-top: 16px;">
+      <div class="wr-scan"></div>
+      <div class="wr-card-hdr">
+        <span class="wr-card-hdr-label">component</span>
+        <span class="wr-card-hdr-accent">INPUT</span>
+      </div>
+      <div class="wr-card-body" style="display: flex; flex-direction: column; gap: 10px;">
+        <input class="wr-input" placeholder="Search fighters..." />
+        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+          <button class="wr-btn" style="font-size: 9px; padding: 4px 10px;">ALL</button>
+          <button class="wr-btn wr-btn--primary" style="font-size: 9px; padding: 4px 10px;">LIGHTWEIGHT</button>
+          <button class="wr-btn" style="font-size: 9px; padding: 4px 10px;">WELTERWEIGHT</button>
+          <button class="wr-btn" style="font-size: 9px; padding: 4px 10px;">MIDDLEWEIGHT</button>
+          <button class="wr-btn" style="font-size: 9px; padding: 4px 10px;">HEAVYWEIGHT</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SECTION: CHECKLIST
+       ============================================================ -->
+  <div class="demo-section">
+    <div class="demo-section-label">TRADE CHECKLIST</div>
+    <div class="demo-grid">
+      <div class="wr-card anim-in">
+        <div class="wr-scan"></div>
+        <div class="wr-card-hdr">
+          <span class="wr-card-hdr-label">protocol</span>
+          <span class="wr-card-hdr-accent">PRE-TRADE CHECKLIST</span>
+          <div class="wr-card-hdr-right">
+            <button class="wr-btn" style="font-size: 9px; padding: 3px 8px;">RESET</button>
+          </div>
+        </div>
+        <div class="wr-progress">
+          <div class="wr-progress-header">
+            <span>COMPLETION</span>
+            <span>3 / 6</span>
+          </div>
+          <div class="wr-progress-track">
+            <div class="wr-progress-fill" style="width: 50%;"></div>
+          </div>
+        </div>
+        <div>
+          <div class="wr-cl-item" onclick="this.querySelector('.wr-cl-box').classList.toggle('checked'); this.querySelector('.wr-cl-text').classList.toggle('checked');">
+            <div class="wr-cl-box checked">&#10003;</div>
+            <div>
+              <div class="wr-cl-text checked">Check line movement direction</div>
+              <div class="wr-cl-sub">Is money coming in on your side or against?</div>
+            </div>
+          </div>
+          <div class="wr-cl-item" onclick="this.querySelector('.wr-cl-box').classList.toggle('checked'); this.querySelector('.wr-cl-text').classList.toggle('checked');">
+            <div class="wr-cl-box checked">&#10003;</div>
+            <div>
+              <div class="wr-cl-text checked">Review fight camp reports</div>
+              <div class="wr-cl-sub">Injuries, weight cut issues, training partner intel</div>
+            </div>
+          </div>
+          <div class="wr-cl-item" onclick="this.querySelector('.wr-cl-box').classList.toggle('checked'); this.querySelector('.wr-cl-text').classList.toggle('checked');">
+            <div class="wr-cl-box checked">&#10003;</div>
+            <div>
+              <div class="wr-cl-text checked">Compare implied prob vs your estimate</div>
+              <div class="wr-cl-sub">Only bet when you see +EV edge of at least 5%</div>
+            </div>
+          </div>
+          <div class="wr-cl-item">
+            <div class="wr-cl-box"></div>
+            <div>
+              <div class="wr-cl-text">Check for correlated parlays</div>
+              <div class="wr-cl-sub">Related fights on the same card that share risk</div>
+            </div>
+          </div>
+          <div class="wr-cl-item">
+            <div class="wr-cl-box"></div>
+            <div>
+              <div class="wr-cl-text">Verify bankroll sizing</div>
+              <div class="wr-cl-sub">Kelly criterion or fixed % of bankroll</div>
+            </div>
+          </div>
+          <div class="wr-cl-item">
+            <div class="wr-cl-box"></div>
+            <div>
+              <div class="wr-cl-text">Set alert threshold</div>
+              <div class="wr-cl-sub">Be notified if line moves past your trigger</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar roster mockup -->
+      <div class="wr-card anim-in anim-in-1">
+        <div class="wr-scan"></div>
+        <div class="wr-card-hdr">
+          <span class="wr-card-hdr-label">roster</span>
+          <span class="wr-card-hdr-accent">FIGHTERS &mdash; 87</span>
+        </div>
+        <div style="padding: 8px 12px; border-bottom: 1px solid var(--border);">
+          <input class="wr-input" placeholder="Search..." style="font-size: 11px; padding: 6px 10px;" />
+        </div>
+        <div>
+          <div class="wr-sidebar-fighter active">
+            <div class="wr-sf-name">Islam Makhachev</div>
+            <div class="wr-sf-meta"><span class="wr-sf-record">26-1-0</span> &middot; Lightweight &middot; #C</div>
+          </div>
+          <div class="wr-sidebar-fighter">
+            <div class="wr-sf-name">Arman Tsarukyan</div>
+            <div class="wr-sf-meta"><span class="wr-sf-record">22-3-0</span> &middot; Lightweight &middot; #1</div>
+          </div>
+          <div class="wr-sidebar-fighter">
+            <div class="wr-sf-name">Charles Oliveira</div>
+            <div class="wr-sf-meta"><span class="wr-sf-record">34-10-0</span> &middot; Lightweight &middot; #2</div>
+          </div>
+          <div class="wr-sidebar-fighter">
+            <div class="wr-sf-name">Dustin Poirier</div>
+            <div class="wr-sf-meta"><span class="wr-sf-record">30-9-0</span> &middot; Lightweight &middot; #4</div>
+          </div>
+          <div class="wr-sidebar-fighter">
+            <div class="wr-sf-name">Justin Gaethje</div>
+            <div class="wr-sf-meta"><span class="wr-sf-record">25-5-0</span> &middot; Lightweight &middot; #5</div>
+          </div>
+          <div class="wr-sidebar-fighter">
+            <div class="wr-sf-name">Beneil Dariush</div>
+            <div class="wr-sf-meta"><span class="wr-sf-record">22-6-1</span> &middot; Lightweight &middot; #7</div>
+          </div>
+          <div class="wr-sidebar-fighter">
+            <div class="wr-sf-name">Michael Chandler</div>
+            <div class="wr-sf-meta"><span class="wr-sf-record">23-8-0</span> &middot; Lightweight &middot; #6</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SECTION: NEWS
+       ============================================================ -->
+  <div class="demo-section">
+    <div class="demo-section-label">INTELLIGENCE FEED</div>
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div class="wr-news-card anim-in">
+        <div class="wr-news-header">
+          <span class="wr-pill wr-pill--threat" style="font-size: 8px; padding: 1px 6px;">INJURY</span>
+          <span class="wr-pill wr-pill--accent" style="font-size: 8px; padding: 1px 6px;">MAKHACHEV</span>
+          <span class="wr-live"><span class="wr-live-dot"></span> LIVE</span>
+          <span class="wr-news-date">2h ago</span>
+        </div>
+        <div class="wr-news-headline">Makhachev dealing with minor hand issue ahead of UFC 311 title defense</div>
+        <div class="wr-news-body">Sources close to the lightweight champion's camp say the injury is not expected to affect the fight, but monitoring is ongoing...</div>
+      </div>
+      <div class="wr-news-card anim-in anim-in-1">
+        <div class="wr-news-header">
+          <span class="wr-pill wr-pill--caution" style="font-size: 8px; padding: 1px 6px;">ANALYSIS</span>
+          <span class="wr-pill wr-pill--accent" style="font-size: 8px; padding: 1px 6px;">TSARUKYAN</span>
+          <span class="wr-news-date">5h ago</span>
+        </div>
+        <div class="wr-news-headline">Breaking down Tsarukyan's improved wrestling defense since first Makhachev fight</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SECTION: THREAT INDICATORS
+       ============================================================ -->
+  <div class="demo-section">
+    <div class="demo-section-label">THREAT INDICATORS</div>
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div class="wr-threat-bar wr-threat-bar--up anim-in">
+        <span class="wr-threat-icon">&#9650;</span>
+        <span style="font-weight: 700;">CLEAR</span>
+        <span style="font-weight: 200; opacity: .7;">&mdash; Line moving in your favor. Steam detected on Makhachev ML.</span>
+      </div>
+      <div class="wr-threat-bar wr-threat-bar--neutral anim-in anim-in-1">
+        <span class="wr-threat-icon">&#9644;</span>
+        <span style="font-weight: 700;">CAUTION</span>
+        <span style="font-weight: 200; opacity: .7;">&mdash; Public money 68% on Volkanovski. Potential trap line.</span>
+      </div>
+      <div class="wr-threat-bar wr-threat-bar--down anim-in anim-in-2">
+        <span class="wr-threat-icon">&#9660;</span>
+        <span style="font-weight: 700;">THREAT</span>
+        <span style="font-weight: 200; opacity: .7;">&mdash; Late money pouring in against your position. Consider hedging.</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

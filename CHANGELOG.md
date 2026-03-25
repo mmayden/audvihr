@@ -13,7 +13,24 @@ All notable changes to this project. Format: [version] — date — description.
 - **`npm run validate`** — single command runs `lint + test:run + audit` in sequence. Use before every merge.
 
 ### UI
-- **Topbar reorganization** — theme toggle (MONOLITH/ARENA) moved from floating `position: fixed` overlay into the MenuScreen topbar as a proper flex child. Eliminates visual collision between ALERTS button, version badge, and theme toggle in the top-right corner. Floating toggle still renders on all non-home screens. `.topbar` right padding reduced from 80px to 20px (no longer needs space reservation for the floating overlay). New `.topbar-theme-btn` CSS class.
+- **War Room design system** — complete visual overhaul of `app.css`. Command center aesthetic replacing MONOLITH's flat minimal style. Key changes:
+  - **Corner bracket reticles** on `.ui-card` panels (expand on hover via spring-eased `::before`/`::after`)
+  - **Dashed border headers** on cards and section labels (1px dashed accent-tinted borders)
+  - **Aggressive typography contrast** — label weights dropped to 200–300, data values pushed to 800 for projected-on-glass feel
+  - **Stat bar terminus dots** — glowing `::after` pseudo-elements on `.ov-bar-fill` / `.srl-fill` with `box-shadow` glow matching fill color
+  - **Threat-level color coding** — green (`#00e676` CLEAR), amber/gold (`#ffab00` CAUTION), red (`#ff1744` THREAT) replace the muted MONOLITH palette
+  - **Spring-eased transitions** — buttons use `cubic-bezier(0.34, 1.56, 0.64, 1)` with `scale(1.02)` lift on hover, `scale(0.98)` press on active
+  - **Entrance animations** — menu items stagger via `fadeInUp` with per-child `animation-delay`; menu wordmark gets cyan `text-shadow` glow
+  - **Live indicator pulse** — `.live-indicator::before` pulsing dot (2s `livePulse` keyframe)
+  - **Gradient progress bars** — checklist progress uses `linear-gradient(90deg, accent, green)` with `box-shadow` glow
+  - **Checkbox glow** — `.cl-box.checked` gets cyan `box-shadow` halo
+  - **Background system** — parallax layers restyled: Layer 2 becomes scanline overlay, grid uses cyan-tinted lines at 48px spacing
+  - **Portrait corner ticks** — `.card-portrait::before`/`::after` accent-colored corner marks
+  - **Input focus states** — outer glow ring (`0 0 0 3px rgba(0,200,255,.06)`) + background tint shift
+  - All changes respect `prefers-reduced-motion: reduce` block (unchanged, still last in file)
+  - Zero JSX changes required — all class names preserved, visual-only CSS rewrite
+- **ARENA theme removed** — MONOLITH was the sole colour scheme; now replaced by WAR ROOM. `useTheme` hook + tests deleted; theme toggle removed from App.jsx, MenuScreen, and bottom nav.
+- **Stripe donate link** — "♡ SUPPORT THIS PROJECT" link added to MenuScreen below the navigation menu. Opens Stripe donation page in new tab. Styled as monospace-bordered button with accent hover state (`.menu-donate` CSS class).
 
 ### Data
 - **Fighter data refresh (2026-03-25)** — Evloev 20-0 (Murphy W added), Michael Page 25-3 (Patterson W added), Cannonier age 42, Tuivasa age 33. Stats updated from live UFCStats scrape.

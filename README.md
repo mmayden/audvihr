@@ -19,7 +19,7 @@ Not a sportsbook. Not a fantasy app. Not an AI picks tool. A war room for findin
 |-------|-----------|
 | Build | Vite 6 + `@vitejs/plugin-react` |
 | UI | React 18 + React Router v7 + StrictMode |
-| Styling | Vanilla CSS with CSS variables (MONOLITH + ARENA themes) |
+| Styling | Vanilla CSS with CSS variables (WAR ROOM design system) |
 | Fonts | Inter + JetBrains Mono (self-hosted via `@fontsource-variable`) |
 | State | `useState` / `useMemo` / custom hooks (no state management library) |
 | Testing | Vitest + Testing Library (538 tests, 80% coverage target) |
