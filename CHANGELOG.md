@@ -6,6 +6,12 @@ All notable changes to this project. Format: [version] — date — description.
 
 ## [Unreleased]
 
+### Build Quality & Security Guardrails
+- **Self-hosted fonts** — replaced Google Fonts CDN `<link>` with `@fontsource-variable/inter` + `@fontsource-variable/jetbrains-mono`. Fonts now bundled as woff2 in `dist/assets/`. Eliminated external CDN dependency; tightened CSP (`style-src 'self'`, `font-src 'self'` — no more `fonts.googleapis.com` / `fonts.gstatic.com`). Resolves SRI compliance gap (Google Fonts CSS varies by user-agent, making SRI hashes non-deterministic).
+- **Pre-commit hooks** — `husky` + `lint-staged`. Every commit auto-runs ESLint on staged `src/**/*.{js,jsx}` files. Prevents broken code from reaching `master`.
+- **Security header parity test** — `src/test/security-headers.test.js` (47 tests). Validates all 8 required security headers exist in both `netlify.toml` and `vercel.json`, values match, CSP directives are complete, no `unsafe-inline`/`unsafe-eval`, fonts are self-hosted, `index.html` has `noindex` meta and no external resources without SRI.
+- **`npm run validate`** — single command runs `lint + test:run + audit` in sequence. Use before every merge.
+
 ### Data
 - **Fighter data refresh (2026-03-25)** — Evloev 20-0 (Murphy W added), Michael Page 25-3 (Patterson W added), Cannonier age 42, Tuivasa age 33. Stats updated from live UFCStats scrape.
 

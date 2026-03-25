@@ -61,7 +61,7 @@
  *   trader_notes: String,     // from seed
  * }
  */
-// Last updated: 2026-03-25T05:24:47.719Z
+// Last updated: 2026-03-25T05:41:54.283Z
 
 export const FIGHTERS = [
   { id:1, name:"Islam Makhachev", nickname:"The Dagestani", weight:"Welterweight", org:'UFC', rank:"CHAMPION",

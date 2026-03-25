@@ -11,7 +11,15 @@
 ## Current Sprint
 
 **Branch:** `master`
-**Status:** v0.18.3 — BFO odds scraper shipped. Next: Deployment to audvihr.space.
+**Status:** v0.18.4-dev — Build quality guardrails shipped. Next: Deployment to audvihr.space.
+
+### Build Quality & Security Guardrails (v0.18.4) — 2026-03-25
+
+- [x] Self-hosted fonts via `@fontsource-variable` — eliminated Google Fonts CDN; tightened CSP (`style-src 'self'`, `font-src 'self'`)
+- [x] Pre-commit hooks — `husky` + `lint-staged` (ESLint on staged `.js/.jsx` files)
+- [x] Security header parity test — 47 tests validating `netlify.toml` ↔ `vercel.json` header sync, CSP completeness, CSP hardening, `index.html` security
+- [x] `npm run validate` — lint + test + audit in one command
+- [x] 538 tests passing (47 new); 0 lint errors; 0 CVEs
 
 ### Phase 17 — Deployment + Free Odds Pipeline (scoped 2026-03-24)
 
@@ -355,7 +363,7 @@
 1. All tasks in the sprint are checked off
 2. Manual smoke test passes (all screens render, no console errors)
 3. localStorage functions correctly (odds/notes/checklist persist on reload)
-4. `npm run test:run` exits 0; `npm run lint` exits 0; `npm audit` clean
+4. `npm run validate` exits 0 (runs lint + test + audit in sequence)
 5. Changes committed to feature branch; merged to `master`, tagged vN.N.N
 6. CHANGELOG.md `[Unreleased]` promoted to version
 7. PLANNING.md decisions log updated for any architecture/CSP/data model change

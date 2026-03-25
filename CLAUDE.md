@@ -20,7 +20,7 @@ These are non-negotiable. Do not skip them to save time or complexity.
 - **No hardcoded secrets.** API keys, tokens, credentials go in `.env` (Vite: `VITE_` prefix). `.env` files are gitignored. Never commit secrets.
 - **localStorage / sessionStorage input validation.** All reads from localStorage or sessionStorage must be wrapped in `try/catch` and validated against an expected shape. If validation fails, fall back to the typed default — never use raw parsed data unsanitized.
 - **User input sanitization at the boundary.** Validate and sanitize all form inputs (odds fields, notes) before using them in calculations. `parseInt()` with `isNaN` guard is the current pattern — maintain it.
-- **CSP required for web deployment.** Configured in `netlify.toml` and `vercel.json`. Current policy includes: `default-src 'self'`; `script-src 'self'`; `worker-src 'self'` (for Service Worker); `style-src 'self' fonts.googleapis.com`; `font-src fonts.gstatic.com`; `connect-src 'self'` + 3 API domains (The Odds API, Polymarket, Kalshi) — MMA news feeds are fetched server-side via `/api/rss-proxy` so their origins are no longer in `connect-src`; `img-src 'self' data:`; `frame-ancestors 'none'`. Do not weaken any directive. Every new external domain must be added to both files and documented in PLANNING.md decisions log.
+- **CSP required for web deployment.** Configured in `netlify.toml` and `vercel.json`. Current policy includes: `default-src 'self'`; `script-src 'self'`; `worker-src 'self'` (for Service Worker); `style-src 'self'`; `font-src 'self'` (fonts self-hosted via `@fontsource-variable`); `connect-src 'self'` + 3 API domains (The Odds API, Polymarket, Kalshi) — MMA news feeds are fetched server-side via `/api/rss-proxy` so their origins are no longer in `connect-src`; `img-src 'self' data:`; `frame-ancestors 'none'`. Do not weaken any directive. Every new external domain must be added to both files and documented in PLANNING.md decisions log. **Security header parity is enforced by `src/test/security-headers.test.js`** — 47 tests validate that both deploy configs have identical headers, all 8 required headers are present, and CSP is hardened.
 - **External feed content is untrusted — text extraction only.** `src/utils/newsParser.js` owns all RSS sanitization. `stripHtml()` uses `DOMParser('text/html').body.textContent` — tags are never rendered, only text extracted. `parseRssFeed()` uses `DOMParser('application/xml')`. Feed content (title, description) must never be passed to `innerHTML`, `dangerouslySetInnerHTML`, or any DOM-insertion API. Headline capped at 160 chars, body at 600 chars. XSS test coverage is mandatory.
 - **Alert notifications use plain text only.** The Notification API body must be constructed with string concatenation of validated values only. No HTML template literals, no `innerHTML`, no `dangerouslySetInnerHTML`. Browsers do not render HTML in notification bodies — never attempt to inject markup.
 - **CSV export must guard against formula injection.** Any value exported as CSV that begins with `=`, `+`, `-`, or `@` must be prefixed with a single quote `'` to prevent spreadsheet formula execution.
@@ -103,6 +103,9 @@ Each storage key is owned by exactly one module. No other module reads or writes
 - **Test files co-located with source.** `src/utils/odds.test.js` lives next to `src/utils/odds.js`. Pattern: `<name>.test.{js,jsx}`.
 - **All tests must pass before merging to `master`.** A failing test is a merge blocker.
 - **ESLint must exit 0 before merging.** Run `npm run lint`. Zero errors is required; warnings are acceptable only if they cannot be resolved without disproportionate effort (document in PR description).
+- **`npm run validate` is the single pre-merge quality gate.** Runs `lint + test:run + audit` in sequence. Use this instead of running the three commands separately.
+- **Pre-commit hooks enforce lint on staged files.** `husky` + `lint-staged` run ESLint on staged `src/**/*.{js,jsx}` files before every commit. Do not bypass with `--no-verify`.
+- **Security header parity is tested.** `src/test/security-headers.test.js` validates `netlify.toml` ↔ `vercel.json` header sync, CSP completeness, CSP hardening, and `index.html` security. Any change to deploy config headers must pass these tests.
 
 ### Modular Design (post-Vite)
 
@@ -186,7 +189,8 @@ src/
 │   ├── MarketsScreen.jsx     Unified market dashboard — 3-layer data: BFO build-time sportsbook (baseline) → live Odds API (override) → Polymarket/Kalshi (alongside); multi-book breakdown; opening line + Tapology %; alert bell; PICK form; PICKS log; CLV ↓ CSV export
 │   └── NewsScreen.jsx        Fighter news feed with filters; LIVE/MOCK source badge; per-item badge; headline expand/collapse on tap (expandedIds Set state; news-headline--expanded modifier)
 └── test/
-    └── setup.js              Vitest setup — jest-dom + in-memory localStorage mock
+    ├── setup.js              Vitest setup — jest-dom + in-memory localStorage mock
+    └── security-headers.test.js  Deploy config parity + CSP hardening + index.html security (47 tests)
 ```
 
 - **One component per file.** File name = component name = export name.
@@ -206,7 +210,7 @@ src/
 - **Serverless proxy is the only CORS bypass mechanism.** Do not add direct browser fetches to CORS-restricted external domains. If a new live data source requires CORS bypass, extend the proxy allowlist (both function files) and document the new URL in PLANNING.md. Proxy functions must always: validate against a strict allowlist (`Set.has(url)` — exact equality), enforce a response size cap, accept only GET, and not forward client auth headers to upstream.
 - **sessionStorage for API response caching.** Cache TTL: 15 min for The Odds API (quota budget), 10 min for Polymarket + Kalshi, 30 min for RSS news. Use `src/utils/cache.js` helpers — do not re-implement cache logic inline.
 - **CLV log in localStorage.** `src/utils/clv.js` owns the CLV log key (`clv_log`, 500-entry cap) and the opening line key (`opening_lines`, never evicted). Do not write to either key from any other path.
-- **All numbers and labels use JetBrains Mono.** All colors come from CSS variables — never hardcode hex values in JSX inline styles.
+- **All numbers and labels use JetBrains Mono.** Fonts are self-hosted via `@fontsource-variable/inter` and `@fontsource-variable/jetbrains-mono` (imported in `main.jsx`). No CDN dependency. All colors come from CSS variables — never hardcode hex values in JSX inline styles.
 - **CSS variables are the design system.** Do not use Tailwind, CSS Modules, or styled-components until a deliberate design system decision is made and logged in PLANNING.md.
 - **New CSS tokens must be declared in all three theme blocks.** Any new CSS variable added to `:root` that has a theme-relevant value must also be declared in `[data-theme="light"]` and the `@media (prefers-color-scheme: light)` block. Missing declarations cause invisible/fallback rendering in the alternate theme.
 - **`--accent-bg` and `--accent-bg-mid` are the canonical accent tint tokens.** Use `var(--accent-bg)` (≈7% opacity) for subtle fills (chip active state, banners, search option selected) and `var(--accent-bg-mid)` (≈12% opacity) for medium fills (hover states, badge backgrounds). Never hardcode `rgba(...)` values that reference the accent color — they will not adapt across MONOLITH/ARENA themes. Both are declared in all three theme blocks.
@@ -227,7 +231,7 @@ src/
 - **Swipe-to-close sidebar — `useRef` + `onTouchStart`/`onTouchEnd` pattern.** Both FighterScreen and CalendarScreen sidebar drawers support swipe-left-to-close. Record `touchStartX` and `touchStartTime` in refs on `touchstart`; compute `dx = startX - endX` and `velocity = dx / dt * 1000` (px/s) on `touchend`; call `setSidebarOpen(false)` when `dx > 112` (40% of 280px sidebar) OR `velocity > 80` px/s. Do NOT use `onTouchMove` — it causes scroll conflicts. Handlers must be `useCallback`-wrapped.
 - **Bottom nav icon + label structure.** Each `.bottom-nav-item` renders a `<span className="bottom-nav-icon" aria-hidden="true">` (emoji icon) above a `<span>` (text label). The button itself carries `aria-label` with the full label text. The icon span is purely decorative (`aria-hidden="true"`). Do not render text-only nav items — the icon-above-label pattern is now the standard.
 - **News headline expand/collapse pattern.** `expandedIds` is a `Set` in `useState`. The `.news-headline` div carries `role="button"`, `tabIndex={0}`, `aria-expanded`, and an `onKeyDown` handler for Enter/Space. On `@media (max-width: 480px)` the headline is clamped to 3 lines via `-webkit-line-clamp: 3`; the `.news-headline--expanded` modifier class removes the clamp. The expand state is React-only — never persisted.
-- **Current test count: 491 passing.** Do not merge changes that reduce this number without a documented reason.
+- **Current test count: 538 passing.** Do not merge changes that reduce this number without a documented reason.
 - **Current version: v0.18.3.** Update `package.json` `version`, `MenuScreen.jsx` version badge, and `CHANGELOG.md` before merging any new phase to `master`.
 
 ---
