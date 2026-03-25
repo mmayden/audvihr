@@ -10,6 +10,10 @@ vi.mock('../hooks/useOdds',       () => ({ useOdds:       vi.fn(() => ({ data: n
 vi.mock('../hooks/usePolymarket', () => ({ usePolymarket: vi.fn(() => ({ data: null, loading: false, error: null, fetchHistory: vi.fn(() => Promise.resolve([])), refetch: vi.fn() })) }));
 vi.mock('../hooks/useKalshi',     () => ({ useKalshi:     vi.fn(() => ({ data: null, loading: false, error: null, fetchHistory: vi.fn(() => Promise.resolve([])), refetch: vi.fn() })) }));
 
+// ---------- BFO odds mock ----------
+// Empty by default so build-time data does not leak into tests.
+vi.mock('../data/odds', () => ({ ODDS: {} }));
+
 // ---------- Events mock ----------
 // Inject Tsarukyan vs Gaethje with tapology_pct so tapologyByKey is non-empty.
 vi.mock('../data/events', () => ({

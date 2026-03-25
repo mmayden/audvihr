@@ -4,15 +4,32 @@ All notable changes to this project. Format: [version] — date — description.
 
 ---
 
-## [Unreleased] — Phase 17: Deployment + Free Odds Pipeline
+## [0.18.3] — 2026-03-24
 
-### Planned
-- **Deployment** — `audvihr.space` via Vercel + Namecheap custom domain (A record + CNAME); TLS auto-provisioned; `www` → apex 308 redirect
-- **`scripts/fetch-odds.js`** — build-time BestFightOdds scraper (cheerio, browser UA, same pattern as UFCStats/Tapology); replaces The Odds API as the free sportsbook data source
-- **`src/data/odds.js`** — generated file keyed by `fightKey`; multi-book moneylines + opening lines per fight
-- **`prebuild` chain** — `fetch-data.js --ci && fetch-odds.js --ci`; both degrade silently
-- **MarketsScreen + TabMarket** — merge build-time odds as baseline alongside live Polymarket data
-- **`useOdds.js` (The Odds API)** — becomes fully optional; no paid dependency required for core sportsbook data
+### Build-Time Free Odds Pipeline — BestFightOdds Scraper
+
+#### Added
+- **`scripts/fetch-odds.js`** — build-time BestFightOdds scraper (cheerio, browser UA, same pattern as `fetch-data.js`). Scrapes multi-book moneylines for all upcoming UFC fights. Supports `--dry-run`, `--ci`, `--fresh` flags. Local `.raw.json` cache (500ms inter-request delay). Silent degradation on error — empty ODDS is valid.
+- **`src/data/odds.js`** — generated file keyed by `fightKey` (same algorithm as `normalizeOdds.js`). Shape: `{ [fightKey]: { fighter1, fighter2, books: [{ source, f1_ml, f2_ml }], best, ts } }`. Multi-book data from FanDuel, Caesars, BetMGM, BetRivers, BetWay, DraftKings, Bet365, PointsBet.
+- **`package.json`** — `fetch-odds`, `fetch-odds:dry`, `fetch-odds:fresh` npm scripts. `prebuild` chain updated: `fetch-data.js --ci && fetch-odds.js --ci`.
+- **`src/screens/MarketsScreen.jsx`** — `liveByKey` now layers three data sources: (1) build-time BFO odds as sportsbook baseline, (2) live Odds API override when key present, (3) live Polymarket/Kalshi alongside. BFO multi-book breakdown shown per fight row.
+- **`src/tabs/TabMarket.jsx`** — "SPORTSBOOK ODDS" section with best line + multi-book breakdown from BFO build-time data for the fighter's next fight.
+- **`src/data/odds.test.js`** — 10 tests: ODDS shape validation, fightKey consistency with `normalizeOdds.js`, safe consumption by components.
+
+#### Changed
+- **`useOdds.js` (The Odds API)** — now fully optional. Build-time BFO data replaces it as the free sportsbook baseline. App ships complete sportsbook data with zero paid API keys.
+- **`useKalshi.js`** — also fully optional. No paid API key required for core market data.
+
+#### Security
+- **`vercel.json` + `netlify.toml`** — added `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Resource-Policy: same-origin` headers. Prevents cross-origin window handle leaks and Spectre-class side-channel attacks.
+- **BFO is build-time only** — no `connect-src` CSP change needed. Zero new external domains at runtime.
+- **0 new npm dependencies. 0 CVEs (`npm audit fix` resolved flatted vulnerability).**
+
+#### Testing
+- **491 tests, all passing. 0 lint errors. 0 CVEs.**
+
+### Deployment — Planned (not yet started)
+- `audvihr.space` via Vercel + Namecheap custom domain — see TASKS.md for deployment checklist
 
 ---
 

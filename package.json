@@ -1,7 +1,7 @@
 {
   "name": "audwihr",
   "private": true,
-  "version": "0.18.1",
+  "version": "0.18.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,7 +10,10 @@
     "fetch-data": "node scripts/fetch-data.js",
     "fetch-data:dry": "node scripts/fetch-data.js --dry-run",
     "fetch-data:fresh": "node scripts/fetch-data.js --fresh",
-    "prebuild": "node scripts/fetch-data.js --ci",
+    "fetch-odds": "node scripts/fetch-odds.js",
+    "fetch-odds:dry": "node scripts/fetch-odds.js --dry-run",
+    "fetch-odds:fresh": "node scripts/fetch-odds.js --fresh",
+    "prebuild": "node scripts/fetch-data.js --ci && node scripts/fetch-odds.js --ci",
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",

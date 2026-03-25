@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { usePolymarket } from '../hooks/usePolymarket';
 import { useKalshi } from '../hooks/useKalshi';
 import { mlToImplied, lineMovement } from '../utils/odds';
 import { PriceChart } from '../components/PriceChart';
+import { ODDS } from '../data/odds';
 
 /**
  * TabMarket — renders the Market tab for a fighter profile.
@@ -46,6 +47,14 @@ export const TabMarket = ({ fighter }) => {
   });
 
   const hasLive = Boolean(polyMatch || kalshiMatch);
+
+  // Build-time BFO odds for this fighter (match by last name in fightKey)
+  const bfoMatch = useMemo(() => {
+    return Object.values(ODDS).find((entry) => {
+      const key = entry.fightKey || '';
+      return key.includes(lastName);
+    });
+  }, [lastName]);
 
   // Lazy-load history when live match is found and user hasn't loaded it yet.
   useEffect(() => {
@@ -135,6 +144,34 @@ export const TabMarket = ({ fighter }) => {
       {hasLive && !polyHistory && !kalshiHistory && chartLoaded && (
         <div className="mono-status-dim section-mb-16">
           LOADING PRICE HISTORY…
+        </div>
+      )}
+
+      {/* Build-time sportsbook odds (BestFightOdds scrape) */}
+      {bfoMatch && bfoMatch.books.length > 0 && (
+        <div className="section-mb-16">
+          <div className="sec-label">SPORTSBOOK ODDS <span style={{color:'var(--text-dim)',fontWeight:400,fontSize:'0.75rem'}}>(BestFightOdds — build-time)</span></div>
+          <div className="market-grid">
+            {bfoMatch.best && (
+              <div className="market-card">
+                <div className="mc-label">BEST LINE ({bfoMatch.best.source})</div>
+                <div className="mc-live-price">{bfoMatch.best.f1_ml}</div>
+                <div className="mc-implied">
+                  {fighter.name === bfoMatch.fighter1 ? bfoMatch.fighter1 : bfoMatch.fighter2}
+                  {' '}— Implied: {mlToImplied(bfoMatch.best.f1_ml)}%
+                </div>
+              </div>
+            )}
+            {bfoMatch.books.length > 1 && bfoMatch.books
+              .filter((b) => !bfoMatch.best || b.source !== bfoMatch.best.source)
+              .slice(0, 3)
+              .map((b) => (
+                <div className="market-card" key={b.source}>
+                  <div className="mc-label">{b.source.toUpperCase()}</div>
+                  <div className="mc-live-price" style={{fontSize:'0.9rem'}}>{b.f1_ml} / {b.f2_ml}</div>
+                </div>
+              ))}
+          </div>
         </div>
       )}
 

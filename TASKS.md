@@ -11,7 +11,7 @@
 ## Current Sprint
 
 **Branch:** `master`
-**Status:** v0.18.2 shipped. Next: Phase 17 — Deployment + Free Odds Pipeline.
+**Status:** v0.18.3 — BFO odds scraper shipped. Next: Deployment to audvihr.space.
 
 ### Phase 17 — Deployment + Free Odds Pipeline (scoped 2026-03-24)
 
@@ -24,18 +24,17 @@
 - [ ] Configure `www.audvihr.space` → `audvihr.space` redirect (308, canonical apex)
 - [ ] Smoke test: all screens render, CSP headers active, HTTPS enforced, `noindex` meta present
 
-#### Build-Time Odds Scraper — BestFightOdds (free, no API key)
-- [ ] `scripts/fetch-odds.js` — cheerio scraper; browser UA; `--dry-run`/`--ci`/`--fresh` flags; 500ms delay; local `.raw.json` cache; silent degradation
-- [ ] `src/data/odds.js` — generated output keyed by `fightKey`; shape: `{ [fightKey]: { fighter1, fighter2, books: [{ source, f1_ml, f2_ml }], opening: { f1_ml, f2_ml, ts }, ts } }`
-- [ ] Wire into `prebuild`: `"prebuild": "node scripts/fetch-data.js --ci && node scripts/fetch-odds.js --ci"`
-- [ ] Update `MarketsScreen` + `TabMarket` to read build-time odds as baseline (merge with live Polymarket data)
-- [ ] `useOdds.js` becomes optional — build-time BestFightOdds replaces The Odds API as the free sportsbook data source
-- [ ] Tests for odds scraper normalization + fightKey matching
-- [ ] CSP review: BestFightOdds is build-time only (no `connect-src` change needed)
-- [ ] Update CLAUDE.md (new file in modular design table, storage key ownership if any, scraper docs)
-- [ ] Update PLANNING.md decisions log
-- [ ] Update CHANGELOG.md
-- [ ] `npm audit` clean; all tests pass; 0 lint errors
+#### ✅ Build-Time Odds Scraper — BestFightOdds (free, no API key) — DONE v0.18.3
+- [x] `scripts/fetch-odds.js` — cheerio scraper; browser UA; `--dry-run`/`--ci`/`--fresh` flags; 500ms delay; local `.raw.json` cache; silent degradation
+- [x] `src/data/odds.js` — generated output keyed by `fightKey`; multi-book moneylines + best line per fight
+- [x] Wire into `prebuild`: `"prebuild": "node scripts/fetch-data.js --ci && node scripts/fetch-odds.js --ci"`
+- [x] Update `MarketsScreen` + `TabMarket` to read build-time odds as baseline (merge with live Polymarket data)
+- [x] `useOdds.js` + `useKalshi.js` fully optional — build-time BFO replaces paid APIs as free sportsbook data source
+- [x] Tests for odds data shape + fightKey matching (10 tests in `src/data/odds.test.js`)
+- [x] CSP review: BestFightOdds is build-time only (no `connect-src` change needed)
+- [x] COOP + CORP security headers added to `vercel.json` + `netlify.toml`
+- [x] CLAUDE.md, PLANNING.md, CHANGELOG.md updated
+- [x] `npm audit` clean (flatted fix); 491 tests pass; 0 lint errors
 
 ---
 
@@ -333,17 +332,13 @@
 
 ---
 
-## Backlog (Unscheduled — Post v0.18.2)
+## Backlog (Unscheduled — Post v0.18.3)
 
 #### High value
-- [x] ~~**CORS proxy for live RSS**~~ — shipped v0.17.0
-- [x] ~~**Fighter stat range search**~~ — shipped v0.16.0 (11-preset STAT FILTERS)
-- [x] ~~**MUAY THAI + CLINCH FIGHTER in ARCH_COLORS**~~ — shipped v0.16.0
-- [x] ~~**Mobile-first development phase**~~ — shipped v0.18.0
 - [ ] **Women's divisions** — Strawweight, Flyweight, Bantamweight (~30 fighters); same seed + scrape pipeline; in Proposed Phase 18 sprint
 - [ ] **Keyboard navigation** — arrow keys in sidebar, Tab across screens, keyboard-accessible compare selectors; in Proposed Phase 18 sprint
 - [ ] **Stat trend lines** — per-fight trajectory over last N fights; requires scraper to store per-fight stats alongside career averages; needs Chart.js/Recharts decision first
-- [ ] **Historical opening line database** — searchable archive of opening lines per fighter across all past fights; BestFightOdds scraper (Phase 17) is the data source for this
+- [ ] **Historical opening line database** — searchable archive of opening lines per fighter across all past fights; BFO scraper (`fetch-odds.js`) is the data source for current lines; historical archive requires additional scraping or manual entry
 
 #### Medium value
 - [ ] **Chart.js / Recharts for trend charts** — stat bars are functional but trend charts unlock trajectory analysis; deliberate dependency + `npm audit` decision required before adding
@@ -351,7 +346,6 @@
 - [ ] **Recently viewed fighter strip** — last 3 viewed fighters; `recent_fighters` sessionStorage key already reserved; low effort
 
 #### Low / nice-to-have
-- [x] ~~**Visual reskin pass**~~ — delivered Post-Phase-16 polish
 - [ ] **Sound design** — optional click feedback, opt-in only; deliberate decision required before adding audio (new browser API surface)
 
 ---

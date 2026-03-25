@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { MARKETS } from '../data/markets';
 import { EVENTS } from '../data/events';
+import { ODDS } from '../data/odds';
 import { useWatchlist } from '../hooks/useWatchlist';
 import { useOdds } from '../hooks/useOdds';
 import { usePolymarket } from '../hooks/usePolymarket';
@@ -112,26 +113,47 @@ export const MarketsScreen = ({ onBack }) => {
   const { data: kalshiData, fetchHistory: kalshiFetchHistory } = useKalshi();
   const { alertRules, toggleFightAlert, setFightThreshold } = useAlerts(oddsData);
 
-  const liveAvailable = Boolean(oddsData || polyData || kalshiData);
+  const hasBfoOdds = Object.keys(ODDS).length > 0;
+  const liveAvailable = Boolean(oddsData || polyData || kalshiData || hasBfoOdds);
 
   const today = useMemo(() => { const d = new Date(); d.setHours(0,0,0,0); return d; }, []);
 
-  // Build a lookup map: fightKey → live sources
+  // Build a lookup map: fightKey → live sources.
+  // Layer 1: build-time BFO odds (free baseline — always available after scrape).
+  // Layer 2: live The Odds API (optional — overrides BFO sportsbook when key present).
+  // Layer 3: live Polymarket + Kalshi (optional — merged alongside).
   const liveByKey = useMemo(() => {
     const map = {};
 
-    (oddsData || []).forEach((f) => {
-      if (!map[f.fightKey]) map[f.fightKey] = { sportsbook: null, polymarket: null, kalshi: null, fighter1: f.fighter1, fighter2: f.fighter2, eventDate: f.eventDate };
-      map[f.fightKey].sportsbook = f.sportsbook;
+    // Layer 1: Build-time BestFightOdds data
+    Object.entries(ODDS).forEach(([key, entry]) => {
+      if (!entry.best) return;
+      map[key] = {
+        sportsbook: { f1_ml: entry.best.f1_ml, f2_ml: entry.best.f2_ml, source: `${entry.best.source} (BFO)` },
+        polymarket: null,
+        kalshi: null,
+        fighter1: entry.fighter1,
+        fighter2: entry.fighter2,
+        eventDate: '',
+        bfoBooks: entry.books,
+      };
     });
 
+    // Layer 2: Live The Odds API (overrides BFO sportsbook)
+    (oddsData || []).forEach((f) => {
+      if (!map[f.fightKey]) map[f.fightKey] = { sportsbook: null, polymarket: null, kalshi: null, fighter1: f.fighter1, fighter2: f.fighter2, eventDate: f.eventDate, bfoBooks: null };
+      map[f.fightKey].sportsbook = f.sportsbook;
+      if (f.eventDate) map[f.fightKey].eventDate = f.eventDate;
+    });
+
+    // Layer 3: Live Polymarket + Kalshi
     (polyData || []).forEach((f) => {
-      if (!map[f.fightKey]) map[f.fightKey] = { sportsbook: null, polymarket: null, kalshi: null, fighter1: f.fighter1, fighter2: f.fighter2, eventDate: '' };
+      if (!map[f.fightKey]) map[f.fightKey] = { sportsbook: null, polymarket: null, kalshi: null, fighter1: f.fighter1, fighter2: f.fighter2, eventDate: '', bfoBooks: null };
       map[f.fightKey].polymarket = f.polymarket;
     });
 
     (kalshiData || []).forEach((f) => {
-      if (!map[f.fightKey]) map[f.fightKey] = { sportsbook: null, polymarket: null, kalshi: null, fighter1: f.fighter1, fighter2: f.fighter2, eventDate: '' };
+      if (!map[f.fightKey]) map[f.fightKey] = { sportsbook: null, polymarket: null, kalshi: null, fighter1: f.fighter1, fighter2: f.fighter2, eventDate: '', bfoBooks: null };
       map[f.fightKey].kalshi = f.kalshi;
     });
 
@@ -618,6 +640,31 @@ export const MarketsScreen = ({ onBack }) => {
                       formatF1={(v) => `${(v * 100).toFixed(1)}%`}
                       formatF2={(v) => `${(v * 100).toFixed(1)}%`}
                     />
+                  </div>
+                )}
+
+                {/* BFO multi-book breakdown (when build-time data available) */}
+                {live?.bfoBooks && live.bfoBooks.length > 1 && (
+                  <div className="mkt-platforms">
+                    {live.bfoBooks.map((b) => {
+                      const f1Num = parseInt(b.f1_ml);
+                      const f1IsFav = !isNaN(f1Num) && f1Num < 0;
+                      return (
+                        <div className="mkt-platform-row" key={b.source}>
+                          <span className="mkt-platform-badge platform-draftkings">
+                            {b.source.toUpperCase()}
+                          </span>
+                          <div className="mkt-price-cell">
+                            <div className="mkt-price-name">{market.fighter1.split(' ').pop()}</div>
+                            <div className={`mkt-price-ml ${f1IsFav ? 'fav' : 'dog'}`}>{b.f1_ml}</div>
+                          </div>
+                          <div className="mkt-price-cell">
+                            <div className="mkt-price-name">{market.fighter2.split(' ').pop()}</div>
+                            <div className={`mkt-price-ml ${!f1IsFav ? 'fav' : 'dog'}`}>{b.f2_ml}</div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
 
