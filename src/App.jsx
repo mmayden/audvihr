@@ -121,7 +121,7 @@ const AppInner = () => {
 
       <ErrorBoundary key={pathname}>
         <Routes>
-          <Route path="/"                     element={<MenuScreen onSelect={(id) => navigate(SCREEN_PATH[id] ?? '/')} />} />
+          <Route path="/"                     element={<MenuScreen onSelect={(id) => navigate(SCREEN_PATH[id] ?? '/')} toggleTheme={toggleTheme} themeLabel={themeLabel} />} />
           <Route path="/fighters"             element={<FighterScreen onBack={() => navigate('/')} initialFighter={null} />} />
           <Route path="/fighters/:id"         element={<FighterScreenRoute />} />
           <Route path="/compare"              element={<CompareScreen onBack={() => navigate('/')} />} />
@@ -132,8 +132,8 @@ const AppInner = () => {
         </Routes>
       </ErrorBoundary>
 
-      {/* Floating theme toggle — visible on desktop, hidden on mobile */}
-      <button className="theme-toggle-floating" onClick={toggleTheme} aria-label="Toggle colour theme">{themeLabel}</button>
+      {/* Floating theme toggle — visible on desktop (non-home screens), hidden on mobile */}
+      {pathname !== '/' && <button className="theme-toggle-floating" onClick={toggleTheme} aria-label="Toggle colour theme">{themeLabel}</button>}
 
       {/* Bottom nav — hidden on desktop, shown on mobile */}
       <nav className="bottom-nav" aria-label="Main navigation">

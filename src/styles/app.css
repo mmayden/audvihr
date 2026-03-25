@@ -191,7 +191,7 @@ a:focus-visible,
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 .app { position: relative; z-index: 10; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 /* TOPBAR */
-.topbar { height: 48px; min-height: 48px; display: flex; align-items: center; gap: 16px; padding: 0 80px 0 20px; background: rgba(2,3,10,.62); backdrop-filter: blur(20px) saturate(160%); -webkit-backdrop-filter: blur(20px) saturate(160%); border-bottom: 1px solid rgba(255,255,255,.07); z-index: 50; box-shadow: 0 1px 28px rgba(0,0,0,.55); }
+.topbar { height: 48px; min-height: 48px; display: flex; align-items: center; gap: 16px; padding: 0 20px; background: rgba(2,3,10,.62); backdrop-filter: blur(20px) saturate(160%); -webkit-backdrop-filter: blur(20px) saturate(160%); border-bottom: 1px solid rgba(255,255,255,.07); z-index: 50; box-shadow: 0 1px 28px rgba(0,0,0,.55); }
 .topbar-logo { font-size: 13px; font-weight: 700; letter-spacing: .12em; color: var(--accent); font-family: var(--mono); }
 .topbar-sep { color: var(--border2); }
 .topbar-section { font-size: 12px; font-weight: 500; color: var(--text-dim); letter-spacing: .06em; }
@@ -599,6 +599,8 @@ a:focus-visible,
 
 /* MENUSCREEN */
 .topbar-version-badge { font-family: var(--mono); font-size: 10px; color: var(--text-dim); letter-spacing: .08em; }
+.topbar-theme-btn { font-family: var(--mono); font-size: 9px; font-weight: 600; letter-spacing: .08em; color: var(--text-dim); border: 1px solid var(--border2); padding: 3px 8px; cursor: pointer; background: transparent; transition: color .15s, border-color .15s; }
+.topbar-theme-btn:hover { color: var(--text); border-color: var(--border); }
 
 /* ROSTER / EVENTS toggle button — hidden on desktop, shown on mobile */
 .topbar-roster-btn { display: none; font-size: 10px; font-family: var(--mono); color: var(--text-dim); border: 1px solid var(--border2); padding: 3px 8px; cursor: pointer; background: transparent; transition: all .15s; letter-spacing: .06em; }

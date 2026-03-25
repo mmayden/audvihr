@@ -12,6 +12,9 @@ All notable changes to this project. Format: [version] — date — description.
 - **Security header parity test** — `src/test/security-headers.test.js` (47 tests). Validates all 8 required security headers exist in both `netlify.toml` and `vercel.json`, values match, CSP directives are complete, no `unsafe-inline`/`unsafe-eval`, fonts are self-hosted, `index.html` has `noindex` meta and no external resources without SRI.
 - **`npm run validate`** — single command runs `lint + test:run + audit` in sequence. Use before every merge.
 
+### UI
+- **Topbar reorganization** — theme toggle (MONOLITH/ARENA) moved from floating `position: fixed` overlay into the MenuScreen topbar as a proper flex child. Eliminates visual collision between ALERTS button, version badge, and theme toggle in the top-right corner. Floating toggle still renders on all non-home screens. `.topbar` right padding reduced from 80px to 20px (no longer needs space reservation for the floating overlay). New `.topbar-theme-btn` CSS class.
+
 ### Data
 - **Fighter data refresh (2026-03-25)** — Evloev 20-0 (Murphy W added), Michael Page 25-3 (Patterson W added), Cannonier age 42, Tuivasa age 33. Stats updated from live UFCStats scrape.
 

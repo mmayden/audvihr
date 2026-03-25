@@ -1,69 +1,95 @@
 # Audwihr — MMA Prediction Market Trader
 
-A personal research and decision-support tool for MMA prediction market trading on platforms like Polymarket, Kalshi, and Novig. Collapses the multi-tab research workflow (stats sites, odds trackers, fight calendars) into one purpose-built interface.
+A personal research and decision-support tool for MMA prediction market trading. Consolidates deep fighter analytics, live multi-source market intelligence (sportsbook + Polymarket + Kalshi), a structured pre-fight discipline framework, and long-term CLV tracking into one fast, shareable interface.
 
 ## What It Is
 
-Not a sportsbook. Not a fantasy app. A war room for finding and sizing edges in MMA prediction markets by:
+Not a sportsbook. Not a fantasy app. Not an AI picks tool. A war room for finding and sizing edges in MMA prediction markets by:
 
-- Profiling fighters with structured statistical and qualitative data
-- Running side-by-side matchup comparisons
-- Working through a research checklist before each trade
-- Tracking manually entered odds with auto implied probability calculation
+- Profiling fighters with structured statistical + qualitative data (archetype system, editorial flags)
+- Running side-by-side matchup comparisons with 14 archetype rules, 8 style clashes, 10 modifier warnings
+- Working through a 17-item research checklist before each trade
+- Tracking live sportsbook odds (8 books via BestFightOdds), Polymarket, and Kalshi in one unified view
+- Monitoring CLV (closing line value) with automated prediction-market snapshots
+- Exporting research as shareable URLs, Markdown, or CSV
 
 ## Tech Stack
 
-| Layer | Current (Phase 1–3) | Post-Migration (Phase 3a+) |
-|-------|---------------------|---------------------------|
-| Runtime | Single HTML file | Vite + React (static build) |
-| UI | React 18 via CDN + Babel standalone | React 18 (compiled) |
-| Styling | Vanilla CSS (CSS variables) | Same — no framework dependency |
-| Fonts | Inter + JetBrains Mono via Google Fonts | Same |
-| Persistence | localStorage | Same |
-| Data | Static JS objects | Mock data now; API layer planned in Phase 6 |
-| Deployment | Local file only | GitHub Pages / Netlify / Vercel |
-
-> **Note:** The current single-file build uses `babel-standalone` to compile JSX at runtime (~860KB, fires on every load). This is fine locally but is a production blocker. Phase 3a migrates to a proper Vite build before web deployment.
+| Layer | Technology |
+|-------|-----------|
+| Build | Vite 6 + `@vitejs/plugin-react` |
+| UI | React 18 + React Router v7 + StrictMode |
+| Styling | Vanilla CSS with CSS variables (MONOLITH + ARENA themes) |
+| Fonts | Inter + JetBrains Mono (self-hosted via `@fontsource-variable`) |
+| State | `useState` / `useMemo` / custom hooks (no state management library) |
+| Testing | Vitest + Testing Library (538 tests, 80% coverage target) |
+| Data | Build-time scrapers (UFCStats + Tapology + BestFightOdds via cheerio) |
+| Runtime APIs | Polymarket CLOB (free), The Odds API + Kalshi (optional, paid) |
+| Serverless | `/api/rss-proxy` — RSS CORS proxy (Netlify Functions v2 / Vercel) |
+| Deployment | Vercel (primary) / Netlify (fallback) — static `dist/` output |
+| Domain | `audvihr.space` (Namecheap DNS) |
 
 ## How to Run
 
-**Local (current):**
-1. Download `mma-trader.html`
-2. Open it in any modern browser
-3. No server, no install, no dependencies
+```bash
+# Install dependencies
+npm install
 
-**Web (after Phase 3a Vite migration):**
-1. `npm install && npm run build`
-2. Deploy `dist/` to GitHub Pages, Netlify, or Vercel
-3. All three platforms support static SPA deployment with zero config
+# Development server (HMR)
+npm run dev
+
+# Production build (runs scrapers + Vite build)
+npm run build
+
+# Single pre-merge quality gate (lint + test + audit)
+npm run validate
+
+# Individual commands
+npm run lint          # ESLint
+npm run test:run      # Vitest single pass
+npm run test:coverage # Coverage report
+npm test              # Vitest watch mode
+```
 
 ## Project Structure
 
 ```
-Audwihr/
-├── mma-trader.html     # The entire application
-├── README.md           # This file
-├── PLANNING.md         # Architecture, data models, design decisions
-├── TASKS.md            # Phased roadmap and current sprint
-└── CHANGELOG.md        # Version history
+audvihr/
+├── CLAUDE.md           # Claude Code instructions (standards, security, modular design)
+├── PLANNING.md         # Architecture, data models, design system, decisions log
+├── TASKS.md            # Roadmap, current sprint, completed phases
+├── CHANGELOG.md        # Version history
+├── netlify.toml        # Netlify deploy config (security headers, CSP, SPA fallback)
+├── vercel.json         # Vercel deploy config (mirrors netlify.toml headers)
+├── netlify/functions/  # Netlify serverless functions (rss-proxy)
+├── api/                # Vercel serverless functions (rss-proxy)
+├── public/             # Static assets (SW, portraits, arena-test prototype)
+├── scripts/            # Build-time scrapers (fetch-data.js, fetch-odds.js)
+└── src/
+    ├── main.jsx        # Entry point
+    ├── App.jsx         # Router + layout shell
+    ├── styles/app.css  # Global styles + CSS variables (design system)
+    ├── constants/      # Pure lookup tables (archetypes, tiers, matchup rules, filters)
+    ├── data/           # Generated + static data files
+    ├── hooks/          # Custom React hooks (odds, markets, theme, alerts, news)
+    ├── utils/          # Pure utility functions (odds math, cache, export, parsing)
+    ├── components/     # Reusable UI components
+    ├── tabs/           # Fighter profile tab panels (6 tabs)
+    ├── screens/        # Top-level screen components (6 screens)
+    └── test/           # Test setup + security header tests
 ```
 
 ## Current Status
 
-**v0.3.0 / Phase 3 in progress** — Fight Calendar built and active. See `TASKS.md` for sprint status and `CHANGELOG.md` for version history.
+**v0.18.4-dev** — 538 tests passing, 0 lint errors, 0 CVEs. See [TASKS.md](TASKS.md) for sprint status and [CHANGELOG.md](CHANGELOG.md) for version history.
 
 ## Git Workflow
 
-```
-main                  # always deployable, tagged releases only
-feature/*             # one branch per phase or feature
-```
-
-Branch naming:
-- `feature/expand-roster`
-- `feature/phase-3-calendar`
-- `feature/phase-4-markets`
+- `master` — tagged releases only, always deployable
+- `feature/*` — one branch per phase or feature
+- Pre-commit hooks enforce ESLint on staged files
+- `npm run validate` before every merge
 
 ## Data Disclaimer
 
-All fighter data is manually curated mock data for development. Stats are representative but not guaranteed accurate. Do not use for actual trading decisions until live data layer (Phase 6) is implemented.
+Fighter statistics are scraped from UFCStats.com at build time. Editorial data (archetypes, modifiers, qualitative flags) is manually curated in `scripts/fighter-seed.json`. Sportsbook odds are scraped from BestFightOdds.com at build time. All analysis outputs are labeled "RESEARCH PROMPT — NOT A PICK." This is a personal research tool, not financial advice.

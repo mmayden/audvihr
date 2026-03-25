@@ -123,7 +123,7 @@ public/
 │   └── assets/portraits/     Self-hosted fighter portrait images (*.jpg); no CDN, no CSP change
 src/
 ├── main.jsx                  Entry point — ReactDOM.createRoot + StrictMode; SW registration
-├── App.jsx                   URL router — BrowserRouter + Routes; FighterScreenRoute + CompareScreenRoute at module scope; DisclaimerGate wrapper; 4-layer parallax arena backdrop; bottom nav; theme toggle
+├── App.jsx                   URL router — BrowserRouter + Routes; FighterScreenRoute + CompareScreenRoute at module scope; DisclaimerGate wrapper; 4-layer parallax arena backdrop; bottom nav; floating theme toggle (non-home screens); passes toggleTheme + themeLabel to MenuScreen
 ├── styles/
 │   └── app.css               All global styles, CSS variables, component classes
 ├── constants/
@@ -182,7 +182,7 @@ src/
 │   ├── TabHistory.jsx        Fight log table
 │   └── TabMarket.jsx         BFO sportsbook odds (build-time, multi-book) + manual odds entry + live Polymarket/Kalshi prices when matched
 ├── screens/
-│   ├── MenuScreen.jsx        Main navigation (5 ACTIVE items) + ⚙ ALERTS settings panel
+│   ├── MenuScreen.jsx        Main navigation (5 ACTIVE items) + ⚙ ALERTS settings panel + inline theme toggle (toggleTheme + themeLabel props from App.jsx)
 │   ├── FighterScreen.jsx     Sidebar + hero card (arch/mod pill badges + VS./COMPARE button) + 6-tab profile; calls useNews(); passes fighterNews to TabOverview; onTouchStart/onTouchEnd swipe-to-close on sidebar
 │   ├── CompareScreen.jsx     FighterCard hero header + implied probability gap; FighterSearch selectors; MATCHUP NOTES section (computeMatchupWarnings — style/risk/fade/clash cards); stat table with tier labels + category edge stripe (scrolls horizontally at ≤480px); edge signal panel; checklist; COPY LINK + ↓ MD export
 │   ├── CalendarScreen.jsx    Event sidebar + card detail + fighter deep-links + COMPARE button per in-roster bout; onTouchStart/onTouchEnd swipe-to-close on sidebar
@@ -232,7 +232,7 @@ src/
 - **Bottom nav icon + label structure.** Each `.bottom-nav-item` renders a `<span className="bottom-nav-icon" aria-hidden="true">` (emoji icon) above a `<span>` (text label). The button itself carries `aria-label` with the full label text. The icon span is purely decorative (`aria-hidden="true"`). Do not render text-only nav items — the icon-above-label pattern is now the standard.
 - **News headline expand/collapse pattern.** `expandedIds` is a `Set` in `useState`. The `.news-headline` div carries `role="button"`, `tabIndex={0}`, `aria-expanded`, and an `onKeyDown` handler for Enter/Space. On `@media (max-width: 480px)` the headline is clamped to 3 lines via `-webkit-line-clamp: 3`; the `.news-headline--expanded` modifier class removes the clamp. The expand state is React-only — never persisted.
 - **Current test count: 538 passing.** Do not merge changes that reduce this number without a documented reason.
-- **Current version: v0.18.3.** Update `package.json` `version`, `MenuScreen.jsx` version badge, and `CHANGELOG.md` before merging any new phase to `master`.
+- **Current version: v0.18.4-dev.** Update `package.json` `version`, `MenuScreen.jsx` version badge, and `CHANGELOG.md` before merging any new phase to `master`.
 
 ---
 

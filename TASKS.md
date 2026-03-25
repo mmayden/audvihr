@@ -11,14 +11,16 @@
 ## Current Sprint
 
 **Branch:** `master`
-**Status:** v0.18.4-dev — Build quality guardrails shipped. Next: Deployment to audvihr.space.
+**Status:** v0.18.4-dev — Build quality guardrails + UI polish shipped. Next: Deployment to audvihr.space.
 
-### Build Quality & Security Guardrails (v0.18.4) — 2026-03-25
+### Build Quality, Security Guardrails & UI Polish (v0.18.4) — 2026-03-25
 
 - [x] Self-hosted fonts via `@fontsource-variable` — eliminated Google Fonts CDN; tightened CSP (`style-src 'self'`, `font-src 'self'`)
 - [x] Pre-commit hooks — `husky` + `lint-staged` (ESLint on staged `.js/.jsx` files)
 - [x] Security header parity test — 47 tests validating `netlify.toml` ↔ `vercel.json` header sync, CSP completeness, CSP hardening, `index.html` security
 - [x] `npm run validate` — lint + test + audit in one command
+- [x] Topbar reorganization — theme toggle moved from floating overlay into MenuScreen topbar; ALERTS + version + theme toggle properly spaced as flex children
+- [x] Documentation refresh — PLANNING.md (stale CSP, file structure, decisions log), TASKS.md, CHANGELOG.md, CLAUDE.md, README.md modernized
 - [x] 538 tests passing (47 new); 0 lint errors; 0 CVEs
 
 ### Phase 17 — Deployment + Free Odds Pipeline (scoped 2026-03-24)
@@ -70,7 +72,7 @@
 - [ ] Smoke test: open FighterScreen, select a women's division fighter, confirm all 6 tabs render, percentile badges work, compare works
 
 ### Quality Gate (before merge)
-- [ ] `npm run test:run` — all existing 491 tests still pass; new keyboard nav tests added (target: ≥ 15 new tests)
+- [ ] `npm run test:run` — all existing 538 tests still pass; new keyboard nav tests added (target: ≥ 15 new tests)
 - [ ] `npm run lint` — 0 errors
 - [ ] `npm audit` — 0 critical/high CVEs
 - [ ] CHANGELOG.md `[Unreleased]` → `[0.19.0]`
@@ -340,7 +342,7 @@
 
 ---
 
-## Backlog (Unscheduled — Post v0.18.3)
+## Backlog (Unscheduled — Post v0.18.4)
 
 #### High value
 - [ ] **Women's divisions** — Strawweight, Flyweight, Bantamweight (~30 fighters); same seed + scrape pipeline; in Proposed Phase 18 sprint

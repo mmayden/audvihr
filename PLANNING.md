@@ -91,7 +91,7 @@ Does fight breakdowns for a podcast or Discord. Wants fast access to stats witho
 
 ---
 
-## Current File Structure (Vite + React — v0.18.3)
+## Current File Structure (Vite + React — v0.18.4-dev)
 
 The single-file prototype (`mma-trader.html`) was retired at Phase 3a. The project is now a Vite + React app with the following modular layout:
 
@@ -166,7 +166,7 @@ src/
 │   ├── TabHistory.jsx        Fight log table with opponent quality
 │   └── TabMarket.jsx         BFO sportsbook odds (build-time, multi-book) + manual moneyline entry + live Polymarket/Kalshi prices; line movement; notes (mkt_{fighter.id} key)
 ├── screens/
-│   ├── MenuScreen.jsx        Main navigation (5 items) + ⚙ ALERTS settings panel; version badge
+│   ├── MenuScreen.jsx        Main navigation (5 items) + ⚙ ALERTS settings panel; version badge; inline theme toggle (toggleTheme + themeLabel props from App.jsx)
 │   ├── FighterScreen.jsx     Sidebar (useRef swipe-to-close) + hero card + 6-tab profile; calls useNews(); aria-expanded on ROSTER toggle
 │   ├── CompareScreen.jsx     Hero header (FighterCard × 2, implied prob gap); MATCHUP NOTES; stat table (tier labels, edge stripe, horizontal scroll ≤480px); edge signals; checklist; COPY LINK; ↓ MD export
 │   ├── CalendarScreen.jsx    Event sidebar (useRef swipe-to-close) + card detail + fighter deep-links + COMPARE per in-roster bout; aria-expanded on EVENTS toggle
@@ -582,13 +582,13 @@ Checklist persists per matchup via localStorage. Key = `cl_{f1id}_{f2id}`.
 
 ## Security Model
 
-### Current State (Vite + React — v0.18.3)
+### Current State (Vite + React — v0.18.4-dev)
 
 | Surface | Risk | Status |
 |---------|------|--------|
 | `babel-standalone` CDN | Runtime code execution (~860KB compiler, supply chain risk) | **Eliminated** — Vite compiles at build time, no runtime JSX compiler |
 | CDN scripts (React, ReactDOM) | No SRI — CDN compromise could inject arbitrary JS | **Eliminated** — Vite bundles React into `dist/`, no CDN scripts at runtime |
-| Google Fonts CDN | No SRI — low risk (CSS/fonts only, no JS) | Acceptable; add SRI if CSP tightened |
+| Google Fonts CDN | No SRI — low risk (CSS/fonts only, no JS) | **Eliminated** — fonts self-hosted via `@fontsource-variable` (v0.18.4-dev). No external font CDN. |
 | `localStorage` reads | Malformed JSON parsed directly into state | **Mitigated** — `try/catch` with typed default fallback in `useLocalStorage` |
 | User inputs (odds fields, notes) | Reflected into UI | **Mitigated** — React JSX escapes by default; `parseInt`/`isNaN` guard on all numeric fields |
 | `dangerouslySetInnerHTML` | XSS if used with user input | **Not used** — do not introduce |
@@ -608,8 +608,8 @@ Content-Security-Policy:
   default-src 'self';
   script-src 'self';
   worker-src 'self';
-  style-src 'self' https://fonts.googleapis.com;
-  font-src https://fonts.gstatic.com;
+  style-src 'self';
+  font-src 'self';
   connect-src 'self'
               https://api.the-odds-api.com
               https://clob.polymarket.com
@@ -805,6 +805,7 @@ Ordered by value vs. effort. Full sprint tasks in TASKS.md.
 | **v0.18.1** ✅ | Visual Identity + Bug Fix | **Delivered v0.18.1.** MONOLITH theme (cold electric dark, cyan `#00c8ff` accent) + ARENA theme (warm ember dark, orange `#e06828` accent) replace the old light/dark palette. `--accent-bg` / `--accent-bg-mid` CSS tokens; 10 hardcoded gold rgba values removed. `.topbar` padding fix (button overlay). `useTheme` labels → ARENA / MONOLITH. No new external surfaces. | No new CSP entries; no new npm deps; no new external domains. CSS variable substitution only. |
 | **v0.18.2** ✅ | DisclaimerGate + Arena Atmosphere | **Delivered v0.18.2.** Two-step DisclaimerGate (age 18+ → risk acknowledgement) wraps entire app; `disclaimer_accepted` localStorage key. Immersive arena backdrop: 4-layer parallax (deep atmosphere, LED grid, ambient pulse, vignette), mouse-driven smooth lerp. Frosted glass on topbar, bottom-nav, sidebar. `--text-dim` WCAG AA contrast fix. `--sphere-*` + `--surface-glass` CSS tokens. TabOverview KEY STATS: percentile badges → coloured stat bars with tier labels. `arena-test.html` visual prototype. 481 tests. | DisclaimerGate: UI-only, no PII, `try/catch` localStorage. Parallax: CSS gradients + pseudo-elements, no CDN. `prefers-reduced-motion` kills pulse. No new CSP entries; no new npm deps; no new external domains. |
 | **v0.18.3** ✅ | Build-Time Free Odds Pipeline | **Delivered v0.18.3.** `scripts/fetch-odds.js` — BestFightOdds cheerio scraper (browser UA, `--dry-run`/`--ci`/`--fresh`, 500ms delay, `.raw.json` cache). `src/data/odds.js` — generated multi-book moneylines keyed by fightKey. MarketsScreen 3-layer data: BFO baseline → live Odds API override → Polymarket/Kalshi alongside. TabMarket SPORTSBOOK ODDS section. `useOdds` + `useKalshi` fully optional — app ships complete sportsbook data with zero paid API keys. COOP + CORP headers added. 491 tests (10 new odds tests + test fix for ODDS mock). | BFO is build-time only — no `connect-src` CSP change. COOP + CORP headers prevent cross-origin window handle leaks and Spectre-class side-channel attacks. 0 new npm deps; 0 new external domains at runtime. |
+| **v0.18.4-dev** 🔄 | Build Quality + UI Polish | **In progress.** Self-hosted fonts (`@fontsource-variable` — eliminated Google Fonts CDN). Pre-commit hooks (`husky` + `lint-staged`). Security header parity test (47 tests). `npm run validate` single quality gate. Topbar reorganization (theme toggle integrated into MenuScreen topbar). CSP tightened: `style-src 'self'`, `font-src 'self'`. 538 tests. | Google Fonts CDN eliminated — zero external font dependencies. No new external domains. CSP tightened (removed `fonts.googleapis.com` + `fonts.gstatic.com`). |
 | **Phase 17** ✅ | Mobile-First UX | **Delivered v0.18.0.** Bottom nav: emoji icon + label stack, `min-height: var(--touch-target, 44px)`. `--touch-target: 44px` / `--touch-target-sm: 36px` tokens in all theme blocks. `@media (max-width: 480px)`: compare hero stacks (F1/VS/F2); headline line-clamped 3 lines; `.card-portrait` 64×64px; `.compare-table-wrap { overflow-x: auto }` + `.ctable { min-width: 400px }` for horizontal scroll. Swipe-to-close sidebars (`useRef` + `onTouchStart`/`onTouchEnd`; velocity ≥ 80 px/s OR drag ≥ 112px). Stat filter chips 36px; filters body scrollable. News cat chips horizontal-scroll. Markets live-row 1fr; threshold input 16px (iOS fix); PICKS scrollable. Calendar COMPARE btn 36px. `CalendarScreen.test.jsx` (7 tests) + `NewsScreen.test.jsx` (9 tests). 481 tests total. | No new CSP surfaces (touch events are internal DOM). No new npm dependencies. `font-size ≥ 16px` enforced on `.mkt-alert-threshold` — iOS auto-zoom rule codified in CLAUDE.md. `card-portrait` at 64px is self-hosted, no CSP change. |
 
 ---
@@ -941,6 +942,10 @@ Before beginning a new phase, verify:
 | 2026-03-18 | Phase 17: emoji icons in bottom nav — no icon library | Bottom nav items now render an emoji icon (`🥊⚖️🗓📊📰`) above the text label. Decision rationale: (1) No new npm dependency; (2) emoji render consistently on all modern mobile OS platforms (iOS/Android/Chrome); (3) they match the dense-data, functional aesthetic better than SVG icon libraries would given there are only 5 icons total; (4) fast to iterate. The icon is in a `<span className="bottom-nav-icon" aria-hidden="true">` so it is invisible to screen readers. The `<button>` carries `aria-label` with the full screen name. If the icon set needs to change in the future, the NAV_ITEMS array is the single source of truth. |
 | 2026-03-18 | Phase 17: news headline expand/collapse — React state only, no localStorage | The `expandedIds` Set in NewsScreen is React state only — it resets when the user navigates away. Rationale: expanded headlines are ephemeral reading state, not a persistent preference. Persisting this would add a storage key with zero research value. CSS uses `-webkit-line-clamp: 3` (well-supported on all modern browsers; no polyfill needed) inside `@media (max-width: 480px)`. The `.news-headline--expanded` modifier class switches `display: block; overflow: visible` to remove the clamp. `role="button"` + `aria-expanded` + `onKeyDown` (Enter/Space) makes the headline keyboard-accessible per WCAG 2.1.1 (Level A). |
 | 2026-03-18 | Phase 17: hero portrait reduced 88px→64px at ≤480px | The `@media (max-width: 767px)` block already reduces the hero portrait from 160px to 88px. At the 480px small-phone breakpoint, 88px still occupies a disproportionate share of the screen height relative to the information it provides (initials or a small image). Reduced to 64×64px with corresponding `portrait-initials` font-size adjustment (40px→28px) and tighter `card-identity` padding. Portrait images are self-hosted (`public/assets/portraits/`) — no CDN, no CSP change. |
+| 2026-03-25 | Self-hosted fonts replace Google Fonts CDN | `@fontsource-variable/inter` and `@fontsource-variable/jetbrains-mono` bundled as woff2 in `dist/assets/`. Eliminates external CDN dependency. CSP tightened: `style-src 'self'` (was `'self' https://fonts.googleapis.com`), `font-src 'self'` (was `https://fonts.gstatic.com`). Resolves SRI compliance gap — Google Fonts CSS varies by user-agent, making SRI hashes non-deterministic. |
+| 2026-03-25 | Pre-commit hooks: `husky` + `lint-staged` | ESLint runs on staged `src/**/*.{js,jsx}` files before every commit. Prevents broken code from reaching `master`. Low-friction quality gate — does not block CI, only the committer. |
+| 2026-03-25 | Security header parity test — 47 tests | `src/test/security-headers.test.js` validates all 8 required security headers in both `netlify.toml` and `vercel.json`, checks values match, confirms CSP completeness, verifies no `unsafe-inline`/`unsafe-eval`, confirms fonts self-hosted, and validates `index.html` has `noindex` meta + no external resources without SRI. Catches config drift between deploy targets automatically. |
+| 2026-03-25 | Topbar reorganization — theme toggle integrated into MenuScreen | The floating `position: fixed` theme toggle overlapped with the ALERTS button and version badge in the top-right corner. Moved the toggle into the MenuScreen topbar-right flex group as a proper child element (`toggleTheme` + `themeLabel` props passed from App.jsx). Floating toggle conditionally hidden on `/` route. `.topbar` right padding reduced from 80px to 20px. New `.topbar-theme-btn` CSS class matches floating toggle style. |
 | 2026-03-18 | Phase 17: stat table horizontal scroll on ≤480px | The `.ctable` (3-column compare table: F1 value / stat label / F2 value) becomes illegible when squished onto a 375px viewport — the F1/F2 value columns truncate or wrap. Rather than hide columns (which loses information), the table now scrolls horizontally at ≤480px: `.compare-table-wrap { overflow-x: auto }` + `.ctable { min-width: 400px }`. 400px ensures each column has enough width for a value + tier label without wrapping. The wrapper already has `overflow-y: auto` — adding `overflow-x` does not affect vertical scroll. |
 | 2026-03-18 | Phase 17: CalendarScreen + NewsScreen — screen-level tests added | FighterScreen already had sidebar-toggle tests. CalendarScreen and NewsScreen both have JS-conditional render paths (sidebar open/close; headline expand/collapse) that differ from the default state and are not CSS-only. TASKS.md Phase 17 item: "Add responsive smoke tests if any screen has a conditional render path that differs on mobile." `CalendarScreen.test.jsx` (7 tests: sidebar EVENTS button, backdrop, sidebar--open class, aria-expanded both states). `NewsScreen.test.jsx` (9 tests: headline click/double-click/Enter/Space, aria-expanded, role=button). vi.hoisted() pattern required for CalendarScreen because vi.mock factories are hoisted before const declarations — matches the existing FighterScreen.test.jsx pattern. 481 tests total; 0 lint errors. |
 | 2026-03-18 | v0.18.0 — Phase 17 complete; merged to master | All Phase 17 tasks checked off: touch tokens, 480px breakpoint, swipe-to-close sidebars, headline expand/collapse, iOS auto-zoom fix, bottom nav icon+label, date.js consolidation, CalendarScreen.test.jsx + NewsScreen.test.jsx (481 tests, 0 lint errors, 0 CVEs). Documentation updated: CLAUDE.md phase reference cleaned up; PLANNING.md file structure phase annotations stripped, CSP example updated to match actual deployed policy (added worker-src, actual connect-src domains, HSTS header); TASKS.md Phase 17 sprint moved to Completed. North Star feature set: all 11 items delivered. No new external domains; no new runtime npm dependencies; no CSP changes. |
