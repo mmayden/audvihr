@@ -26,6 +26,7 @@ import { CalendarScreen } from './screens/CalendarScreen';
 import { MarketsScreen } from './screens/MarketsScreen';
 import { NewsScreen } from './screens/NewsScreen';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { DisclaimerGate } from './components/DisclaimerGate';
 import { useTheme } from './hooks/useTheme';
 
 /** Bottom-nav items. */
@@ -121,7 +122,9 @@ const AppInner = () => {
 };
 
 export const App = () => (
-  <BrowserRouter>
-    <AppInner />
-  </BrowserRouter>
+  <DisclaimerGate>
+    <BrowserRouter>
+      <AppInner />
+    </BrowserRouter>
+  </DisclaimerGate>
 );

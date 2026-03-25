@@ -845,6 +845,80 @@ a:focus-visible,
 }
 
 /* ============================================================
+   Disclaimer Gate
+   ============================================================ */
+.disclaimer-gate {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: 20px;
+}
+.disclaimer-card {
+  max-width: 480px;
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 40px 32px;
+  text-align: center;
+  box-shadow: var(--shadow-md);
+}
+.disclaimer-wordmark {
+  font-family: var(--mono);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: .2em;
+  color: var(--text-bright);
+  margin-bottom: 32px;
+}
+.disclaimer-heading {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.disclaimer-text {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text);
+  margin-bottom: 28px;
+}
+.disclaimer-btn {
+  display: block;
+  width: 100%;
+  padding: 12px 20px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  color: var(--bg);
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  cursor: pointer;
+  transition: opacity var(--transition);
+}
+.disclaimer-btn:hover { opacity: .85; }
+.disclaimer-btn-back {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px 20px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .06em;
+  color: var(--text-dim);
+  background: transparent;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: color var(--transition), border-color var(--transition);
+}
+.disclaimer-btn-back:hover { color: var(--text); border-color: var(--border2); }
+
+/* ============================================================
    Accessibility — reduce motion for users who prefer it
    ============================================================ */
 @media (prefers-reduced-motion: reduce) {

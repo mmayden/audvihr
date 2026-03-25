@@ -49,6 +49,7 @@ Each storage key is owned by exactly one module. No other module reads or writes
 | `cache_odds_v1` | sessionStorage | `src/hooks/useOdds.js` via `cache.js` | 15-min Odds API response cache |
 | `cache_news_v1` | sessionStorage | `src/hooks/useNews.js` via `cache.js` | 30-min RSS feed response cache |
 | Polymarket/Kalshi cache | sessionStorage | respective hooks via `cache.js` | 10-min market price cache |
+| `disclaimer_accepted` | localStorage | `src/components/DisclaimerGate.jsx` | `'1'` when user has accepted age + risk gate |
 
 ### Code Quality
 
