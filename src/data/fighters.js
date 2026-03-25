@@ -61,7 +61,7 @@
  *   trader_notes: String,     // from seed
  * }
  */
-// Last updated: 2026-03-19T13:25:29.779Z
+// Last updated: 2026-03-25T05:24:47.719Z
 
 export const FIGHTERS = [
   { id:1, name:"Islam Makhachev", nickname:"The Dagestani", weight:"Welterweight", org:'UFC', rank:"CHAMPION",
@@ -591,18 +591,18 @@ export const FIGHTERS = [
   { id:33, name:"Movsar Evloev", nickname:"Read", weight:"Featherweight", org:'UFC', rank:"#6",
     age:32, height:"5'7\"", reach:"72\"", stance:"Orthodox", camp:"Akhmat MMA", country:"Russia",
     archetype:"WRESTLER", mods:["VOLUME STRIKER"],
-    record:"19-0", wins:19, losses:0, draws:0, streak:9, streakType:'W',
-    finishes:{ko:0,sub:0,dec:9}, losses_by:{ko:0,sub:0,dec:0}, finish_rate:0,
+    record:"20-0", wins:20, losses:0, draws:0, streak:10, streakType:'W',
+    finishes:{ko:0,sub:0,dec:10}, losses_by:{ko:0,sub:0,dec:0}, finish_rate:0,
     chin:"Solid", cardio:"Good", weight_cut:"Minimal",
-    striking:{ slpm:3.99, str_acc:48, sapm:2.66, str_def:60, head_pct:48, body_pct:30, leg_pct:22, kd_landed:2, kd_suffered:1, clinch_str_pct:38, distance_str_pct:50, ground_str_pct:12 },
-    grappling:{ td_per15:4.67, td_acc:48, td_def:61, sub_per15:0.2, top_time_pct:55, bottom_time_pct:12, ctrl_time_per15:5, pass_rate:60, reversal_rate:14 },
+    striking:{ slpm:3.91, str_acc:47, sapm:2.8, str_def:61, head_pct:48, body_pct:30, leg_pct:22, kd_landed:2, kd_suffered:1, clinch_str_pct:38, distance_str_pct:50, ground_str_pct:12 },
+    grappling:{ td_per15:4.78, td_acc:52, td_def:61, sub_per15:0.2, top_time_pct:55, bottom_time_pct:12, ctrl_time_per15:5, pass_rate:60, reversal_rate:14 },
     history:[
+      {result:'W',opponent:"Lerone Murphy",method:'DEC',round:5,event:"UFC Fight Night: Evloev vs. Murphy",year:2026},
       {result:'W',opponent:"Aljamain Sterling",method:'DEC',round:3,event:"UFC 310: Pantoja vs. Asakura",year:2024},
       {result:'W',opponent:"Arnold Allen",method:'DEC',round:3,event:"UFC 297: Strickland vs. Du Plessis",year:2024,opp_quality:'contender'},
       {result:'W',opponent:"Diego Lopes",method:'DEC',round:3,event:"UFC 288: Sterling vs. Cejudo",year:2023},
       {result:'W',opponent:"Dan Ige",method:'DEC',round:3,event:"UFC Fight Night: Volkov vs. Rozenstruik",year:2022,opp_quality:'gatekeeper'},
-      {result:'W',opponent:"Hakeem Dawodu",method:'DEC',round:3,event:"UFC 263: Adesanya vs. Vettori 2",year:2021},
-      {result:'W',opponent:"Nik Lentz",method:'DEC',round:3,event:"UFC 257: Poirier vs. McGregor",year:2021}
+      {result:'W',opponent:"Hakeem Dawodu",method:'DEC',round:3,event:"UFC 263: Adesanya vs. Vettori 2",year:2021}
     ],
     trader_notes:"Elite grappler from the Chechen system — disciplined, technical, and relentless. Long winning streak in UFC before first loss. Suffocating top control and pace. Below the radar for casual fans — market tends to undervalue him as an underdog. Watch for him vs pure strikers." },
   { id:34, name:"Arnold Allen", nickname:"Almighty", weight:"Featherweight", org:'UFC', rank:"#7",
@@ -793,12 +793,13 @@ export const FIGHTERS = [
   { id:45, name:"Michael Page", nickname:"Venom", weight:"Welterweight", org:'UFC', rank:"#9",
     age:38, height:"6'3\"", reach:"79\"", stance:"Switch", camp:"SENI MMA", country:"England",
     archetype:"COUNTER STRIKER", mods:["KO POWER","SOUTHPAW"],
-    record:"24-3", wins:24, losses:3, draws:0, streak:3, streakType:'W',
-    finishes:{ko:0,sub:0,dec:3}, losses_by:{ko:0,sub:0,dec:0}, finish_rate:0,
+    record:"25-3", wins:25, losses:3, draws:0, streak:4, streakType:'W',
+    finishes:{ko:0,sub:0,dec:4}, losses_by:{ko:0,sub:0,dec:0}, finish_rate:0,
     chin:"Solid", cardio:"Good", weight_cut:"Minimal",
-    striking:{ slpm:2.39, str_acc:60, sapm:1.68, str_def:57, head_pct:50, body_pct:30, leg_pct:20, kd_landed:11, kd_suffered:2, clinch_str_pct:14, distance_str_pct:76, ground_str_pct:10 },
-    grappling:{ td_per15:0.23, td_acc:16, td_def:66, sub_per15:0, top_time_pct:14, bottom_time_pct:18, ctrl_time_per15:0.8, pass_rate:24, reversal_rate:24 },
+    striking:{ slpm:2.28, str_acc:58, sapm:1.51, str_def:62, head_pct:50, body_pct:30, leg_pct:20, kd_landed:11, kd_suffered:2, clinch_str_pct:14, distance_str_pct:76, ground_str_pct:10 },
+    grappling:{ td_per15:0.19, td_acc:16, td_def:70, sub_per15:0, top_time_pct:14, bottom_time_pct:18, ctrl_time_per15:0.8, pass_rate:24, reversal_rate:24 },
     history:[
+      {result:'W',opponent:"Sam Patterson",method:'DEC',round:3,event:"UFC Fight Night: Evloev vs. Murphy",year:2026},
       {result:'W',opponent:"Jared Cannonier",method:'DEC',round:3,event:"UFC 319: Du Plessis vs. Chimaev",year:2025},
       {result:'W',opponent:"Shara Magomedov",method:'DEC',round:3,event:"UFC Fight Night: Adesanya vs. Imavov",year:2025},
       {result:'W',opponent:"Kevin Holland",method:'DEC',round:3,event:"UFC 299: O'Malley vs. Vera 2",year:2024,opp_quality:'contender'}
@@ -907,7 +908,7 @@ export const FIGHTERS = [
     ],
     trader_notes:"High submission rate combined with strong volume output for a grappler. Sanford MMA camp means improved striking over early career. Consistent performer. Market undervalues him in matchups vs pure strikers — he has the BJJ depth to submit them. Good underdog value consistently." },
   { id:52, name:"Jared Cannonier", nickname:"The Killa Gorilla", weight:"Middleweight", org:'UFC', rank:"#7",
-    age:41, height:"5'11\"", reach:"77\"", stance:"Switch", camp:"Team Combat Club", country:"USA",
+    age:42, height:"5'11\"", reach:"77\"", stance:"Switch", camp:"Team Combat Club", country:"USA",
     archetype:"BRAWLER", mods:["KO POWER","LATE BLOOMER"],
     record:"18-9", wins:18, losses:9, draws:0, streak:11, streakType:'W',
     finishes:{ko:7,sub:0,dec:4}, losses_by:{ko:0,sub:0,dec:0}, finish_rate:39,
@@ -1145,7 +1146,7 @@ export const FIGHTERS = [
     ],
     trader_notes:"Tall technical kickboxer (6'7\") with long punches and excellent leg kick volume. Range management is his primary weapon. Chin exposed by Lewis KO and others — questionable at elite level. Consistent top-10 performer who never quite breaks the top-3. Best value as slight underdog vs mid-tier HW strikers." },
   { id:66, name:"Tai Tuivasa", nickname:"Bam Bam", weight:"Heavyweight", org:'UFC', rank:"#9",
-    age:32, height:"6'2\"", reach:"75\"", stance:"Southpaw", camp:"Freestyle Fighting Gym", country:"Australia",
+    age:33, height:"6'2\"", reach:"75\"", stance:"Southpaw", camp:"Freestyle Fighting Gym", country:"Australia",
     archetype:"BRAWLER", mods:["KO POWER","FRONT-RUNNER","DURABILITY RISK"],
     record:"15-9", wins:15, losses:9, draws:0, streak:8, streakType:'W',
     finishes:{ko:7,sub:0,dec:1}, losses_by:{ko:0,sub:0,dec:0}, finish_rate:47,

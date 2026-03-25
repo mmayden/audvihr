@@ -4,6 +4,13 @@ All notable changes to this project. Format: [version] — date — description.
 
 ---
 
+## [Unreleased]
+
+### Data
+- **Fighter data refresh (2026-03-25)** — Evloev 20-0 (Murphy W added), Michael Page 25-3 (Patterson W added), Cannonier age 42, Tuivasa age 33. Stats updated from live UFCStats scrape.
+
+---
+
 ## [0.18.3] — 2026-03-24
 
 ### Build-Time Free Odds Pipeline — BestFightOdds Scraper
