@@ -45,77 +45,6 @@
   --surface-glass:      rgba(6,8,18,.78);
 }
 
-/* ---- ARENA — warm ember dark (applied via [data-theme="light"] on <html>) ---- */
-[data-theme="light"] {
-  --bg:         #0f0c08;
-  --surface:    #181410;
-  --surface2:   #221e18;
-  --surface3:   #2c2620;
-  --border:     #3a3028;
-  --border2:    #4a3e32;
-  --text:       #cec0a8;
-  --text-dim:   #a08870;
-  --text-bright:#f0e2cc;
-  --accent:     #e06828;
-  --accent-dim: #904020;
-  --green:      #50c878;
-  --red:        #d03028;
-  --dark-red:   #b02020;
-  --blue:       #5888d0;
-  --purple:     #9068c8;
-  --orange:     #e08840;
-  --teal:       #38a890;
-  --gold:       #c89038;
-  --bg-elevated: var(--surface2);
-  --bg-card:     var(--surface);
-  --touch-target:    44px;
-  --touch-target-sm: 36px;
-  /* ── Accent tint backgrounds (theme-adaptive) ── */
-  --accent-bg:     rgba(224,104,40,.07);
-  --accent-bg-mid: rgba(224,104,40,.12);
-  /* ── Sphere background tokens ── */
-  --sphere-base:        #060200;
-  --sphere-mid:         #120700;
-  --sphere-glow:        rgba(120,40,5,.45);
-  --sphere-pulse-color: rgba(224,104,40,.04);
-  --surface-glass:      rgba(14,10,6,.78);
-}
-
-/* ---- System-preference: map light OS preference to ARENA ---- */
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) {
-    --bg:         #0f0c08;
-    --surface:    #181410;
-    --surface2:   #221e18;
-    --surface3:   #2c2620;
-    --border:     #3a3028;
-    --border2:    #4a3e32;
-    --text:       #cec0a8;
-    --text-dim:   #a08870;
-    --text-bright:#f0e2cc;
-    --accent:     #e06828;
-    --accent-dim: #904020;
-    --green:      #50c878;
-    --red:        #d03028;
-    --dark-red:   #b02020;
-    --blue:       #5888d0;
-    --purple:     #9068c8;
-    --orange:     #e08840;
-    --teal:       #38a890;
-    --gold:       #c89038;
-    --bg-elevated: var(--surface2);
-    --bg-card:     var(--surface);
-    --touch-target:    44px;
-    --touch-target-sm: 36px;
-    --accent-bg:     rgba(224,104,40,.07);
-    --accent-bg-mid: rgba(224,104,40,.12);
-    --sphere-base:        #060200;
-    --sphere-mid:         #120700;
-    --sphere-glow:        rgba(120,40,5,.45);
-    --sphere-pulse-color: rgba(224,104,40,.04);
-    --surface-glass:      rgba(14,10,6,.78);
-  }
-}
 
 html, body, #root { height: 100%; }
 
@@ -599,17 +528,11 @@ a:focus-visible,
 
 /* MENUSCREEN */
 .topbar-version-badge { font-family: var(--mono); font-size: 10px; color: var(--text-dim); letter-spacing: .08em; }
-.topbar-theme-btn { font-family: var(--mono); font-size: 9px; font-weight: 600; letter-spacing: .08em; color: var(--text-dim); border: 1px solid var(--border2); padding: 3px 8px; cursor: pointer; background: transparent; transition: color .15s, border-color .15s; }
-.topbar-theme-btn:hover { color: var(--text); border-color: var(--border); }
 
 /* ROSTER / EVENTS toggle button — hidden on desktop, shown on mobile */
 .topbar-roster-btn { display: none; font-size: 10px; font-family: var(--mono); color: var(--text-dim); border: 1px solid var(--border2); padding: 3px 8px; cursor: pointer; background: transparent; transition: all .15s; letter-spacing: .06em; }
 .topbar-roster-btn:hover { color: var(--text); border-color: var(--border); }
 
-/* THEME TOGGLE — floating on desktop, inline in bottom-nav on mobile */
-.theme-toggle-floating { display: inline-block; position: fixed; top: 10px; right: 14px; z-index: 200; font-family: var(--mono); font-size: 9px; font-weight: 600; letter-spacing: .08em; color: var(--text-dim); border: 1px solid var(--border2); padding: 3px 8px; cursor: pointer; background: var(--surface); transition: color .15s, border-color .15s; }
-.theme-toggle-floating:hover { color: var(--text); border-color: var(--border2); }
-.bottom-nav-theme { display: none; }
 
 /* ERROR BOUNDARY */
 .error-fallback { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; gap: 12px; background: var(--bg); color: var(--text); font-family: var(--mono); font-size: 13px; }
@@ -899,26 +822,6 @@ a:focus-visible,
   /* Calendar — COMPARE button meets minimum touch target */
   .cal-compare-btn { min-height: var(--touch-target-sm, 36px); padding: 6px 12px; display: inline-flex; align-items: center; }
 
-  /* Theme toggle — hide floating button, show inline in bottom nav */
-  .theme-toggle-floating { display: none; }
-  .bottom-nav-theme {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 8px 10px;
-    background: transparent;
-    border: none;
-    border-left: 1px solid var(--border);
-    cursor: pointer;
-    color: var(--text-dim);
-    font-family: var(--mono);
-    font-size: 8px;
-    font-weight: 600;
-    letter-spacing: .05em;
-    flex-shrink: 0;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .bottom-nav-theme:hover { color: var(--text); }
 }
 
 /* ============================================================

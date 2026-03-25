@@ -28,7 +28,6 @@ import { MarketsScreen } from './screens/MarketsScreen';
 import { NewsScreen } from './screens/NewsScreen';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { DisclaimerGate } from './components/DisclaimerGate';
-import { useTheme } from './hooks/useTheme';
 
 /** Bottom-nav items. */
 const NAV_ITEMS = [
@@ -83,8 +82,6 @@ const CompareScreenRoute = () => {
 const AppInner = () => {
   const navigate  = useNavigate();
   const { pathname } = useLocation();
-  const { toggle: toggleTheme, label: themeLabel } = useTheme();
-
   const activeId = NAV_ITEMS.find(n => pathname.startsWith(n.path))?.id ?? '';
 
   // Parallax background — 4 depth layers move at different rates on mousemove
@@ -121,7 +118,7 @@ const AppInner = () => {
 
       <ErrorBoundary key={pathname}>
         <Routes>
-          <Route path="/"                     element={<MenuScreen onSelect={(id) => navigate(SCREEN_PATH[id] ?? '/')} toggleTheme={toggleTheme} themeLabel={themeLabel} />} />
+          <Route path="/"                     element={<MenuScreen onSelect={(id) => navigate(SCREEN_PATH[id] ?? '/')} />} />
           <Route path="/fighters"             element={<FighterScreen onBack={() => navigate('/')} initialFighter={null} />} />
           <Route path="/fighters/:id"         element={<FighterScreenRoute />} />
           <Route path="/compare"              element={<CompareScreen onBack={() => navigate('/')} />} />
@@ -131,9 +128,6 @@ const AppInner = () => {
           <Route path="/news"                 element={<NewsScreen onBack={() => navigate('/')} onGoFighter={(f) => navigate('/fighters/' + f.id)} />} />
         </Routes>
       </ErrorBoundary>
-
-      {/* Floating theme toggle — visible on desktop (non-home screens), hidden on mobile */}
-      {pathname !== '/' && <button className="theme-toggle-floating" onClick={toggleTheme} aria-label="Toggle colour theme">{themeLabel}</button>}
 
       {/* Bottom nav — hidden on desktop, shown on mobile */}
       <nav className="bottom-nav" aria-label="Main navigation">
@@ -148,7 +142,6 @@ const AppInner = () => {
             <span>{item.label}</span>
           </button>
         ))}
-        <button className="bottom-nav-theme" onClick={toggleTheme} aria-label="Toggle colour theme">{themeLabel}</button>
       </nav>
     </>
   );

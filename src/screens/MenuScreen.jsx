@@ -22,10 +22,8 @@ const PERM_LABEL = {
  * MenuScreen — renders the main navigation menu with an alert settings panel.
  *
  * @param {function} onSelect - callback invoked with the section id string when a menu item is clicked
- * @param {function} toggleTheme - callback to toggle the colour theme
- * @param {string} themeLabel - label for the theme toggle button (e.g. 'ARENA' or 'MONOLITH')
  */
-export const MenuScreen = ({ onSelect, toggleTheme, themeLabel }) => {
+export const MenuScreen = ({ onSelect }) => {
   const [showSettings, setShowSettings] = useState(false);
   const { alertsEnabled, toggleAlerts, permissionState, requestPermission } = useAlerts();
 
@@ -42,7 +40,6 @@ export const MenuScreen = ({ onSelect, toggleTheme, themeLabel }) => {
             ⚙ ALERTS
           </button>
           <span className="topbar-version-badge">v0.18.4-dev</span>
-          <button className="topbar-theme-btn" onClick={toggleTheme} aria-label="Toggle colour theme">{themeLabel}</button>
         </div>
       </div>
 

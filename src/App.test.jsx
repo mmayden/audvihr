@@ -15,7 +15,6 @@ beforeEach(() => {
   localStorage.clear();
   // Pre-accept disclaimer gate so bottom nav is reachable
   localStorage.setItem('disclaimer_accepted', '1');
-  document.documentElement.removeAttribute('data-theme');
 });
 
 describe('App — bottom nav', () => {
@@ -46,16 +45,4 @@ describe('App — bottom nav', () => {
     expect(activeItem.textContent).toContain('FIGHTERS');
   });
 
-  it('renders the theme toggle button', () => {
-    render(<App />);
-    expect(document.querySelector('.theme-toggle-floating')).toBeTruthy();
-    expect(document.querySelector('.bottom-nav-theme')).toBeTruthy();
-  });
-
-  it('theme toggle changes data-theme attribute on <html>', () => {
-    render(<App />);
-    const btn = document.querySelector('.theme-toggle-floating');
-    fireEvent.click(btn);
-    expect(document.documentElement.getAttribute('data-theme')).toBeTruthy();
-  });
 });
