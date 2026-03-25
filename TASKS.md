@@ -19,7 +19,7 @@
 - [x] Pre-commit hooks — `husky` + `lint-staged` (ESLint on staged `.js/.jsx` files)
 - [x] Security header parity test — 47 tests validating `netlify.toml` ↔ `vercel.json` header sync, CSP completeness, CSP hardening, `index.html` security
 - [x] `npm run validate` — lint + test + audit in one command
-- [x] ARENA theme removed — MONOLITH sole colour scheme; `useTheme` hook + tests deleted; theme toggle removed from App.jsx, MenuScreen, and bottom nav
+- [x] ARENA theme removed — single theme only; `useTheme` hook + tests deleted; theme toggle removed from App.jsx, MenuScreen, and bottom nav; subsequently replaced by WAR ROOM design system
 - [x] Documentation refresh — PLANNING.md (stale CSP, file structure, decisions log), TASKS.md, CHANGELOG.md, CLAUDE.md, README.md modernized
 - [x] Stripe donate link — "♡ SUPPORT THIS PROJECT" in MenuScreen below nav menu; `.menu-donate` CSS class; opens `donate.stripe.com` in new tab
 - [x] 527 tests passing (47 new); 0 lint errors; 0 CVEs

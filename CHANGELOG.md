@@ -13,10 +13,10 @@ All notable changes to this project. Format: [version] — date — description.
 - **`npm run validate`** — single command runs `lint + test:run + audit` in sequence. Use before every merge.
 
 ### UI
-- **War Room design system** — complete visual overhaul of `app.css`. Command center aesthetic replacing MONOLITH's flat minimal style. Key changes:
+- **War Room design system** — complete visual overhaul of `app.css`. Command center aesthetic replacing MONOLITH. Key changes:
   - **Corner bracket reticles** on `.ui-card` panels (expand on hover via spring-eased `::before`/`::after`)
   - **Dashed border headers** on cards and section labels (1px dashed accent-tinted borders)
-  - **Aggressive typography contrast** — label weights dropped to 200–300, data values pushed to 800 for projected-on-glass feel
+  - **Typography contrast** — labels at weight 400, data values at weight 800; text tokens brightened for readability (`--text: #94a3c0`, `--text-dim: #6b7fa0`)
   - **Stat bar terminus dots** — glowing `::after` pseudo-elements on `.ov-bar-fill` / `.srl-fill` with `box-shadow` glow matching fill color
   - **Threat-level color coding** — green (`#00e676` CLEAR), amber/gold (`#ffab00` CAUTION), red (`#ff1744` THREAT) replace the muted MONOLITH palette
   - **Spring-eased transitions** — buttons use `cubic-bezier(0.34, 1.56, 0.64, 1)` with `scale(1.02)` lift on hover, `scale(0.98)` press on active

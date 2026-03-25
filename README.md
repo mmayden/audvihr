@@ -22,7 +22,7 @@ Not a sportsbook. Not a fantasy app. Not an AI picks tool. A war room for findin
 | Styling | Vanilla CSS with CSS variables (WAR ROOM design system) |
 | Fonts | Inter + JetBrains Mono (self-hosted via `@fontsource-variable`) |
 | State | `useState` / `useMemo` / custom hooks (no state management library) |
-| Testing | Vitest + Testing Library (538 tests, 80% coverage target) |
+| Testing | Vitest + Testing Library (527 tests, 80% coverage target) |
 | Data | Build-time scrapers (UFCStats + Tapology + BestFightOdds via cheerio) |
 | Runtime APIs | Polymarket CLOB (free), The Odds API + Kalshi (optional, paid) |
 | Serverless | `/api/rss-proxy` — RSS CORS proxy (Netlify Functions v2 / Vercel) |
@@ -71,7 +71,7 @@ audvihr/
     ├── styles/app.css  # Global styles + CSS variables (design system)
     ├── constants/      # Pure lookup tables (archetypes, tiers, matchup rules, filters)
     ├── data/           # Generated + static data files
-    ├── hooks/          # Custom React hooks (odds, markets, theme, alerts, news)
+    ├── hooks/          # Custom React hooks (odds, markets, alerts, news, localStorage)
     ├── utils/          # Pure utility functions (odds math, cache, export, parsing)
     ├── components/     # Reusable UI components
     ├── tabs/           # Fighter profile tab panels (6 tabs)
@@ -81,7 +81,7 @@ audvihr/
 
 ## Current Status
 
-**v0.18.4-dev** — 538 tests passing, 0 lint errors, 0 CVEs. See [TASKS.md](TASKS.md) for sprint status and [CHANGELOG.md](CHANGELOG.md) for version history.
+**v0.18.4-dev** — 527 tests passing, 0 lint errors, 0 CVEs. WAR ROOM design system active. See [TASKS.md](TASKS.md) for sprint status and [CHANGELOG.md](CHANGELOG.md) for version history.
 
 ## Git Workflow
 
