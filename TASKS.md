@@ -62,7 +62,7 @@
 - [ ] Smoke test: open FighterScreen, select a women's division fighter, confirm all 6 tabs render, percentile badges work, compare works
 
 ### Quality Gate (before merge)
-- [ ] `npm run test:run` — all existing 481 tests still pass; new keyboard nav tests added (target: ≥ 15 new tests)
+- [ ] `npm run test:run` — all existing 491 tests still pass; new keyboard nav tests added (target: ≥ 15 new tests)
 - [ ] `npm run lint` — 0 errors
 - [ ] `npm audit` — 0 critical/high CVEs
 - [ ] CHANGELOG.md `[Unreleased]` → `[0.19.0]`

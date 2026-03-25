@@ -80,6 +80,7 @@ Does fight breakdowns for a podcast or Discord. Wants fast access to stats witho
 9. ✅ **Matchup Context Engine** — `computeMatchupWarnings` pure function; MATCHUP NOTES section in CompareScreen with 14 archetype rules, 8 style clashes, 10 modifier warnings. Delivered in v0.15.0.
 10. ✅ **Stat Range Search** — 11-preset STAT FILTERS panel in FighterScreen sidebar; AND logic with name search + weight class; MUAY THAI + CLINCH FIGHTER colors filled in. Delivered in v0.16.0.
 11. ✅ **Mobile-first development (Phase 17)** — `feature/phase-17-mobile` branch. Bottom nav icon + label (emoji + monospace text). `--touch-target: 44px` / `--touch-target-sm: 36px` CSS tokens in all theme blocks. `@media (max-width: 480px)` block: compare hero stacks (F1/VS/F2), headline line-clamp (3 lines, tap to expand), hero portrait 64×64px, stat table horizontal scroll (`overflow-x: auto` + `min-width: 400px`). Swipe-to-close sidebars (FighterScreen + CalendarScreen). News headline expand/collapse. Market live-row collapses. iOS auto-zoom fix (font-size ≥ 16px). CalendarScreen + NewsScreen screen-level tests (16 new tests, 481 total). Delivered in v0.18.0.
+12. ✅ **Build-time free sportsbook data (v0.18.3)** — `scripts/fetch-odds.js` BestFightOdds scraper; multi-book moneylines in `src/data/odds.js`. App ships complete sportsbook data with zero paid API keys. `useOdds` + `useKalshi` fully optional. 3-layer data model: BFO baseline → live Odds API override → Polymarket/Kalshi alongside. COOP + CORP security headers. 491 tests.
 
 ### What This Is Not
 
@@ -90,7 +91,7 @@ Does fight breakdowns for a podcast or Discord. Wants fast access to stats witho
 
 ---
 
-## Current File Structure (Vite + React — v0.18.2)
+## Current File Structure (Vite + React — v0.18.3)
 
 The single-file prototype (`mma-trader.html`) was retired at Phase 3a. The project is now a Vite + React app with the following modular layout:
 
@@ -581,7 +582,7 @@ Checklist persists per matchup via localStorage. Key = `cl_{f1id}_{f2id}`.
 
 ## Security Model
 
-### Current State (Vite + React — v0.18.0)
+### Current State (Vite + React — v0.18.3)
 
 | Surface | Risk | Status |
 |---------|------|--------|
@@ -655,6 +656,10 @@ Cross-Origin-Resource-Policy: same-origin
 - **iOS auto-zoom prevention (Phase 17)** ✅ — `.mkt-alert-threshold` upgraded to `font-size: 16px` on mobile. Security-neutral but UX-critical; prevents involuntary viewport zoom that could disorient users and make the interface unusable.
 - **Bottom nav icons (Phase 17)** ✅ — Emoji characters rendered via JSX text nodes in `aria-hidden` spans. No new external resources, no CSP change. Emoji are static strings — no user input, no injection surface.
 - **News headline expand/collapse (Phase 17)** ✅ — State is a `Set<string>` of item IDs (internal), toggled onClick. No user content rendered as HTML — all via JSX text nodes as before. No new storage keys, no new network requests.
+
+**v0.18.3 surfaces (all resolved):**
+- **Build-time BFO scraper (v0.18.3)** ✅ — `scripts/fetch-odds.js` scrapes BestFightOdds.com at build time only via cheerio (no runtime fetch). No new `connect-src` entry. `src/data/odds.js` is a static generated file consumed by MarketsScreen and TabMarket.
+- **COOP + CORP headers (v0.18.3)** ✅ — `Cross-Origin-Opener-Policy: same-origin` + `Cross-Origin-Resource-Policy: same-origin` added to both `vercel.json` and `netlify.toml`. Prevents cross-origin window handle leaks and Spectre-class side-channel attacks.
 
 **v0.18.2 surfaces (all resolved):**
 - **DisclaimerGate (v0.18.2)** ✅ — UI-only compliance gate; no server-side age verification (not required for informational tool with no financial transactions). `disclaimer_accepted` localStorage key: try/catch reads, strict `=== '1'` equality, falls back to `false`. No user input collected — only button clicks. No PII stored. No new CSP entries, no new external domains.
@@ -799,13 +804,14 @@ Ordered by value vs. effort. Full sprint tasks in TASKS.md.
 | **v0.17.0** ✅ | CORS Proxy + Visual & QoL Polish | `netlify/functions/rss-proxy.js` + `api/rss-proxy.js` — same-origin serverless RSS proxy. `useNews` routes all fetches through `/api/rss-proxy?url=...`. MMA Fighting + MMA Junkie removed from CSP `connect-src`. Visual polish: broken CSS variable fix (`--bg-elevated`, `--bg-card`), design tokens, global focus rings, sidebar slide animation, VS button CTA, label readability, mobile touch targets, card depth, `prefers-reduced-motion` support, ARIA on sidebar toggles. 2 tests (proxy routing); 456 total. | SSRF prevention: `ALLOWED_URLS.has(url)` — exact Set equality only, 2-entry allowlist, no patterns. 403 on any unlisted URL. 512 KB response cap, 10s timeout, GET only, no auth header forwarding. RSS origins removed from browser-reachable `connect-src`. Proxy runs server-side only — zero CORS exposure. No new runtime npm dependencies; no new external domains beyond the proxy itself. |
 | **v0.18.1** ✅ | Visual Identity + Bug Fix | **Delivered v0.18.1.** MONOLITH theme (cold electric dark, cyan `#00c8ff` accent) + ARENA theme (warm ember dark, orange `#e06828` accent) replace the old light/dark palette. `--accent-bg` / `--accent-bg-mid` CSS tokens; 10 hardcoded gold rgba values removed. `.topbar` padding fix (button overlay). `useTheme` labels → ARENA / MONOLITH. No new external surfaces. | No new CSP entries; no new npm deps; no new external domains. CSS variable substitution only. |
 | **v0.18.2** ✅ | DisclaimerGate + Arena Atmosphere | **Delivered v0.18.2.** Two-step DisclaimerGate (age 18+ → risk acknowledgement) wraps entire app; `disclaimer_accepted` localStorage key. Immersive arena backdrop: 4-layer parallax (deep atmosphere, LED grid, ambient pulse, vignette), mouse-driven smooth lerp. Frosted glass on topbar, bottom-nav, sidebar. `--text-dim` WCAG AA contrast fix. `--sphere-*` + `--surface-glass` CSS tokens. TabOverview KEY STATS: percentile badges → coloured stat bars with tier labels. `arena-test.html` visual prototype. 481 tests. | DisclaimerGate: UI-only, no PII, `try/catch` localStorage. Parallax: CSS gradients + pseudo-elements, no CDN. `prefers-reduced-motion` kills pulse. No new CSP entries; no new npm deps; no new external domains. |
+| **v0.18.3** ✅ | Build-Time Free Odds Pipeline | **Delivered v0.18.3.** `scripts/fetch-odds.js` — BestFightOdds cheerio scraper (browser UA, `--dry-run`/`--ci`/`--fresh`, 500ms delay, `.raw.json` cache). `src/data/odds.js` — generated multi-book moneylines keyed by fightKey. MarketsScreen 3-layer data: BFO baseline → live Odds API override → Polymarket/Kalshi alongside. TabMarket SPORTSBOOK ODDS section. `useOdds` + `useKalshi` fully optional — app ships complete sportsbook data with zero paid API keys. COOP + CORP headers added. 491 tests (10 new odds tests + test fix for ODDS mock). | BFO is build-time only — no `connect-src` CSP change. COOP + CORP headers prevent cross-origin window handle leaks and Spectre-class side-channel attacks. 0 new npm deps; 0 new external domains at runtime. |
 | **Phase 17** ✅ | Mobile-First UX | **Delivered v0.18.0.** Bottom nav: emoji icon + label stack, `min-height: var(--touch-target, 44px)`. `--touch-target: 44px` / `--touch-target-sm: 36px` tokens in all theme blocks. `@media (max-width: 480px)`: compare hero stacks (F1/VS/F2); headline line-clamped 3 lines; `.card-portrait` 64×64px; `.compare-table-wrap { overflow-x: auto }` + `.ctable { min-width: 400px }` for horizontal scroll. Swipe-to-close sidebars (`useRef` + `onTouchStart`/`onTouchEnd`; velocity ≥ 80 px/s OR drag ≥ 112px). Stat filter chips 36px; filters body scrollable. News cat chips horizontal-scroll. Markets live-row 1fr; threshold input 16px (iOS fix); PICKS scrollable. Calendar COMPARE btn 36px. `CalendarScreen.test.jsx` (7 tests) + `NewsScreen.test.jsx` (9 tests). 481 tests total. | No new CSP surfaces (touch events are internal DOM). No new npm dependencies. `font-size ≥ 16px` enforced on `.mkt-alert-threshold` — iOS auto-zoom rule codified in CLAUDE.md. `card-portrait` at 64px is self-hosted, no CSP change. |
 
 ---
 
 ## Phase 18+ Roadmap Candidates
 
-All 11 North Star features are delivered through v0.18.0. These are the ranked next candidates based on value vs. effort and security surface introduced.
+All 11 North Star features are delivered through v0.18.0. Build-time free sportsbook data pipeline shipped in v0.18.3 (BFO scraper). These are the ranked next candidates based on value vs. effort and security surface introduced.
 
 | Priority | Theme | Candidate | Effort | Security Notes |
 |---|---|---|---|---|
