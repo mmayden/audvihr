@@ -10,8 +10,32 @@
 
 ## Current Sprint
 
-**Branch:** —
-**Status:** No active sprint. v0.18.1 shipped.
+**Branch:** `master`
+**Status:** v0.18.2 shipped. Next: Phase 17 — Deployment + Free Odds Pipeline.
+
+### Phase 17 — Deployment + Free Odds Pipeline (scoped 2026-03-24)
+
+#### Deployment — audvihr.space via Vercel + Namecheap
+- [ ] Connect repo to Vercel (auto-detect Vite; `vercel.json` already configured)
+- [ ] Add env vars in Vercel project settings: `VITE_ODDS_API_KEY`, `VITE_KALSHI_API_KEY` (optional — app degrades silently)
+- [ ] Add custom domain `audvihr.space` in Vercel project → Domains
+- [ ] Namecheap Advanced DNS: A record `@` → `76.76.21.21`; CNAME `www` → `cname.vercel-dns.com.`
+- [ ] Verify domain + TLS provisioning in Vercel
+- [ ] Configure `www.audvihr.space` → `audvihr.space` redirect (308, canonical apex)
+- [ ] Smoke test: all screens render, CSP headers active, HTTPS enforced, `noindex` meta present
+
+#### Build-Time Odds Scraper — BestFightOdds (free, no API key)
+- [ ] `scripts/fetch-odds.js` — cheerio scraper; browser UA; `--dry-run`/`--ci`/`--fresh` flags; 500ms delay; local `.raw.json` cache; silent degradation
+- [ ] `src/data/odds.js` — generated output keyed by `fightKey`; shape: `{ [fightKey]: { fighter1, fighter2, books: [{ source, f1_ml, f2_ml }], opening: { f1_ml, f2_ml, ts }, ts } }`
+- [ ] Wire into `prebuild`: `"prebuild": "node scripts/fetch-data.js --ci && node scripts/fetch-odds.js --ci"`
+- [ ] Update `MarketsScreen` + `TabMarket` to read build-time odds as baseline (merge with live Polymarket data)
+- [ ] `useOdds.js` becomes optional — build-time BestFightOdds replaces The Odds API as the free sportsbook data source
+- [ ] Tests for odds scraper normalization + fightKey matching
+- [ ] CSP review: BestFightOdds is build-time only (no `connect-src` change needed)
+- [ ] Update CLAUDE.md (new file in modular design table, storage key ownership if any, scraper docs)
+- [ ] Update PLANNING.md decisions log
+- [ ] Update CHANGELOG.md
+- [ ] `npm audit` clean; all tests pass; 0 lint errors
 
 ---
 
@@ -48,6 +72,24 @@
 ---
 
 ## ✅ Completed Sprints
+
+### ✅ v0.18.2 — DisclaimerGate + Arena Atmosphere — 2026-03-24
+
+**Branch:** `feature/phase-17-mobile` → merged to `master`
+
+- [x] **DisclaimerGate** — two-step acceptance gate (age 18+ → risk acknowledgement); wraps entire app; `disclaimer_accepted` localStorage key; try/catch reads; UI-only compliance
+- [x] **Arena atmosphere** — 4-layer parallax backdrop (deep atmosphere, LED grid, ambient pulse, vignette); mouse-driven smooth lerp via `requestAnimationFrame`
+- [x] **Frosted glass** — `backdrop-filter: blur(14px)` + `--surface-glass` token on topbar, bottom-nav, sidebar overlay
+- [x] **Sphere CSS tokens** — `--sphere-base`, `--sphere-mid`, `--sphere-glow`, `--sphere-pulse-color`, `--surface-glass` in all three theme blocks
+- [x] **`--text-dim` WCAG AA fix** — MONOLITH `#3e4a62` → `#7890b0` (~5:1); ARENA `#6a5840` → `#a08870` (~4.5:1)
+- [x] **TabOverview stat bars** — percentile badges replaced with 6 coloured horizontal bars (green/cyan/red) + tier labels
+- [x] **FighterScreen hero** — compact 88px avatar box with cyan accent border
+- [x] **`arena-test.html`** — standalone visual prototype in `public/` (reference only)
+- [x] **App.test.jsx fix** — `beforeEach` pre-accepts disclaimer gate so bottom nav tests pass
+- [x] 481 tests passing; 0 lint errors; 0 CVEs
+- [x] CHANGELOG, TASKS, PLANNING, CLAUDE.md updated
+
+---
 
 ### ✅ v0.18.1 — Visual Identity + Bug Fix — 2026-03-18
 
@@ -291,7 +333,7 @@
 
 ---
 
-## Backlog (Unscheduled — Post v0.18.0)
+## Backlog (Unscheduled — Post v0.18.2)
 
 #### High value
 - [x] ~~**CORS proxy for live RSS**~~ — shipped v0.17.0
@@ -301,9 +343,9 @@
 - [ ] **Women's divisions** — Strawweight, Flyweight, Bantamweight (~30 fighters); same seed + scrape pipeline; in Proposed Phase 18 sprint
 - [ ] **Keyboard navigation** — arrow keys in sidebar, Tab across screens, keyboard-accessible compare selectors; in Proposed Phase 18 sprint
 - [ ] **Stat trend lines** — per-fight trajectory over last N fights; requires scraper to store per-fight stats alongside career averages; needs Chart.js/Recharts decision first
+- [ ] **Historical opening line database** — searchable archive of opening lines per fighter across all past fights; BestFightOdds scraper (Phase 17) is the data source for this
 
 #### Medium value
-- [ ] **Historical opening line database** — searchable archive of opening lines per fighter across all past fights; needs a scrape source or manual-entry flow
 - [ ] **Chart.js / Recharts for trend charts** — stat bars are functional but trend charts unlock trajectory analysis; deliberate dependency + `npm audit` decision required before adding
 - [ ] **Manual data refresh button** — in-app trigger for same-day stat update without full rebuild; requires a new serverless endpoint with origin check + response validation; add to `connect-src` in both deploy configs
 - [ ] **Recently viewed fighter strip** — last 3 viewed fighters; `recent_fighters` sessionStorage key already reserved; low effort

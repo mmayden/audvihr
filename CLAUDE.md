@@ -116,10 +116,11 @@ api/
 │   └── rss-proxy.js          Vercel serverless function — identical security logic; auto-routed at /api/rss-proxy
 public/
 │   ├── sw.js                 Service Worker — install/activate only; scope /; no fetch handler
+│   ├── arena-test.html       Standalone visual prototype for arena atmosphere development (reference only, not linked from app)
 │   └── assets/portraits/     Self-hosted fighter portrait images (*.jpg); no CDN, no CSP change
 src/
 ├── main.jsx                  Entry point — ReactDOM.createRoot + StrictMode; SW registration
-├── App.jsx                   URL router — BrowserRouter + Routes; FighterScreenRoute + CompareScreenRoute at module scope; bottom nav; theme toggle
+├── App.jsx                   URL router — BrowserRouter + Routes; FighterScreenRoute + CompareScreenRoute at module scope; DisclaimerGate wrapper; 4-layer parallax arena backdrop; bottom nav; theme toggle
 ├── styles/
 │   └── app.css               All global styles, CSS variables, component classes
 ├── constants/
@@ -166,9 +167,10 @@ src/
 │   ├── FighterSearch.jsx     Type-to-search combobox; ARIA-compliant; XSS-safe; blur race guard
 │   ├── ChecklistPanel.jsx    17-item trade checklist with progress bar
 │   ├── ErrorBoundary.jsx     Class component error boundary wrapping all screens
+│   ├── DisclaimerGate.jsx    Two-step acceptance gate (age 18+ → risk acknowledgement); wraps entire app in App.jsx; persists acceptance to localStorage (disclaimer_accepted key)
 │   └── PriceChart.jsx        SVG sparkline for prediction-market probability-over-time
 ├── tabs/
-│   ├── TabOverview.jsx       Key numbers + TOP X% percentile badges; FLAGS as inline pill row (chin/cardio/cut); trader notes; RECENT NEWS (top 2 items via newsItems prop)
+│   ├── TabOverview.jsx       Key numbers + coloured stat bars with tier labels; FLAGS as inline pill row (chin/cardio/cut); trader notes; RECENT NEWS (top 2 items via newsItems prop)
 │   ├── TabStriking.jsx       Striking volume, accuracy, knockdowns, position
 │   ├── TabGrappling.jsx      Takedowns, submissions, ground control, transitions
 │   ├── TabPhysical.jsx       Physical attributes, camp, durability, loss methods

@@ -87,7 +87,7 @@ Does fight breakdowns for a podcast or Discord. Wants fast access to stats witho
 
 ---
 
-## Current File Structure (Vite + React — v0.18.0)
+## Current File Structure (Vite + React — v0.18.2)
 
 The single-file prototype (`mma-trader.html`) was retired at Phase 3a. The project is now a Vite + React app with the following modular layout:
 
@@ -99,10 +99,11 @@ api/
 │   └── rss-proxy.js          Vercel serverless function — identical security logic and allowlist; auto-routed at /api/rss-proxy
 public/
 │   ├── sw.js                 Service Worker — install/activate only; scope /; no fetch handler; satisfies Notification API requirement
+│   ├── arena-test.html       Standalone visual prototype for arena atmosphere development (reference only, not linked from app)
 │   └── assets/portraits/     Self-hosted fighter portrait images (*.jpg); no CDN, no CSP change required
 src/
 ├── main.jsx                  Entry point — ReactDOM.createRoot + StrictMode; SW registration
-├── App.jsx                   URL router — BrowserRouter + Routes; FighterScreenRoute + CompareScreenRoute at module scope (param validation); bottom nav (icon + label); theme toggle
+├── App.jsx                   URL router — BrowserRouter + Routes; FighterScreenRoute + CompareScreenRoute at module scope (param validation); DisclaimerGate wrapper; 4-layer parallax arena backdrop; bottom nav (icon + label); theme toggle
 ├── styles/
 │   └── app.css               All global styles, CSS variables (design system), responsive breakpoints (767px / 480px), prefers-reduced-motion block (always last)
 ├── constants/                Pure lookup tables and rule sets — no I/O, no side effects
@@ -149,9 +150,10 @@ src/
 │   ├── FighterSearch.jsx     Type-to-search combobox; ARIA-compliant (role=combobox, aria-expanded, aria-activedescendant); XSS-safe; blur race guard
 │   ├── ChecklistPanel.jsx    17-item trade checklist with progress bar; role=checkbox + aria-checked on each item
 │   ├── ErrorBoundary.jsx     Class component error boundary wrapping all screens; RETRY button
+│   ├── DisclaimerGate.jsx    Two-step acceptance gate (age 18+ → risk acknowledgement); wraps entire app; persists to localStorage (disclaimer_accepted key)
 │   └── PriceChart.jsx        SVG sparkline for prediction-market probability-over-time
 ├── tabs/
-│   ├── TabOverview.jsx       Key numbers + TOP X% percentile badges; flags pills (chin/cardio/cut); trader notes; RECENT NEWS (top 2 matched items)
+│   ├── TabOverview.jsx       Key numbers + coloured stat bars with tier labels; flags pills (chin/cardio/cut); trader notes; RECENT NEWS (top 2 matched items)
 │   ├── TabStriking.jsx       Striking volume, accuracy, knockdowns, position
 │   ├── TabGrappling.jsx      Takedowns, submissions, ground control, transitions
 │   ├── TabPhysical.jsx       Physical attributes, camp, durability, loss methods
@@ -190,7 +192,7 @@ Two named theme palettes. Neither is white. Toggle via `data-theme` on `<html>`.
 
 /* Text */
 --text:         #b8c4d8   /* cold blue-white body text */
---text-dim:     #3e4a62   /* muted labels, metadata */
+--text-dim:     #7890b0   /* muted labels, metadata (WCAG AA ~5:1 vs bg) */
 --text-bright:  #dce6f8   /* headings, primary values */
 
 /* Accent */
@@ -210,6 +212,13 @@ Two named theme palettes. Neither is white. Toggle via `data-theme` on `<html>`.
 /* Accent tint backgrounds */
 --accent-bg:     rgba(0,200,255,.07)   /* subtle accent fill (chips, banners) */
 --accent-bg-mid: rgba(0,200,255,.12)   /* medium accent fill (hover states, badges) */
+
+/* Arena atmosphere (v0.18.2) */
+--sphere-base:        #050810           /* deepest arena void */
+--sphere-mid:         #0a1020           /* mid-depth arena layer */
+--sphere-glow:        #00c8ff           /* horizon glow band */
+--sphere-pulse-color: rgba(0,200,255,.03) /* ambient breathing pulse */
+--surface-glass:      rgba(13,15,26,.75)  /* frosted glass panels (topbar, nav, sidebar) */
 ```
 
 #### ARENA — warm ember dark (`[data-theme="light"]` + system light preference)
@@ -224,7 +233,7 @@ Two named theme palettes. Neither is white. Toggle via `data-theme` on `<html>`.
 
 /* Text */
 --text:         #cec0a8   /* warm medium text */
---text-dim:     #6a5840   /* warm dim labels */
+--text-dim:     #a08870   /* warm dim labels (WCAG AA ~4.5:1 vs bg) */
 --text-bright:  #f0e2cc   /* warm cream headings */
 
 /* Accent */
@@ -244,6 +253,13 @@ Two named theme palettes. Neither is white. Toggle via `data-theme` on `<html>`.
 /* Accent tint backgrounds */
 --accent-bg:     rgba(224,104,40,.07)   /* subtle ember fill */
 --accent-bg-mid: rgba(224,104,40,.12)   /* medium ember fill */
+
+/* Arena atmosphere (v0.18.2) */
+--sphere-base:        #100a04           /* deepest arena void — warm */
+--sphere-mid:         #1a1008           /* mid-depth arena layer — warm */
+--sphere-glow:        #e06828           /* horizon glow band — ember */
+--sphere-pulse-color: rgba(224,104,40,.03) /* ambient breathing pulse */
+--surface-glass:      rgba(24,20,16,.75)   /* frosted glass panels */
 ```
 
 Archetype/semantic color primitives differ between themes. All values are still CSS variables — no hardcoded hex in component code.
@@ -262,11 +278,18 @@ Declared in all three theme blocks. Use `min-height: var(--touch-target, 44px)` 
 
 ### Visual Direction
 
-**Guiding principle:** dense-data readability first. Think scouting report, not gaming UI. Neither theme is white. No particle effects, no animated backgrounds. Animations only where they reduce cognitive load (fade-in on tab switch, sidebar slide-in).
+**Guiding principle:** dense-data readability first, immersive atmosphere second. Think scouting terminal inside an arena, not flat dashboard. Neither theme is white. Animations are purposeful: parallax depth, ambient pulse (killed by `prefers-reduced-motion`), sidebar slide-in.
 
-**Theme identity (v0.18.1):**
-- **MONOLITH** — cold, electric, data-terminal. Near-void dark blues with cyan highlights. Premium analytics feel. Default.
-- **ARENA** — warm, amber-lit, fight-night energy. Deep charcoal-amber with ember orange. The lights are down and the cage is lit.
+**Theme identity (v0.18.2):**
+- **MONOLITH** — cold, electric, data-terminal. Near-void dark blues with cyan highlights. LED grid subtlety. Frosted glass surfaces. Default.
+- **ARENA** — warm, amber-lit, fight-night energy. Deep charcoal-amber with ember orange. Same arena atmosphere with warm tones.
+
+**Arena atmosphere (v0.18.2):**
+- 4-layer parallax backdrop: deep atmosphere + LED grid + ambient pulse + edge vignette
+- Mouse-driven smooth lerp via `requestAnimationFrame`
+- Frosted glass (`backdrop-filter: blur(14px)` + `--surface-glass`) on topbar, bottom-nav, sidebar
+- `--sphere-*` CSS tokens in all three theme blocks
+- `prefers-reduced-motion` kills ambient pulse animation
 
 **Phase 14 visual targets — all delivered in v0.14.0:**
 
@@ -470,6 +493,7 @@ theme                      'light' | 'dark' | 'system' (owned by useTheme ONLY)
 alerts_enabled             boolean global alert toggle (owned by alerts.js ONLY)
 alert_rules                { [fightKey]: { enabled: bool, threshold: number } } (owned by alerts.js ONLY)
 pick_log                   array of pick records (200-entry cap) — { fightKey, fighter, method, confidence, outcome, notes, ts } — plain text only (owned by pickLog.js ONLY, Phase 14)
+disclaimer_accepted        '1' when user has accepted age + risk gate (owned by DisclaimerGate.jsx ONLY)
 ```
 
 **sessionStorage** (cleared when tab closes):
@@ -600,6 +624,12 @@ Cross-Origin-Resource-Policy: same-origin
 - **iOS auto-zoom prevention (Phase 17)** ✅ — `.mkt-alert-threshold` upgraded to `font-size: 16px` on mobile. Security-neutral but UX-critical; prevents involuntary viewport zoom that could disorient users and make the interface unusable.
 - **Bottom nav icons (Phase 17)** ✅ — Emoji characters rendered via JSX text nodes in `aria-hidden` spans. No new external resources, no CSP change. Emoji are static strings — no user input, no injection surface.
 - **News headline expand/collapse (Phase 17)** ✅ — State is a `Set<string>` of item IDs (internal), toggled onClick. No user content rendered as HTML — all via JSX text nodes as before. No new storage keys, no new network requests.
+
+**v0.18.2 surfaces (all resolved):**
+- **DisclaimerGate (v0.18.2)** ✅ — UI-only compliance gate; no server-side age verification (not required for informational tool with no financial transactions). `disclaimer_accepted` localStorage key: try/catch reads, strict `=== '1'` equality, falls back to `false`. No user input collected — only button clicks. No PII stored. No new CSP entries, no new external domains.
+- **Parallax arena backdrop (v0.18.2)** ✅ — 4-layer CSS effect via `requestAnimationFrame` + mouse-driven offset. All layers are CSS gradients and pseudo-elements — no external images, no CDN, no CSP change. `prefers-reduced-motion` kills the ambient pulse animation.
+- **Frosted glass surfaces (v0.18.2)** ✅ — `backdrop-filter: blur(14px)` on topbar, bottom-nav, sidebar overlay. CSS-only visual effect — no new external surfaces, no CSP change.
+- **`--text-dim` contrast fix (v0.18.2)** ✅ — MONOLITH `#3e4a62` → `#7890b0` (~5:1 vs bg); ARENA `#6a5840` → `#a08870` (~4.5:1 vs bg). WCAG AA compliant.
 
 **Completed phase surfaces (continued):**
 - **React Router + shareable URLs (Phase 13)** ✅ — `BrowserRouter` in `App.jsx`. URL params contain only numeric fighter IDs. `FighterScreenRoute` and `CompareScreenRoute` validate params with `/^\d+$/` before FIGHTERS lookup. History API navigation requires no CSP change. SPA fallback added to `netlify.toml` (200 redirect) and `vercel.json` (rewrites). `noindex` tag preserved.
@@ -737,6 +767,7 @@ Ordered by value vs. effort. Full sprint tasks in TASKS.md.
 | **Phase 16** ✅ | Stat Range Search | `src/constants/statFilters.js` — 11 preset filter definitions (4 categories: STRIKING, GRAPPLING, FINISHING, PHYSICAL); each: `{ id, label, category, predicate(fighter) → boolean }`. FighterScreen collapsible STAT FILTERS panel: toggle button with active-count badge, chips grouped by category, AND logic with existing name search + weight class filter, CLEAR ALL. MUAY THAI + CLINCH FIGHTER added to ARCH_COLORS (`--teal` #3aafa9, `--gold` #c9a84c). 35 tests (35 new); 454 total. | Predicate functions are pure closures over static thresholds — no I/O, no side effects. Input to predicates is the in-memory FIGHTERS array (build-time scraped, validated at fetch time). No new external domains; no CSP changes; no new runtime dependencies. Active filter set stored as React state (`Set<string>`) — no localStorage, no URL params. |
 | **v0.17.0** ✅ | CORS Proxy + Visual & QoL Polish | `netlify/functions/rss-proxy.js` + `api/rss-proxy.js` — same-origin serverless RSS proxy. `useNews` routes all fetches through `/api/rss-proxy?url=...`. MMA Fighting + MMA Junkie removed from CSP `connect-src`. Visual polish: broken CSS variable fix (`--bg-elevated`, `--bg-card`), design tokens, global focus rings, sidebar slide animation, VS button CTA, label readability, mobile touch targets, card depth, `prefers-reduced-motion` support, ARIA on sidebar toggles. 2 tests (proxy routing); 456 total. | SSRF prevention: `ALLOWED_URLS.has(url)` — exact Set equality only, 2-entry allowlist, no patterns. 403 on any unlisted URL. 512 KB response cap, 10s timeout, GET only, no auth header forwarding. RSS origins removed from browser-reachable `connect-src`. Proxy runs server-side only — zero CORS exposure. No new runtime npm dependencies; no new external domains beyond the proxy itself. |
 | **v0.18.1** ✅ | Visual Identity + Bug Fix | **Delivered v0.18.1.** MONOLITH theme (cold electric dark, cyan `#00c8ff` accent) + ARENA theme (warm ember dark, orange `#e06828` accent) replace the old light/dark palette. `--accent-bg` / `--accent-bg-mid` CSS tokens; 10 hardcoded gold rgba values removed. `.topbar` padding fix (button overlay). `useTheme` labels → ARENA / MONOLITH. No new external surfaces. | No new CSP entries; no new npm deps; no new external domains. CSS variable substitution only. |
+| **v0.18.2** ✅ | DisclaimerGate + Arena Atmosphere | **Delivered v0.18.2.** Two-step DisclaimerGate (age 18+ → risk acknowledgement) wraps entire app; `disclaimer_accepted` localStorage key. Immersive arena backdrop: 4-layer parallax (deep atmosphere, LED grid, ambient pulse, vignette), mouse-driven smooth lerp. Frosted glass on topbar, bottom-nav, sidebar. `--text-dim` WCAG AA contrast fix. `--sphere-*` + `--surface-glass` CSS tokens. TabOverview KEY STATS: percentile badges → coloured stat bars with tier labels. `arena-test.html` visual prototype. 481 tests. | DisclaimerGate: UI-only, no PII, `try/catch` localStorage. Parallax: CSS gradients + pseudo-elements, no CDN. `prefers-reduced-motion` kills pulse. No new CSP entries; no new npm deps; no new external domains. |
 | **Phase 17** ✅ | Mobile-First UX | **Delivered v0.18.0.** Bottom nav: emoji icon + label stack, `min-height: var(--touch-target, 44px)`. `--touch-target: 44px` / `--touch-target-sm: 36px` tokens in all theme blocks. `@media (max-width: 480px)`: compare hero stacks (F1/VS/F2); headline line-clamped 3 lines; `.card-portrait` 64×64px; `.compare-table-wrap { overflow-x: auto }` + `.ctable { min-width: 400px }` for horizontal scroll. Swipe-to-close sidebars (`useRef` + `onTouchStart`/`onTouchEnd`; velocity ≥ 80 px/s OR drag ≥ 112px). Stat filter chips 36px; filters body scrollable. News cat chips horizontal-scroll. Markets live-row 1fr; threshold input 16px (iOS fix); PICKS scrollable. Calendar COMPARE btn 36px. `CalendarScreen.test.jsx` (7 tests) + `NewsScreen.test.jsx` (9 tests). 481 tests total. | No new CSP surfaces (touch events are internal DOM). No new npm dependencies. `font-size ≥ 16px` enforced on `.mkt-alert-threshold` — iOS auto-zoom rule codified in CLAUDE.md. `card-portrait` at 64px is self-hosted, no CSP change. |
 
 ---
@@ -875,3 +906,11 @@ Before beginning a new phase, verify:
 | 2026-03-18 | Phase 17: CalendarScreen + NewsScreen — screen-level tests added | FighterScreen already had sidebar-toggle tests. CalendarScreen and NewsScreen both have JS-conditional render paths (sidebar open/close; headline expand/collapse) that differ from the default state and are not CSS-only. TASKS.md Phase 17 item: "Add responsive smoke tests if any screen has a conditional render path that differs on mobile." `CalendarScreen.test.jsx` (7 tests: sidebar EVENTS button, backdrop, sidebar--open class, aria-expanded both states). `NewsScreen.test.jsx` (9 tests: headline click/double-click/Enter/Space, aria-expanded, role=button). vi.hoisted() pattern required for CalendarScreen because vi.mock factories are hoisted before const declarations — matches the existing FighterScreen.test.jsx pattern. 481 tests total; 0 lint errors. |
 | 2026-03-18 | v0.18.0 — Phase 17 complete; merged to master | All Phase 17 tasks checked off: touch tokens, 480px breakpoint, swipe-to-close sidebars, headline expand/collapse, iOS auto-zoom fix, bottom nav icon+label, date.js consolidation, CalendarScreen.test.jsx + NewsScreen.test.jsx (481 tests, 0 lint errors, 0 CVEs). Documentation updated: CLAUDE.md phase reference cleaned up; PLANNING.md file structure phase annotations stripped, CSP example updated to match actual deployed policy (added worker-src, actual connect-src domains, HSTS header); TASKS.md Phase 17 sprint moved to Completed. North Star feature set: all 11 items delivered. No new external domains; no new runtime npm dependencies; no CSP changes. |
 | 2026-03-18 | v0.18.1 — MONOLITH + ARENA theme system; button overlay fix | Replaced old generic light/dark palette with two named, intentional themes: MONOLITH (cold electric dark — near-void blue-black, cyan accent `#00c8ff`) and ARENA (warm ember dark — charcoal-amber, ember orange `#e06828`). Neither theme is white. The old light theme (pure white `#ffffff` surfaces) was replaced after user feedback that it was too bright. Both themes are dark-base with distinct personality. `--accent-bg` + `--accent-bg-mid` CSS tokens replace 10 hardcoded `rgba(212,168,67,...)` values throughout `app.css` — theme-adaptive accent tints now resolve correctly in both themes. `.topbar` desktop padding `0 20px → 0 80px 0 20px` fixes the fixed-position theme toggle button overlapping topbar-right action buttons (↓ MD, COPY LINK). Mobile override `0 14px` restores symmetric padding when toggle is hidden. `useTheme.js` labels changed from `'LIGHT'/'DARK'` to `'ARENA'/'MONOLITH'`. 481 tests, 0 lint errors, 0 CVEs. No new external domains; no new npm dependencies; no CSP changes. |
+| 2026-03-18 | Las Vegas Sphere immersive background — v0.18.2 visual overhaul | Multi-layer radial CSS gradient on body simulating arena LED interior: vignette edge-darkening + horizon glow band + base depth void. `body::before` LED panel grid (44×44px, 1.6% opacity, masked to centre). `body::after` ambient sphere pulse (9s ease breathing, `prefers-reduced-motion` killed). Frosted glass on topbar, mobile bottom-nav, and mobile sidebar overlay via `backdrop-filter: blur(14px)` + `--surface-glass` token. Menu items lifted to frosted glass panels. Wordmark accent text-shadow glow. `--text-dim` contrast fix to WCAG AA. New CSS tokens: `--sphere-base`, `--sphere-mid`, `--sphere-glow`, `--sphere-pulse-color`, `--surface-glass` in all three theme blocks. |
+| 2026-03-24 | DisclaimerGate added — age 18+ verification + risk acknowledgement | Two-step acceptance gate wrapping the entire app. Step 1: age verification (18+ — lowest global legal age for prediction markets). Step 2: risk acknowledgement (informational use only, not financial advice, substantial risk). Persisted as `disclaimer_accepted = '1'` in localStorage with try/catch reads. UI-only gate — no server-side verification (appropriate for an informational tool with no financial transactions). No PII collected. Storage key owned exclusively by `DisclaimerGate.jsx`. |
+| 2026-03-24 | Arena atmosphere UI — parallax backdrop + TabOverview stat bars | 4-layer parallax arena backdrop in App.jsx: deep atmosphere, LED grid, ambient pulse, edge vignette. Mouse-driven smooth lerp via `requestAnimationFrame`. TabOverview KEY STATS section replaced percentile badges with 6 coloured horizontal stat bars (green = ELITE, cyan = AVG/ABOVE AVG, red = BELOW AVG) with tier labels — more visually informative and consistent with arena aesthetic. FighterScreen hero: compact 88px avatar box with cyan accent. `arena-test.html` added to `public/` as standalone visual prototype (reference only). |
+| 2026-03-24 | Phase 17 scoped: deployment (audvihr.space) + free odds pipeline | Domain `audvihr.space` purchased via Namecheap. Deployment target: Vercel (already configured via `vercel.json`). DNS: A record `@` → `76.76.21.21`, CNAME `www` → `cname.vercel-dns.com.`. User already has another webapp deployed on Vercel via Namecheap — same workflow. |
+| 2026-03-24 | Build-time BestFightOdds scraper chosen over paid APIs | The Odds API free tier (500 req/mo) is tight for polling; Kalshi requires US identity verification. BestFightOdds.com is the canonical MMA odds aggregator — opening lines, current lines, multi-book comparison, all in HTML tables. Build-time cheerio scrape (same pattern as UFCStats + Tapology) gives comprehensive sportsbook data for free. No API key, no rate limit, no `connect-src` CSP change (build-time only). Tradeoff: snapshot per deploy vs live polling. Acceptable for a tool where user redeploys before fight week. |
+| 2026-03-24 | Hybrid odds architecture: BestFightOdds (build-time) + Polymarket (runtime) | Sportsbook moneylines (multi-book, opening + current) come from BestFightOdds at build time → `src/data/odds.js`. Prediction market prices come from Polymarket at runtime (free, unauthenticated, already integrated). `useOdds.js` (The Odds API) becomes fully optional — no paid dependency required for core functionality. `useKalshi.js` stays optional. All three live hooks degrade silently when keys absent. |
+| 2026-03-24 | `src/data/odds.js` — new generated data file | Keyed by `fightKey` (reusing `normalizeOdds.js` key format). Shape: `{ [fightKey]: { fighter1, fighter2, books: [{ source, f1_ml, f2_ml }], opening: { f1_ml, f2_ml, ts }, ts } }`. Generated by `scripts/fetch-odds.js`. Same serialization pattern as `fighters.js` and `events.js`. |
+| 2026-03-24 | `scripts/fetch-odds.js` — new build-time scraper | Follows established patterns: Node ESM + cheerio, browser UA header, `--dry-run`/`--ci`/`--fresh` CLI flags, 500ms inter-request delay, local `.raw.json` file cache, silent degradation on failure. Integrated into `prebuild` script chain after `fetch-data.js`. No new runtime dependencies. |

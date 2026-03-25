@@ -4,6 +4,52 @@ All notable changes to this project. Format: [version] — date — description.
 
 ---
 
+## [Unreleased] — Phase 17: Deployment + Free Odds Pipeline
+
+### Planned
+- **Deployment** — `audvihr.space` via Vercel + Namecheap custom domain (A record + CNAME); TLS auto-provisioned; `www` → apex 308 redirect
+- **`scripts/fetch-odds.js`** — build-time BestFightOdds scraper (cheerio, browser UA, same pattern as UFCStats/Tapology); replaces The Odds API as the free sportsbook data source
+- **`src/data/odds.js`** — generated file keyed by `fightKey`; multi-book moneylines + opening lines per fight
+- **`prebuild` chain** — `fetch-data.js --ci && fetch-odds.js --ci`; both degrade silently
+- **MarketsScreen + TabMarket** — merge build-time odds as baseline alongside live Polymarket data
+- **`useOdds.js` (The Odds API)** — becomes fully optional; no paid dependency required for core sportsbook data
+
+---
+
+## [0.18.2] — 2026-03-24
+
+### DisclaimerGate — Age Verification + Risk Acknowledgement
+
+#### Added
+- **`src/components/DisclaimerGate.jsx`** — two-step acceptance gate wrapping the entire app. Step 1: age verification (18+ confirmation). Step 2: risk acknowledgement disclaimer (informational use only, not financial advice, substantial risk of loss). Acceptance persisted to localStorage (`disclaimer_accepted` key, value `'1'`); gate shows only once. `readAccepted()` / `writeAccepted()` — try/catch-wrapped localStorage access with safe defaults.
+- **`src/App.jsx`** — `<DisclaimerGate>` wraps the `<BrowserRouter>` shell. All app content (nav, screens, theme toggle) is behind the gate.
+- **`src/styles/app.css`** — `.disclaimer-gate`, `.disclaimer-card`, `.disclaimer-wordmark`, `.disclaimer-heading`, `.disclaimer-text`, `.disclaimer-btn`, `.disclaimer-btn-back` CSS classes. Wordmark uses JetBrains Mono + accent color + text-shadow glow. Card uses `--surface` background with `--border` border. Responsive at `@media (max-width: 480px)`.
+
+#### Security
+- DisclaimerGate is a UI-only compliance gate — does not enforce server-side age verification (not required for an informational research tool with no financial transactions).
+- `disclaimer_accepted` localStorage key: try/catch-wrapped reads; validates strict `=== '1'` equality; falls back to `false` on any error. Key owned exclusively by `DisclaimerGate.jsx`.
+- No user input collected — only button clicks. No PII stored.
+- **0 new CSP entries. 0 new npm dependencies. 0 new external domains.**
+
+### Arena Atmosphere UI — Immersive Visual Overhaul
+
+#### Added
+- **`src/App.jsx`** — 4-layer parallax arena backdrop: `bg-layer bg-deep` (base atmosphere), `bg-layer bg-grid` (LED panel grid), `bg-layer bg-pulse` (ambient breathing), `bg-layer bg-vignette` (edge darkening). Mouse-driven parallax offset via `requestAnimationFrame` smooth lerp.
+- **`public/arena-test.html`** — standalone visual prototype page for arena atmosphere development (reference only, not linked from app).
+
+#### Changed
+- **`src/styles/app.css`** — Multi-layer radial CSS gradient on body simulating arena interior: vignette edge-darkening + horizon glow band + base depth void. `body::before` LED panel grid (44×44px, 1.6% opacity, masked to centre). `body::after` ambient pulse (9s ease breathing, `prefers-reduced-motion` killed). Frosted glass on `.topbar`, mobile `.bottom-nav`, and mobile `.sidebar-backdrop` via `backdrop-filter: blur(14px)` + `--surface-glass` token. Menu items lifted to frosted glass panels. Wordmark accent text-shadow glow.
+- **`src/styles/app.css`** — `--text-dim` contrast fix: MONOLITH `#3e4a62` → `#7890b0` (~5:1 vs bg); ARENA `#6a5840` → `#a08870` (~4.5:1 vs bg) — WCAG AA compliant.
+- **`src/styles/app.css`** — New CSS tokens in all three theme blocks: `--sphere-base`, `--sphere-mid`, `--sphere-glow`, `--sphere-pulse-color`, `--surface-glass`.
+- **`src/tabs/TabOverview.jsx`** — KEY STATS section: percentile badges replaced with 6 coloured horizontal stat bars (green = ELITE, cyan = AVG/ABOVE AVG, red = BELOW AVG) with tier labels. Unused `PercentileBadge` component and `pct` prop removed.
+- **`src/screens/FighterScreen.jsx`** — Hero portrait: compact 88px avatar box with cyan accent border (matches arena aesthetic).
+
+#### Testing
+- `src/App.test.jsx` — `beforeEach` updated to pre-accept `disclaimer_accepted` localStorage key so bottom nav tests can reach past the DisclaimerGate.
+- **481 tests, all passing. 0 lint errors. 0 CVEs.**
+
+---
+
 ## [0.18.1] — 2026-03-18
 
 ### Visual Identity — MONOLITH + ARENA themes; button overlay fix

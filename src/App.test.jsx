@@ -13,6 +13,8 @@ vi.mock('./screens/NewsScreen',    () => ({ NewsScreen:    () => <div>NEWS_SCREE
 
 beforeEach(() => {
   localStorage.clear();
+  // Pre-accept disclaimer gate so bottom nav is reachable
+  localStorage.setItem('disclaimer_accepted', '1');
   document.documentElement.removeAttribute('data-theme');
 });
 
