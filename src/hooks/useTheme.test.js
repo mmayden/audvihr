@@ -45,16 +45,16 @@ describe('useTheme', () => {
     expect(document.documentElement.getAttribute('data-theme')).toBe('light');
   });
 
-  it('label is LIGHT when current theme is dark', () => {
+  it('label is ARENA when current theme is dark', () => {
     localStorage.setItem('theme', JSON.stringify('dark'));
     const { result } = renderHook(() => useTheme());
-    expect(result.current.label).toBe('LIGHT');
+    expect(result.current.label).toBe('ARENA');
   });
 
-  it('label is DARK when current theme is light', () => {
+  it('label is MONOLITH when current theme is light', () => {
     localStorage.setItem('theme', JSON.stringify('light'));
     const { result } = renderHook(() => useTheme());
-    expect(result.current.label).toBe('DARK');
+    expect(result.current.label).toBe('MONOLITH');
   });
 
   it('persists chosen theme to localStorage', () => {

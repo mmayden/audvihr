@@ -136,6 +136,47 @@ describe('useNews — silent degradation', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Proxy routing
+// ---------------------------------------------------------------------------
+
+describe('useNews — proxy routing', () => {
+  it('fetches via /api/rss-proxy with url param, not directly from the RSS origin', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      text: () => Promise.resolve(buildRss(['Proxy test item'])),
+    });
+    const { result } = renderHook(() => useNews());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    const calledUrls = fetchSpy.mock.calls.map(([url]) => url);
+    // Every fetch call must go through the proxy, not directly to the RSS origin
+    calledUrls.forEach(url => {
+      expect(url).toMatch(/^\/api\/rss-proxy\?url=/);
+      expect(url).not.toMatch(/^https:\/\/www\.mmafighting\.com/);
+      expect(url).not.toMatch(/^https:\/\/mmajunkie\.usatoday\.com/);
+    });
+  });
+
+  it('encodes the RSS source URL as the url query param', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      text: () => Promise.resolve(buildRss(['Encoded URL test'])),
+    });
+    const { result } = renderHook(() => useNews());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    const calledUrls = fetchSpy.mock.calls.map(([url]) => url);
+    // The proxy calls should contain encoded RSS source URLs
+    const hasMmaFighting = calledUrls.some(url =>
+      url.includes(encodeURIComponent('https://www.mmafighting.com/rss/current'))
+    );
+    const hasMmaJunkie = calledUrls.some(url =>
+      url.includes(encodeURIComponent('https://mmajunkie.usatoday.com/feed'))
+    );
+    expect(hasMmaFighting).toBe(true);
+    expect(hasMmaJunkie).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Cache behaviour
 // ---------------------------------------------------------------------------
 

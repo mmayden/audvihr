@@ -3,15 +3,9 @@ import { FIGHTERS } from '../data/fighters';
 import { FighterName } from '../components/FighterName';
 import { RELEVANCE_COLOR, CATEGORY_COLOR } from '../constants/qualifiers';
 import { useNews } from '../hooks/useNews';
+import { formatDate } from '../utils/date';
 
 const CATEGORIES = ['ALL', 'FIGHT', 'INJURY', 'CAMP', 'WEIGH-IN', 'RESULT'];
-
-/** Format ISO date string as 'Mar 14 2026'. */
-function fmtDate(iso) {
-  return new Date(iso + 'T12:00:00Z').toLocaleDateString('en-US', {
-    month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC',
-  });
-}
 
 /**
  * NewsScreen — fighter news feed with category and fighter filters.
@@ -23,6 +17,7 @@ function fmtDate(iso) {
 export const NewsScreen = ({ onBack, onGoFighter }) => {
   const [catFilter, setCatFilter] = useState('ALL');
   const [fighterFilter, setFighterFilter] = useState('ALL');
+  const [expandedIds, setExpandedIds] = useState(new Set());
 
   const { items, loading, isLive } = useNews();
 
@@ -113,9 +108,20 @@ export const NewsScreen = ({ onBack, onGoFighter }) => {
               <span className={`news-item-badge ${item.isLive ? 'news-item-badge--live' : 'news-item-badge--mock'}`}>
                 {item.isLive ? 'LIVE' : 'MOCK'}
               </span>
-              <span className="news-date">{fmtDate(item.date)}</span>
+              <span className="news-date">{formatDate(item.date)}</span>
             </div>
-            <div className="news-headline">{item.headline}</div>
+            <div
+              className={`news-headline${expandedIds.has(item.id) ? ' news-headline--expanded' : ''}`}
+              onClick={() => setExpandedIds(prev => {
+                const next = new Set(prev);
+                next.has(item.id) ? next.delete(item.id) : next.add(item.id);
+                return next;
+              })}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpandedIds(prev => { const next = new Set(prev); next.has(item.id) ? next.delete(item.id) : next.add(item.id); return next; }); } }}
+              aria-expanded={expandedIds.has(item.id)}
+            >{item.headline}</div>
             <div className="news-body">{item.body}</div>
             <div className="news-footer">
               <span className="news-source">{item.source}</span>

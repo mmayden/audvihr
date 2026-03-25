@@ -2,7 +2,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/((?!assets|sw.js|favicon.ico).*)", "destination": "/index.html" }
+    { "source": "/((?!assets|sw.js|favicon.ico|api/).*)", "destination": "/index.html" }
   ],
   "headers": [
     {
@@ -10,7 +10,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self'; worker-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://api.the-odds-api.com https://clob.polymarket.com https://trading-api.kalshi.com https://www.mmafighting.com https://mmajunkie.usatoday.com; img-src 'self' data:; frame-ancestors 'none'"
+          "value": "default-src 'self'; script-src 'self'; worker-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://api.the-odds-api.com https://clob.polymarket.com https://trading-api.kalshi.com; img-src 'self' data:; frame-ancestors 'none'"
         },
         {
           "key": "X-Frame-Options",

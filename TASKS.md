@@ -10,13 +10,128 @@
 
 ## Current Sprint
 
-**Branch:** `master` (Phase 16 complete — no active sprint)
-**Last completed:** Post-Phase-16 Visual & QoL Polish — 2026-03-18
-**Next:** Phase 17 scope TBD. Mobile-first development begins soon — see Backlog. Cut a `feature/phase-17-*` branch when scoped.
+**Branch:** —
+**Status:** No active sprint. v0.18.1 shipped.
+
+---
+
+## Proposed Next Sprint — Phase 18: Women's Divisions + Keyboard Nav (v0.19.0)
+
+> Cut `feature/phase-18` from `master`. Two independently shippable workstreams — women's roster is data-heavy, keyboard nav is code-only. Sequence: keyboard nav first (immediate value, zero data dependency), then women's divisions.
+
+**Branch:** `feature/phase-18` (not yet cut)
+
+### Workstream A — Keyboard Navigation
+
+- [ ] `FighterScreen` sidebar: arrow keys move focus through `.sidebar-fighter` rows; `Enter` selects; `Escape` closes; `aria-activedescendant` on the container; test coverage
+- [ ] `CalendarScreen` sidebar: same pattern
+- [ ] `CompareScreen` `FighterSearch` dropdowns: already uses `role=combobox`; verify `aria-activedescendant` is wired to the highlighted option; add keyboard navigation tests
+- [ ] Global `Tab` audit: confirm all interactive elements are reachable in logical DOM order on all 5 screens; fix any focus traps or skipped elements
+- [ ] `App.jsx` bottom nav: confirm `Tab` cycles through all 5 nav items; `Enter`/`Space` activates; already has `aria-label`
+
+### Workstream B — Women's Divisions
+
+- [ ] `fighter-seed.json`: add ~30 Strawweight / Flyweight / Bantamweight fighters (archetype, mods, chin, cardio, weight_cut, notes, ufcstats_url)
+- [ ] `scripts/fetch-data.js`: verify scraper handles women's division weight class strings from UFCStats (`Women's Strawweight` etc.)
+- [ ] Run `npm run build` to confirm all new fighters scrape cleanly (0 errors in scrape log)
+- [ ] `FighterScreen` weight filter: add women's division options (currently shows only men's divisions)
+- [ ] `statFilters.js` physical predicates: verify `height` / `reach` thresholds are sensible for women's roster (may need separate tier calibration)
+- [ ] Smoke test: open FighterScreen, select a women's division fighter, confirm all 6 tabs render, percentile badges work, compare works
+
+### Quality Gate (before merge)
+- [ ] `npm run test:run` — all existing 481 tests still pass; new keyboard nav tests added (target: ≥ 15 new tests)
+- [ ] `npm run lint` — 0 errors
+- [ ] `npm audit` — 0 critical/high CVEs
+- [ ] CHANGELOG.md `[Unreleased]` → `[0.19.0]`
+- [ ] TASKS.md, PLANNING.md, CLAUDE.md updated
 
 ---
 
 ## ✅ Completed Sprints
+
+### ✅ v0.18.1 — Visual Identity + Bug Fix — 2026-03-18
+
+**Branch:** `feature/phase-17-mobile`
+
+- [x] **MONOLITH theme** (`:root`): near-void cold blue-blacks; electric cyan `#00c8ff` accent; cold text `#dce6f8`; deeper shadows
+- [x] **ARENA theme** (`[data-theme="light"]`): deep charcoal-amber darks; ember orange `#e06828` accent; warm cream text `#f0e2cc`; tobacco borders — not white
+- [x] OS `prefers-color-scheme: light` mapped to ARENA palette
+- [x] `--accent-bg` / `--accent-bg-mid` CSS tokens added to all three theme blocks; all 10 hardcoded `rgba(212,168,67,...)` gold tints replaced
+- [x] `.topbar` padding `0 80px 0 20px` on desktop (button overlay fix); mobile override `0 14px`
+- [x] `useTheme.js` — toggle label changed to `'ARENA'` / `'MONOLITH'`
+- [x] `useTheme.test.js` — 2 label assertions updated
+- [x] `package.json` + `MenuScreen.jsx` version badge → `v0.18.1`
+- [x] CHANGELOG, TASKS, PLANNING, CLAUDE.md updated
+- [x] 481 tests passing; 0 lint errors; 0 CVEs
+
+---
+
+### ✅ v0.18.0 — Phase 17 Mobile-First UX — 2026-03-18
+
+**Branch:** `feature/phase-17-mobile` → merged to `master`
+
+#### Bottom Nav
+- [x] Emoji icon above text label (`flex-direction: column`); `aria-label` on each button; `aria-hidden="true"` on icon span
+- [x] Active state: `font-weight: 700` on label + accent border-top — unambiguous at all sizes
+- [x] `min-height: var(--touch-target, 44px)` on all five nav items
+
+#### Fighter Screen (mobile)
+- [x] Tab bar: swipe-scroll fluid; `scrollbar-width: none` suppressed globally
+- [x] Hero portrait: 88px at ≤767px; 64×64px at ≤480px
+- [x] Stat filters panel: `max-height: 50vh; overflow-y: auto`; CLEAR ALL reachable; chips `min-height: var(--touch-target-sm, 36px)`
+
+#### Compare Screen (mobile)
+- [x] Hero: `grid-template-columns: 1fr` at ≤480px → F1 / VS / F2 stack vertically
+- [x] Stat table: `overflow-x: auto` + `.ctable { min-width: 400px }` at ≤480px
+- [x] MATCHUP NOTES cards: full-width, no horizontal scroll
+
+#### Calendar Screen (mobile)
+- [x] Swipe-to-close sidebar (`onTouchStart`/`onTouchEnd`; velocity ≥ 80px/s OR drag ≥ 112px)
+- [x] COMPARE button `min-height: var(--touch-target-sm, 36px)`
+
+#### Markets Screen (mobile)
+- [x] `mkt-live-row` collapses to `grid-template-columns: 1fr`
+- [x] `.mkt-alert-threshold` `font-size: 16px` — prevents iOS auto-zoom
+- [x] PICKS panel: `max-height: 60vh; overflow-y: auto`
+
+#### News Screen (mobile)
+- [x] Category chips: `flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none`
+- [x] Headline: `-webkit-line-clamp: 3` at ≤480px; tap to expand via `.news-headline--expanded`; `role="button"`, `tabIndex={0}`, `aria-expanded`, `onKeyDown` (Enter/Space)
+
+#### CSS / Design Tokens
+- [x] `--touch-target: 44px` and `--touch-target-sm: 36px` declared in all three theme blocks (`:root`, `[data-theme="light"]`, `@media prefers-color-scheme: light`)
+- [x] `@media (max-width: 767px)` audited; `@media (max-width: 480px)` block added for small-phone overrides
+- [x] `prefers-reduced-motion` block remains last in `app.css`
+
+#### Code Quality
+- [x] `formatDate`, `formatEventDate`, `countdown` consolidated into `src/utils/date.js` (eliminated duplicates across 4 screens)
+
+#### Testing
+- [x] `CalendarScreen.test.jsx` — 7 tests: sidebar toggle, backdrop, `sidebar--open` class, `aria-expanded`
+- [x] `NewsScreen.test.jsx` — 9 tests: headline click, double-click, Enter, Space, `aria-expanded`, `role="button"`
+- [x] 481 tests passing; 0 lint errors; 0 CVEs
+
+#### Security
+- Touch event handlers are internal DOM events — no new CSP surfaces, no new external domains
+- No new npm runtime dependencies
+- `font-size ≥ 16px` on `<input>` enforced; rule codified in CLAUDE.md
+
+---
+
+## ✅ Completed Sprints (prior)
+
+### ✅ v0.17.0 — CORS Proxy + Visual & QoL Polish — 2026-03-18
+
+- [x] `netlify/functions/rss-proxy.js` — Netlify Functions v2; strict 2-URL `ALLOWED_URLS` Set; 403 on unlisted url; 512 KB cap; 10s timeout; GET only; no auth header forwarding; served at `/api/rss-proxy` via `config.path`
+- [x] `api/rss-proxy.js` — Vercel equivalent; identical security logic; auto-routed from `api/`
+- [x] `useNews.js` — all RSS fetches routed through `/api/rss-proxy?url=...`; silent-degradation unchanged
+- [x] `netlify.toml` + `vercel.json` — `mmafighting.com` + `mmajunkie.usatoday.com` removed from CSP `connect-src`; Vercel SPA rewrite exclusion updated to also exclude `api/`
+- [x] `useNews.test.js` — 2 proxy-routing tests; 456 total passing; 0 lint errors
+- [x] CSS: `--bg-elevated`/`--bg-card` tokens in all three theme blocks; `--radius-*`, `--transition`, `--shadow-*` design tokens; global `:focus-visible` ring; 5 inputs upgraded to `--accent` focus border; tab-bar scrollbar suppressed; `@keyframes sidebarSlideIn`; vs-btn CTA elevated; label size improvements; mobile touch targets; card hover depth; `prefers-reduced-motion` block
+- [x] ARIA: `aria-expanded` + `aria-label` on ROSTER/EVENTS toggles; `role="button"` + `aria-label` on backdrops (FighterScreen, CalendarScreen)
+- [x] CHANGELOG.md `[Unreleased]` × 2 → `[0.17.0]`; TASKS.md Phase 17 scoped; PLANNING.md file structure + version + roadmap table updated
+
+---
 
 ### ✅ Post-Phase-16 Visual & QoL Polish — 2026-03-18
 
@@ -176,25 +291,26 @@
 
 ---
 
-## Backlog (Unscheduled — Post Phase 16)
+## Backlog (Unscheduled — Post v0.18.0)
 
 #### High value
-- [ ] **CORS proxy for live RSS** — one Netlify/Vercel edge function; `useNews` hook is fully ready, this is pure infra
-- [x] ~~**Fighter stat range search**~~ — shipped in Phase 16 (11-preset STAT FILTERS panel in FighterScreen sidebar)
-- [x] ~~**MUAY THAI + CLINCH FIGHTER in ARCH_COLORS**~~ — shipped in Phase 16 (teal/gold)
-- [ ] **Stat trend lines** — per-fight stat trajectory over last N fights; requires scraper enhancement to store per-fight stats alongside career averages
-- [ ] **Historical opening line database** — searchable archive of opening lines per fighter across all past fights
+- [x] ~~**CORS proxy for live RSS**~~ — shipped v0.17.0
+- [x] ~~**Fighter stat range search**~~ — shipped v0.16.0 (11-preset STAT FILTERS)
+- [x] ~~**MUAY THAI + CLINCH FIGHTER in ARCH_COLORS**~~ — shipped v0.16.0
+- [x] ~~**Mobile-first development phase**~~ — shipped v0.18.0
+- [ ] **Women's divisions** — Strawweight, Flyweight, Bantamweight (~30 fighters); same seed + scrape pipeline; in Proposed Phase 18 sprint
+- [ ] **Keyboard navigation** — arrow keys in sidebar, Tab across screens, keyboard-accessible compare selectors; in Proposed Phase 18 sprint
+- [ ] **Stat trend lines** — per-fight trajectory over last N fights; requires scraper to store per-fight stats alongside career averages; needs Chart.js/Recharts decision first
 
 #### Medium value
-- [ ] **Women's divisions** — Strawweight, Flyweight, Bantamweight rosters (same seed + scrape pattern, ~30 fighters)
-- [ ] **Chart.js / Recharts for trend charts** — stat bars are functional but trend charts would unlock trajectory analysis; deliberate dependency decision required before adding
-- [ ] **Keyboard navigation** — arrow keys in sidebar, Tab across screens, keyboard-accessible compare selectors
-- [ ] **Manual data refresh button** — in-app button triggers `fetch-data.js` equivalent for same-day stat updates without full rebuild; requires a build API endpoint
+- [ ] **Historical opening line database** — searchable archive of opening lines per fighter across all past fights; needs a scrape source or manual-entry flow
+- [ ] **Chart.js / Recharts for trend charts** — stat bars are functional but trend charts unlock trajectory analysis; deliberate dependency + `npm audit` decision required before adding
+- [ ] **Manual data refresh button** — in-app trigger for same-day stat update without full rebuild; requires a new serverless endpoint with origin check + response validation; add to `connect-src` in both deploy configs
+- [ ] **Recently viewed fighter strip** — last 3 viewed fighters; `recent_fighters` sessionStorage key already reserved; low effort
 
 #### Low / nice-to-have
-- [x] ~~**Visual reskin pass**~~ — partial: Post-Phase-16 polish pass delivered focus rings, input focus colors, label readability improvements, mobile touch targets, card depth, reduced-motion support, sidebar slide animation, and CTA improvements. Final art direction still possible but core polish is done.
-- [ ] **Mobile-first development phase** — Begin dedicated mobile UX pass (Phase 17 candidate): optimize layouts for <768px, improve bottom nav, enhance touch interactions beyond the initial responsive work
-- [ ] **Sound design** — optional click feedback, opt-in only; deliberate decision required before adding audio
+- [x] ~~**Visual reskin pass**~~ — delivered Post-Phase-16 polish
+- [ ] **Sound design** — optional click feedback, opt-in only; deliberate decision required before adding audio (new browser API surface)
 
 ---
 

@@ -10,14 +10,15 @@ import { readCache, writeCache } from '../utils/cache';
  * newest-first. Caches in sessionStorage for CACHE_TTL_MS to avoid hammering
  * the feeds on every navigation.
  *
- * Degrades silently per source: a source that is unreachable (CORS, network
- * error, non-200) contributes zero items; the remaining sources are still used.
- * If all sources fail (common in production due to CORS restrictions), the hook
- * falls back to the static NEWS mock and sets isLive = false.
+ * Fetches are routed through the same-origin /api/rss-proxy serverless function
+ * (Netlify Functions v2 / Vercel), which fetches feeds server-side and returns
+ * them with CORS headers. This bypasses the CORS restrictions that prevented
+ * direct browser-to-RSS-site fetches in production.
  *
- * Note: MMA news sites do not set CORS headers, so live fetches will succeed
- * only when a CORS proxy is in use or the app is served from a matching origin.
- * The architecture is built and ready; the CORS path is a backlog item.
+ * Degrades silently per source: a source that is unreachable (proxy error,
+ * network error, non-200) contributes zero items; remaining sources are still
+ * used. If all sources fail, the hook falls back to the static NEWS mock and
+ * sets isLive = false.
  *
  * @returns {{ items: NewsItem[], loading: boolean, isLive: boolean }}
  */
@@ -25,7 +26,10 @@ import { readCache, writeCache } from '../utils/cache';
 const CACHE_KEY = 'cache_news_v1';
 const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
 
-/** RSS sources. Both are CORS-restricted in pure browser context; degrade silently. */
+/** Proxy endpoint — same-origin, no CORS restriction. */
+const PROXY = '/api/rss-proxy';
+
+/** RSS sources. Fetched via PROXY to bypass browser CORS restrictions. */
 const SOURCES = [
   { url: 'https://www.mmafighting.com/rss/current',  name: 'MMA Fighting' },
   { url: 'https://mmajunkie.usatoday.com/feed',      name: 'MMA Junkie'  },
@@ -46,10 +50,10 @@ export function useNews() {
 
     setLoading(true);
 
-    // Fetch all sources in parallel; each source degrades independently.
+    // Fetch all sources in parallel via proxy; each source degrades independently.
     Promise.all(
       SOURCES.map(({ url, name }) =>
-        fetch(url)
+        fetch(`${PROXY}?url=${encodeURIComponent(url)}`)
           .then(r => {
             if (!r.ok) throw new Error(`news_http_${r.status}`);
             return r.text();

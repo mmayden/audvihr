@@ -1,27 +1,12 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EVENTS } from '../data/events';
 import { FIGHTERS } from '../data/fighters';
 import { ORG_COLOR } from '../constants/qualifiers';
 import { FighterName } from '../components/FighterName';
-import { daysUntil, isPast } from '../utils/date';
+import { daysUntil, isPast, formatEventDate, countdown } from '../utils/date';
 import { findFighterByName } from '../utils/fighters';
 
-/** Format an ISO date string as a human-readable event date (e.g. 'Sat, Apr 12, 2026'). */
-function fmtDate(dateStr) {
-  return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', {
-    weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
-  });
-}
-
-/** Returns a compact countdown label for an event date. */
-function countdown(dateStr, today) {
-  const d = daysUntil(dateStr, today);
-  if (d < 0) return 'PAST';
-  if (d === 0) return 'TODAY';
-  if (d === 1) return '1D';
-  return d + 'D';
-}
 
 /**
  * CalendarScreen — fight calendar screen with sidebar event list and detail view.
@@ -53,6 +38,23 @@ export const CalendarScreen = ({onBack, onGoFighter}) => {
   const [selId,setSelId] = useState((firstUpcoming||sorted[0]).id);
   const [orgFilter,setOrgFilter] = useState('ALL');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const swipeStartX = useRef(null);
+  const swipeStartTime = useRef(null);
+
+  const handleSidebarTouchStart = useCallback((e) => {
+    swipeStartX.current = e.touches[0].clientX;
+    swipeStartTime.current = Date.now();
+  }, []);
+
+  const handleSidebarTouchEnd = useCallback((e) => {
+    if (swipeStartX.current === null) return;
+    const dx = swipeStartX.current - e.changedTouches[0].clientX;
+    const velocity = (dx / (Date.now() - swipeStartTime.current)) * 1000;
+    swipeStartX.current = null;
+    swipeStartTime.current = null;
+    if (dx > 112 || velocity > 80) setSidebarOpen(false);
+  }, []);
+
   const sel = EVENTS.find(e=>e.id===selId);
   const orgs = ['ALL',...new Set(EVENTS.map(e=>e.org))];
   const filtered = sorted.filter(e=>orgFilter==='ALL'||e.org===orgFilter);
@@ -75,7 +77,11 @@ export const CalendarScreen = ({onBack, onGoFighter}) => {
       </div>
       <div className="main-layout">
         {sidebarOpen && <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} role="button" aria-label="Close events list" tabIndex={-1} />}
-        <div className={`sidebar${sidebarOpen ? ' sidebar--open' : ''}`}>
+        <div
+          className={`sidebar${sidebarOpen ? ' sidebar--open' : ''}`}
+          onTouchStart={handleSidebarTouchStart}
+          onTouchEnd={handleSidebarTouchEnd}
+        >
           <div className="sidebar-header">EVENTS — {filtered.length}</div>
           <div className="sidebar-filters">
             {orgs.map(o=><button key={o} className={`filter-chip ${orgFilter===o?'on':''}`} onClick={()=>setOrgFilter(o)}>{o}</button>)}
@@ -93,7 +99,7 @@ export const CalendarScreen = ({onBack, onGoFighter}) => {
                   </div>
                   <div className="sf-meta">
                     <span className="org-badge" style={{background:ORG_COLOR[e.org]||'var(--border2)'}}>{e.org}</span>
-                    {' '}{fmtDate(e.date)}
+                    {' '}{formatEventDate(e.date)}
                   </div>
                   <div className="cal-event-main-preview">{e.card.main.f1} vs {e.card.main.f2}</div>
                 </div>
@@ -111,7 +117,7 @@ export const CalendarScreen = ({onBack, onGoFighter}) => {
                     <span className="org-badge" style={{background:ORG_COLOR[sel.org]||'var(--border2)'}}>{sel.org}</span>
                     <span className="cal-event-title">{sel.name}</span>
                   </div>
-                  <div className="cal-event-meta">{fmtDate(sel.date)} · {sel.venue} · {sel.city}</div>
+                  <div className="cal-event-meta">{formatEventDate(sel.date)} · {sel.venue} · {sel.city}</div>
                 </div>
                 <div>
                   <div className="cal-countdown-big" style={{color:isPast(sel.date,today)?'var(--text-dim)':daysUntil(sel.date,today)<=7?'var(--accent)':'var(--green)'}}>{countdown(sel.date,today)}</div>

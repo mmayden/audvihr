@@ -4,23 +4,130 @@ All notable changes to this project. Format: [version] — date — description.
 
 ---
 
-## [Unreleased] — Visual & QoL Polish
+## [0.18.1] — 2026-03-18
 
-### Changed
-- **app.css** — Added `--bg-elevated`, `--bg-card` CSS variables (aliases to `--surface2`/`--surface`) to fix undefined-variable references in Phase 11 alert styles
-- **app.css** — Added design tokens: `--radius-sm`, `--radius`, `--radius-pill`, `--transition`, `--shadow-sm`, `--shadow-md`
-- **app.css** — Global `:focus-visible` ring for `button`, `a`, `[tabindex]` elements using `var(--accent)`
-- **app.css** — Input focus colors upgraded from `--border2` to `--accent` on: `.sidebar-input`, `.fighter-search-input`, `.notes-area`, `.mkt-pick-notes`, `.news-fighter-select`
-- **app.css** — `.tabs-bar` scrollbar hidden globally (`scrollbar-width: none` + webkit) — no scrollbar artifact on any viewport
-- **app.css** — Added `@keyframes sidebarSlideIn`; mobile sidebar overlay now slides in from the left instead of appearing instantly
-- **app.css** — `vs-btn` default state upgraded: now uses `var(--accent)` border/color (was muted `--border2`/`--text-dim`), hover fills with accent background — clearer CTA
-- **app.css** — `.stat-cell-label` from 9px → 10px; `.fin-l` from 8px → 9px; `.stat-tier-label` from 8px → 9px — improved readability across tabs
-- **app.css** — Mobile touch targets: `.filter-chip` min-height 36px; `.sidebar-fighter` padding increased to 11px 14px; portrait reduced to 88×88px with tighter card identity padding
-- **app.css** — Topbar subtle drop shadow (`box-shadow: 0 1px 6px`) for visual separation
-- **app.css** — `.mkt-card` and `.news-card` hover state gains `box-shadow: var(--shadow-sm)` for depth
-- **app.css** — `@media (prefers-reduced-motion: reduce)` — all animations/transitions set to 0.01ms; `.srl-fill` and `.cl-prog-fill` transitions suppressed
-- **FighterScreen.jsx** — ROSTER toggle button: `aria-expanded` + `aria-label` state attributes added; sidebar backdrop has `role="button"` + `aria-label`
-- **CalendarScreen.jsx** — EVENTS toggle button: same `aria-expanded`/`aria-label` treatment as FighterScreen
+### Visual Identity — MONOLITH + ARENA themes; button overlay fix
+
+#### Added
+- **`app.css`** — `--accent-bg` and `--accent-bg-mid` CSS variables added to all three theme blocks (`:root`, `[data-theme="light"]`, `@media prefers-color-scheme: light`). Theme-adaptive accent tint backgrounds. MONOLITH: `rgba(0,200,255,.07)` / `rgba(0,200,255,.12)`. ARENA: `rgba(224,104,40,.07)` / `rgba(224,104,40,.12)`.
+
+#### Changed
+- **`app.css` `:root` — MONOLITH theme** replaces old dark palette. Near-void cold blue-blacks (`#07080f` bg, `#0d0f1a` surface, `#121520` surface2, `#171b28` surface3). Electric cyan accent `#00c8ff`. Cold blue-white text `#dce6f8`. Deeper box-shadows. A data-terminal, premium analytics aesthetic.
+- **`app.css` `[data-theme="light"]` — ARENA theme** replaces old white/bright light theme. Deep charcoal-amber darks (`#0f0c08` bg, `#181410` surface, `#221e18` surface2, `#2c2620` surface3). Ember orange accent `#e06828`. Warm cream text `#f0e2cc`. Tobacco-brown borders. Neither theme is white — ARENA is a warm dark experience.
+- **`app.css` `@media (prefers-color-scheme: light)`** — OS light preference now maps to ARENA palette rather than the old white theme.
+- **`app.css` `.topbar`** — padding changed from `0 20px` to `0 80px 0 20px` (desktop). The 80px right clearance prevents the fixed floating theme toggle from overlapping topbar-right action buttons (↓ MD, COPY LINK, etc.). Mobile `@media (max-width: 767px)` override restores symmetric `0 14px` (toggle is hidden on mobile).
+- **`app.css`** — all 10 hardcoded `rgba(212,168,67,...)` gold tint values replaced with `var(--accent-bg)` or `var(--accent-bg-mid)`. Affected rules: `.filter-chip.on`, `.id-pill.champ`, `.cal-title-banner`, `.mkt-arb-alert`, `.mkt-public-fade-badge`, `.fighter-search-option.selected`, `.matchup-note--style/clash .matchup-note-subject`, `.mkt-pick-chip.on`, `.mkt-pick-save:not(:disabled):hover`, `.percentile-badge--top35`.
+- **`useTheme.js`** — toggle label changed from `'LIGHT'` / `'DARK'` to `'ARENA'` / `'MONOLITH'`. The toggle now cycles between the two named theme palettes.
+- **`useTheme.test.js`** — two label test assertions updated to `'ARENA'` and `'MONOLITH'`.
+- **`MenuScreen.jsx`** — version badge updated to `v0.18.1`.
+
+#### Security
+- Button overlay fix is pure CSS (`padding` value) — no new code paths, no storage, no network.
+- Theme palette changes are CSS variable substitutions only — no new external domains, no CDN resources, no CSP changes, no new npm dependencies.
+- `--accent-bg` / `--accent-bg-mid` are CSS variables over static `rgba()` literals — no user input surface, no injection risk.
+- **0 new CSP entries. 0 new npm runtime dependencies. 0 new external domains.**
+
+#### Testing
+- **481 tests, all passing. 0 lint errors. 0 CVEs.**
+
+---
+
+## [0.18.0] — 2026-03-18
+
+### Phase 17 — Mobile-First UX
+
+#### Added
+- **`app.css`** — `--touch-target: 44px` and `--touch-target-sm: 36px` CSS tokens added to all three theme blocks (`:root`, `[data-theme="light"]`, `@media prefers-color-scheme: light`).
+- **`app.css`** — `@media (max-width: 480px)` block for small-phone specifics: `compare-fighter-header` stacks vertically (F1 / VS / F2); news headline clamped to 3 lines with `.news-headline--expanded` opt-in modifier for tap-to-expand; `.compare-table-wrap` adds `overflow-x: auto` + `.ctable` `min-width: 400px` for horizontal scroll; `.card-portrait` shrinks to 64×64px with adjusted `portrait-initials` size.
+- **`App.jsx`** — Bottom nav items now show an emoji icon above the text label (🥊 FIGHTERS, ⚖️ COMPARE, 🗓 CALENDAR, 📊 MARKETS, 📰 NEWS); `aria-label` added to each button; `.bottom-nav-icon` span carries `aria-hidden="true"`.
+
+#### Changed
+- **`app.css` — `@media (max-width: 767px)` mobile block:**
+  - `.bottom-nav-item` — `flex-direction: column`, `gap: 2px`, `min-height: var(--touch-target, 44px)` (all five nav items now meet 44px minimum); font-size 8px→7px to accommodate icon+label.
+  - `.bottom-nav-item.active` — `font-weight: 700` added to bold the active label.
+  - `.stat-filter-chip` — `min-height: var(--touch-target-sm, 36px)` ensures filter chips meet 36px target.
+  - `.stat-filters-body` — `max-height: 50vh; overflow-y: auto` keeps CLEAR ALL reachable in the mobile sidebar.
+  - `.news-filterbar` — `flex-direction: column; align-items: stretch` so chip bar and fighter select stack neatly.
+  - `.news-cat-chips` — `flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none` — horizontal scroll without visible scrollbar.
+  - `.mkt-live-row` — `grid-template-columns: 1fr` collapses 3-column live row to stacked rows on mobile.
+  - `.mkt-alert-threshold` — `font-size: 16px` prevents iOS auto-zoom on focus.
+  - `.markets-pick-panel` — `max-height: 60vh; overflow-y: auto` — PICKS log panel scrollable.
+  - `.cal-compare-btn` — `min-height: var(--touch-target-sm, 36px)` and updated padding for reliable tap target.
+- **`FighterScreen.jsx`** — Touch swipe-to-close on the sidebar: `onTouchStart` / `onTouchEnd` handlers on the sidebar div; closes when swipe-left velocity ≥ 80 px/s OR drag distance ≥ 112 px (40% of 280px sidebar width).
+- **`CalendarScreen.jsx`** — Same swipe-to-close pattern as FighterScreen.
+- **`NewsScreen.jsx`** — News headline truncated to 3 lines on ≤480px viewports via `.news-headline--expanded` toggle; tapping the headline expands/collapses; `role="button"`, `tabIndex={0}`, `aria-expanded` for accessibility.
+- **`App.test.jsx`** — Updated `textContent` assertion to `toContain('FIGHTERS')` to account for the icon+label DOM structure.
+
+#### Security
+- Touch event handlers (`onTouchStart`/`onTouchEnd`) are internal DOM events — no new CSP surfaces, no new external domains, no new network requests.
+- Emoji icons in bottom nav are static JSX text in `aria-hidden` spans — not user input, not rendered as HTML, no injection surface.
+- News headline expand/collapse state (`expandedIds`) is a `Set<string>` of internal item IDs — no user content involved, no new storage keys.
+- `.mkt-alert-threshold` `font-size: 16px` fix prevents iOS auto-zoom — security-neutral but prevents layout disruption.
+- **0 new CSP entries. 0 new npm runtime dependencies. 0 new external domains.**
+
+#### Testing
+- **`CalendarScreen.test.jsx`** — 7 new tests covering sidebar toggle (open/close via EVENTS button, backdrop click, `sidebar--open` class, `aria-expanded` attribute).
+- **`NewsScreen.test.jsx`** — 9 new tests covering headline expand/collapse (click, double-click, Enter key, Space key, `aria-expanded`, `role="button"`).
+- **481 tests, all passing. 0 lint errors. 0 CVEs.**
+
+---
+
+### Code Quality & Cleanup
+
+#### Changed
+- **`src/utils/date.js`** — two new exported utilities added to consolidate duplicated code:
+  - `formatDate(iso)` — UTC-safe short date formatting ("Mar 14, 2026"); was duplicated verbatim in `NewsScreen.jsx` and `TabOverview.jsx`.
+  - `formatEventDate(dateStr)` — long event date with weekday ("Sat, Apr 12, 2026"); was duplicated in `CalendarScreen.jsx`.
+  - `countdown(dateStr, today, pastLabel='PAST')` — compact countdown label ("7D", "1D", "TODAY", "PAST"); was duplicated in `CalendarScreen.jsx` and `MarketsScreen.jsx`. The two callers differed only in their past label — unified via the optional `pastLabel` parameter (`'CLOSED'` for MarketsScreen).
+- **`NewsScreen.jsx`**, **`TabOverview.jsx`** — replaced local `fmtDate()` with imported `formatDate` from `utils/date`.
+- **`CalendarScreen.jsx`** — replaced local `fmtDate()` / `countdown()` with imported `formatEventDate` / `countdown` from `utils/date`.
+- **`MarketsScreen.jsx`** — replaced local `countdown()` with imported `countdown(dateStr, today, 'CLOSED')` from `utils/date`.
+- **`MenuScreen.jsx`** — version badge updated from `v0.11.0` to `v0.17.0`.
+- **`package.json`** — `version` field updated from `0.8.0` to `0.17.0` to match the git tag.
+
+#### Testing
+- **`src/utils/date.test.js`** — 9 new tests covering `formatDate` (UTC noon stability, output format), `formatEventDate` (weekday + month/day/year), and `countdown` (TODAY, 1D, 7D, default PAST label, custom CLOSED label).
+- Total: **465 tests, all passing. 0 lint errors. 0 CVEs.**
+
+---
+
+## [0.17.0] — 2026-03-18
+
+### CORS Proxy for Live RSS
+
+#### Added
+- `netlify/functions/rss-proxy.js` — Netlify Functions v2 serverless function (ESM). Proxies MMA Fighting and MMA Junkie RSS feeds server-side with a strict two-entry `ALLOWED_URLS` Set allowlist. Invalid or unlisted `url` params return 403 immediately (SSRF prevention). Response size capped at 512 KB. 10-second upstream timeout. GET-only, no client auth headers forwarded. Served at `/api/rss-proxy` via `config.path` (takes precedence over the SPA redirect rule).
+- `api/rss-proxy.js` — Vercel equivalent with identical security logic. Auto-routed from the `api/` directory at `/api/rss-proxy`.
+
+#### Changed
+- **useNews.js** — All RSS fetches now route through `/api/rss-proxy?url=...` instead of hitting the RSS origins directly. Silent-degradation behavior is unchanged — proxy errors still cause the affected source to contribute zero items, falling back to the static NEWS mock if all fail.
+- **netlify.toml** — Removed `https://www.mmafighting.com` and `https://mmajunkie.usatoday.com` from CSP `connect-src`. Browser now only contacts same-origin `/api/rss-proxy`.
+- **vercel.json** — Same CSP tightening. SPA rewrite exclusion updated to also exclude `api/` path prefix.
+
+#### Security
+- `ALLOWED_URLS.has(url)` — exact string equality only. No prefix matching, no hostname matching, no regex — any loosening reopens SSRF. Adding a new RSS source requires explicit Set entry in both function files and a decisions log entry.
+- Proxy does not forward `Cookie`, `Authorization`, or any other client-supplied headers to upstream.
+- CSP `connect-src` tightened: both RSS origins removed from browser-reachable domains. Any direct browser fetch to those origins is now blocked by CSP.
+
+### Visual & QoL Polish
+
+#### Changed
+- **app.css** — `--bg-elevated`, `--bg-card` CSS variables added as aliases to `--surface2`/`--surface` to fix undefined-variable references in Phase 11 alert styles; declared in all three theme blocks (`:root`, `[data-theme="light"]`, `@media prefers-color-scheme: light`).
+- **app.css** — Design tokens added: `--radius-sm`, `--radius`, `--radius-pill`, `--transition`, `--shadow-sm`, `--shadow-md`.
+- **app.css** — Global `:focus-visible` ring for `button`, `a`, `[tabindex]` using `var(--accent)`; five inputs upgraded from `--border2` to `--accent` on focus.
+- **app.css** — `.tabs-bar` scrollbar suppressed globally (`scrollbar-width: none` + webkit).
+- **app.css** — `@keyframes sidebarSlideIn`; mobile sidebar slides in from left (was instant snap).
+- **app.css** — `vs-btn` CTA: default upgraded from muted `--border2`/`--text-dim` to `--accent-dim`/`--accent`; hover fills with solid accent background.
+- **app.css** — Label sizes: `.stat-cell-label` 9px→10px, `.fin-l` 8px→9px, `.stat-tier-label` 8px→9px.
+- **app.css** — Mobile touch targets: `.filter-chip` min-height 36px; `.sidebar-fighter` padding 11px 14px; portrait 88×88px.
+- **app.css** — Topbar drop shadow + `.mkt-card`/`.news-card` hover `box-shadow: var(--shadow-sm)`.
+- **app.css** — `@media (prefers-reduced-motion: reduce)` block: all animations/transitions 0.01ms; `.srl-fill` + `.cl-prog-fill` suppressed.
+- **FighterScreen.jsx** — ROSTER button: `aria-expanded` + contextual `aria-label`; sidebar backdrop: `role="button"` + `aria-label`.
+- **CalendarScreen.jsx** — EVENTS button: same `aria-expanded`/`aria-label` treatment.
+
+### Testing
+- `useNews.test.js` — 2 new proxy-routing tests: verifies all fetch calls route through `/api/rss-proxy?url=` (not direct RSS origins), and that both source URLs are correctly encoded as query params.
+- Total: **456 tests, all passing. 0 lint errors. 0 CVEs.**
 
 ---
 
