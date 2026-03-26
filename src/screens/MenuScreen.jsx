@@ -82,11 +82,11 @@ export const MenuScreen = ({ onSelect }) => {
         <div className="menu-sub">MMA Prediction Market Trader</div>
         <div className="menu-list">
           {MENU_ITEMS.map((item,i)=>(
-            <div key={item.id} className="menu-item" onClick={()=>onSelect(item.id)}>
-              <span className="menu-item-num">0{i+1}</span>
+            <button key={item.id} className="menu-item" onClick={()=>onSelect(item.id)} aria-label={item.label}>
+              <span className="menu-item-num" aria-hidden="true">0{i+1}</span>
               <span className="menu-item-label">{item.label}</span>
-              <span className={`menu-item-badge ${item.active?'active':''}`}>{item.badge}</span>
-            </div>
+              <span className={`menu-item-badge ${item.active?'active':''}`} aria-hidden="true">{item.badge}</span>
+            </button>
           ))}
         </div>
         <a
