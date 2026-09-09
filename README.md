@@ -1,3 +1,7 @@
+[ABANDONED]
+
+https://www.audwihr.space/
+
 # Audwihr — MMA Prediction Market Trader
 
 A personal research and decision-support tool for MMA prediction market trading. Consolidates deep fighter analytics, live multi-source market intelligence (sportsbook + Polymarket + Kalshi), a structured pre-fight discipline framework, and long-term CLV tracking into one fast, shareable interface.
